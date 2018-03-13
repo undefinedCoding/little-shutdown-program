@@ -2,8 +2,8 @@
   "name": "little-shutdown-program",
   "version": "0.0.1",
   "url": "https://github.com/undefinedCoding/little-shutdown-program/issues",
-  "description": "little program, that runs a timer and when it is by 0 it shuts down the operating system",
-  "license": "WTFPL",
+  "description": "A little program, that turns off the computer if the timer is done",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/undefinedCoding/little-shutdown-program.git"
@@ -14,7 +14,9 @@
   },
   "dependencies": {
     "cross-spawn": "^6.0.5",
-    "electron": "^1.8.3",
     "electron-shutdown-command": "0.0.8"
+  },
+  "devDependencies": {
+    "electron": "^1.8.3"
   }
 }
