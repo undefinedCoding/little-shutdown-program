@@ -41,7 +41,7 @@
     "appId": "little-shutdown-program",
     "win": {
       "target": "nsis",
-      "icon": "icon.png"
+      "icon": "icon.ico"
     }
   }
 }

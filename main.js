@@ -18,7 +18,7 @@ function createWindow () {
     frame: false,
     fullscreen: false,
     show: false,
-    icon: 'icon.png'
+    icon: 'icon.ico'
   })
 
   // Load in the window the 'index.html' file
