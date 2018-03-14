@@ -1,6 +1,6 @@
 {
   "name": "little-shutdown-program",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "url": "https://github.com/undefinedCoding/little-shutdown-program/issues",
   "description": "A little program, that turns off the computer if the timer is done",
   "license": "MIT",
@@ -14,6 +14,7 @@
     "build-win": "npx electron-builder . --win"
   },
   "dependencies": {
+    "dialogs": "^1.1.20",
     "electron-shutdown-command": "0.0.8",
     "electron-titlebar-windows": "^3.0.0"
   },

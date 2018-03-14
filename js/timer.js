@@ -5,6 +5,7 @@ const titlebar = new ElectronTitlebarWindows({
   draggable: true
 })
 const remote = require('electron').remote
+const dialogs = require('dialogs')()
 
 // global variables
 var globalRemainingSeconds, globalTimerInterval, stateSetting, paused = false
@@ -21,16 +22,23 @@ function resetPage () {
  * FUnction that shuts down the computer
  */
 function startBreak () {
-  const e = document.getElementsByTagName('audio')[0]
-  e.play()
+  document.getElementsByTagName('audio')[0].play()
   stateSetting = document.getElementById('background-setting')
   stateSetting.classList.add('state-rotate')
-  document.getElementById('minutes').value = 'Enjoy your break'
+  document.getElementById('minutes').value = 'Good night'
   setTimeout(resetPage, 5e3)
 
-  var load = setTimeout(() => {
-    shutdown.shutdown({ force: true }) // simple system shutdown with default options
+  const shutdownTimeout = setTimeout(() => {
+    // simple system shutdown with default options
+    shutdown.shutdown({ force: true })
   }, 15000)
+
+  dialogs.confirm(
+    'Stop the computer from shutting down? (in 15s this will automatically happen)',
+    okWasPressed => {
+      if (okWasPressed) clearTimeout(shutdownTimeout)
+    }
+  )
 }
 
 function tick () {
