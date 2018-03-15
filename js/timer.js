@@ -6,6 +6,8 @@ const titlebar = new ElectronTitlebarWindows({
 })
 const remote = require('electron').remote
 const dialogs = require('dialogs')()
+const notifier = require('node-notifier')
+const path = require('path')
 
 // global variables
 var globalRemainingSeconds, globalTimerInterval, stateSetting, paused = false
@@ -106,6 +108,30 @@ titlebar.on('close', e => remote.getCurrentWindow().close())
 window.onload = () => {
   // append windows titlebar to frameless window at the top
   titlebar.appendTo(document.getElementById('electron-titlebar'))
+
+  notifier.notify(
+    {
+      title: 'My awesome title',
+      message: 'Hello from node, Mr. User!',
+      icon: path.join(__dirname, 'icon/icon.png'), // Absolute path (doesn't work on balloons)
+      sound: true, // Only Notification Center or Windows Toasters
+      wait: true // Wait with callback, until user action is taken against notification
+    },
+    (err, response) => {
+      // Response is response from notification
+      console.log('response', response)
+    }
+  )
+   
+  notifier.on('click', (notifierObject, options) => {
+    // Triggers if `wait: true` and user clicks notification
+    console.log('click')
+  })
+   
+  notifier.on('timeout', (notifierObject, options) => {
+    // Triggers if `wait: true` and notification closes
+    console.log('timeout')
+  })
 
   // add event listener to the buttons
   document.getElementById('start').addEventListener('click', startTimer)
