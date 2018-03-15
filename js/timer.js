@@ -145,4 +145,15 @@ window.onload = () => {
     // F12
     if (e.which === 123) remote.getCurrentWindow().toggleDevTools()
   })
+
+
+  // if full screen is activated
+  remote.getCurrentWindow().on('enter-full-screen', () => {
+    document.getElementById('electron-titlebar').style.display = 'none'
+    console.log('enter-full-screen')
+  })
+  remote.getCurrentWindow().on('leave-full-screen', () => {
+    const t = document.getElementById('electron-titlebar').style.display = 'block'
+    console.log('leave-full-screen')
+  })
 }

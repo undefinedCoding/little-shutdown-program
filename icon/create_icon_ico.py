@@ -15,7 +15,7 @@ def create_program_ico_icon(source_file, output_path_ico):
     if os.path.exists(source_file):
 
         img = Image.open(source_file)
-        icon_sizes = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128)]
+        icon_sizes = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
         img.save(output_path_ico, sizes=icon_sizes)
 
         print("- \"" + source_file +
