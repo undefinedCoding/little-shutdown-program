@@ -144,6 +144,10 @@ window.onload = () => {
     if (e.which === 116) location.reload()
     // F12
     if (e.which === 123) remote.getCurrentWindow().toggleDevTools()
+    // F11
+    if (e.which === 122) {
+      remote.getCurrentWindow().setFullScreen(!remote.getCurrentWindow().isFullScreen())
+    }
   })
 
 
