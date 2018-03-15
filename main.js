@@ -30,6 +30,9 @@ function createWindow () {
     })
   )
 
+  // uncomment for instant debugging
+  // win.webContents.openDevTools()
+
   // show window if everythin loaded
   win.on('ready-to-show', ()=> {
     win.show()
