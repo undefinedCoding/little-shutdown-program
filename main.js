@@ -6,7 +6,7 @@ const url = require('url')
 // Global variable for the window
 var win = null
 
-var shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
+const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
   // Someone tried to run a second instance, we should focus our window.
   if (win) {
     if (win.isMinimized()) win.restore()
@@ -16,7 +16,6 @@ var shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
 
 if (shouldQuit) {
   app.quit()
-  return
 }
 
 function createWindow () {
@@ -47,7 +46,7 @@ function createWindow () {
   // win.webContents.openDevTools()
 
   // show window if everythin loaded
-  win.on('ready-to-show', ()=> {
+  win.on('ready-to-show', () => {
     win.show()
     win.focus()
   })

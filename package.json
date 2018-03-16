@@ -1,8 +1,8 @@
 {
   "name": "little-shutdown-program",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "url": "https://github.com/undefinedCoding/little-shutdown-program/issues",
-  "description": "A little program, that turns off the computer if the timer is done",
+  "description": "A little program that turns off the computer if a set timer is done",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -21,7 +21,12 @@
   },
   "devDependencies": {
     "electron": "^1.8.3",
-    "electron-builder": "^20.4.1"
+    "electron-builder": "^20.4.1",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.9.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.7.0",
+    "eslint-plugin-standard": "^3.0.1"
   },
   "bugs": "https://github.com/undefinedCoding/little-shutdown-program/issues",
   "author": {

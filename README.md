@@ -2,6 +2,9 @@
 
 Just a little program, that shuts down a (Windows) computer after a from the user set countdown is done.
 
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
+[![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
+
 ## What is my purpose
 
 It's perfect for just lying in your bed and for example hearing music on your computer until the countdown is done and the computer automatically turns itself off.

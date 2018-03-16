@@ -10,7 +10,10 @@ const notifier = require('node-notifier')
 const path = require('path')
 
 // global variables
-var globalRemainingSeconds, globalTimerInterval, stateSetting, paused = false
+var globalRemainingSeconds
+var globalTimerInterval
+var stateSetting
+var paused = false
 
 /**
  * Function that resets the page
@@ -118,16 +121,17 @@ window.onload = () => {
       wait: true // Wait with callback, until user action is taken against notification
     },
     (err, response) => {
-      // Response is response from notification
+      if (err) console.error('Error', err)
+      // log the response to the notification
       console.log('response', response)
     }
   )
-   
+
   notifier.on('click', (notifierObject, options) => {
     // Triggers if `wait: true` and user clicks notification
     console.log('click')
   })
-   
+
   notifier.on('timeout', (notifierObject, options) => {
     // Triggers if `wait: true` and notification closes
     console.log('timeout')
@@ -141,15 +145,16 @@ window.onload = () => {
   // event listen for shortcuts
   document.addEventListener('keydown', e => {
     // F5
-    if (e.which === 116) location.reload()
+    if (e.which === 116) remote.getCurrentWindow().reload()
     // F12
     if (e.which === 123) remote.getCurrentWindow().toggleDevTools()
     // F11
     if (e.which === 122) {
-      remote.getCurrentWindow().setFullScreen(!remote.getCurrentWindow().isFullScreen())
+      remote
+        .getCurrentWindow()
+        .setFullScreen(!remote.getCurrentWindow().isFullScreen())
     }
   })
-
 
   // if full screen is activated
   remote.getCurrentWindow().on('enter-full-screen', () => {
@@ -157,7 +162,7 @@ window.onload = () => {
     console.log('enter-full-screen')
   })
   remote.getCurrentWindow().on('leave-full-screen', () => {
-    const t = document.getElementById('electron-titlebar').style.display = 'block'
+    document.getElementById('electron-titlebar').style.display = 'block'
     console.log('leave-full-screen')
   })
 }
