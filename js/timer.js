@@ -52,6 +52,9 @@ function startBreak () {
 }
 
 function startWarningDialog () {
+  //later (windows native notification):
+  //https://github.com/felixrieseberg/electron-windows-interactive-notifications 
+
   dialogs.confirm(
     'Stop the computer from shutting down? (in 15s this will automatically happen)',
     okWasPressed => {
@@ -77,6 +80,7 @@ function tick () {
   if (emergencyStop == true) {
     console.log("WOOOOW you really want to stop here....")
     clearInterval(globalTimerInterval)
+    emergencyStop = false;
     resetTimer()
     resetPage()
   }
@@ -94,7 +98,7 @@ function startTimer () {
   globalRemainingSeconds = 60 * e
   if (globalRemainingSeconds < 0 || isNaN(e) || e === '') {
     //Notification if the Input was not accepted
-    alert("Interesting Input, but that's not what i expected")
+    alert("Interesting Input, but that's not what i expected. Only insert Natural Numbers as Minutes")
     resetTimer()
   } else {
     clearInterval(globalTimerInterval)
