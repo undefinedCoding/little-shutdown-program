@@ -104,12 +104,15 @@ window.onload = () => {
     dialogs.confirm(
       'Stop the computer from shutting down? (in 20s this will automatically happen)',
       okWasPressed => {
-        if (!okWasPressed) {
-          // play music again
-          helper.player.play()
-          return
-        }
+        if (!okWasPressed) return
+
+        // play music again
+        helper.player.play()
+
+        // stop timeout/shutdown
         clearTimeout(shutdownTimeout)
+
+        // rotate image back
         rotatingImage.classList.remove('state-rotate')
       }
     )
@@ -296,5 +299,10 @@ window.onload = () => {
         dialogs.cancel()
       }
     )
+  })
+
+  remote.getCurrentWindow().webContents.sendInputEvent({
+    type: 'keyDown',
+    keyCode: 'MediaPlayPause'
   })
 }
