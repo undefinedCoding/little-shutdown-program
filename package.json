@@ -1,6 +1,6 @@
 {
   "name": "little-shutdown-program",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "url": "https://github.com/undefinedCoding/little-shutdown-program",
   "description": "A little program that turns off the computer if a set timer is done",
   "license": "MIT",
@@ -17,7 +17,8 @@
     "dialogs": "^1.1.20",
     "electron-shutdown-command": "0.0.8",
     "electron-titlebar-windows": "^3.0.0",
-    "node-notifier": "^5.2.1"
+    "node-notifier": "^5.2.1",
+    "spotify-web-helper": "^1.12.0"
   },
   "devDependencies": {
     "electron": "^1.8.3",
