@@ -46,8 +46,8 @@ window.onload = () => {
   const stopButton = document.getElementById('stop')
 
   // setup buttons tyles
-  pauseResumeButton.style.background = 'gray'
-  stopButton.style.background = 'gray'
+  pauseResumeButton.classList.add('button-deactivated')
+  stopButton.classList.add('button-deactivated')
 
   // add event listener to the buttons
   startButton.addEventListener('click', () => {
@@ -81,8 +81,8 @@ window.onload = () => {
     timeDisplay.textContent = '00:00:000'
     startButton.value = 'Start'
     pauseResumeButton.value = 'Pause'
-    pauseResumeButton.style.background = 'gray'
-    stopButton.style.background = 'gray'
+    pauseResumeButton.classList.add('button-deactivated')
+    stopButton.classList.add('button-deactivated')
 
     // rotate image
     rotatingImage.classList.add('state-rotate')
@@ -109,22 +109,26 @@ window.onload = () => {
       {
         title: 'Timer is finished (' + (t.msInput / 1000 / 60) + 'min)',
         message: 'The computer is about to shut down (20s) - click here to stop this from happening!',
-        icon: path.join(__dirname, 'icon/icon.png'), // Absolute path (doesn't work on balloons)
-        sound: true, // Only Notification Center or Windows Toasters
-        wait: true // Wait with callback, until user action is taken against notification
+        icon: path.join(__dirname, 'icon/icon.png'),
+        sound: true,
+        wait: true
       },
       (err, response) => {
-        if (err) console.error('Error', err)
-        // log the response to the notification
+        if (err) console.error(err)
         if (response === 'the toast has timed out') return
 
+        // close open dialogs
         dialogs.cancel()
+
+        // clear timeout / stop shutdown
         clearTimeout(shutdownTimeout)
+
+        // rotate image
         rotatingImage.classList.remove('state-rotate')
 
-        // restore it if it's minimized
+        // restore window if it's minimized
         if (remote.getCurrentWindow().isMinimized()) remote.getCurrentWindow().restore()
-        // focus the already opened main window
+        // focus the window
         remote.getCurrentWindow().focus()
       }
     )
@@ -170,8 +174,8 @@ window.onload = () => {
     // change button values and styles
     startButton.value = 'Restart'
     pauseResumeButton.value = 'Pause'
-    pauseResumeButton.style.background = null
-    stopButton.style.background = null
+    pauseResumeButton.classList.remove('button-deactivated')
+    stopButton.classList.remove('button-deactivated')
   })
   shutdownTimer.on('stopCallback', (err, t) => {
     if (err) {
@@ -182,8 +186,8 @@ window.onload = () => {
     timeDisplay.textContent = '00:00:000'
     startButton.value = 'Start'
     pauseResumeButton.value = 'Pause'
-    pauseResumeButton.style.background = 'gray'
-    stopButton.style.background = 'gray'
+    pauseResumeButton.classList.add('button-deactivated')
+    stopButton.classList.add('button-deactivated')
   })
   shutdownTimer.on('resetCallback', err => {
     if (err) {
@@ -194,8 +198,8 @@ window.onload = () => {
     timeDisplay.textContent = '00:00:000'
     startButton.value = 'Start'
     pauseResumeButton.value = 'Pause'
-    pauseResumeButton.style.background = 'gray'
-    stopButton.style.background = 'gray'
+    pauseResumeButton.classList.add('button-deactivated')
+    stopButton.classList.add('button-deactivated')
     // clear time input
     document.getElementById('minutes').value = ''
   })

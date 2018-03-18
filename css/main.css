@@ -116,7 +116,7 @@ input:focus:-moz-placeholder {
     }
 }
 
-.timer-button:hover {
+.timer-button:hover:not(.button-deactivated) {
     background: rgba(0, 0, 0, 0.15);
     cursor: pointer;
 }
@@ -181,6 +181,6 @@ input:focus:-moz-placeholder {
     transform: translateX(-50%) rotate(0deg);
 }
 
-.deactivated {
+.button-deactivated {
     background: gray;
 }
