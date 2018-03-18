@@ -52,7 +52,7 @@ function createWindow () {
   )
 
   // Uncomment for instant debugging (from start opened dev tools)
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 
   // The renderer process has rendered the page for the first time
   mainWindow.on('ready-to-show', () => {
