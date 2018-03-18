@@ -17,13 +17,25 @@ const titlebar = new ElectronTitlebarWindows({
 })
 
 /**
- * Add leading zeroes
+ * Add leading zeroes (only works for numbers smaller than 3 and the maxium length is 3)
  * @param {number} num - The number
- * @param {number} size - The desired size
+ * @param {number} length - The desired length
+ * @returns {string} String with the desired length with leading zeroes
  */
-function pad (num, size) {
+function pad (num, length) {
   const s = '000' + num
-  return s.substr(s.length - size)
+  return s.substr(s.length - length)
+}
+
+/**
+ * Convert milliseconds to min sec string
+ * @param {number} milliseconds - The number of milliseconds
+ * @returns {string} XXmin and XXs formatted string
+ */
+function millisToMinutesAndSeconds (milliseconds) {
+  const minutes = Math.floor(milliseconds / 60000)
+  const seconds = ((milliseconds % 60000) / 1000).toFixed(0)
+  return minutes + 'min and ' + (seconds < 10 ? '0' : '') + seconds + 's'
 }
 
 // set titlebar callbacks
@@ -89,8 +101,11 @@ window.onload = () => {
     // rotate image
     rotatingImage.classList.add('state-rotate')
 
-    // stop music
-    helper.player.pause()
+    // pause music
+    if (helper.status !== null) {
+      const e = helper.player.pause()
+      e.then(argument => console.log(argument)).catch(err => console.log(err))
+    }
 
     // start timeout (20s) for forcefully shutting down the computer
     const shutdownTimeout = setTimeout(() => {
@@ -106,11 +121,14 @@ window.onload = () => {
       okWasPressed => {
         if (!okWasPressed) return
 
-        // play music again
-        helper.player.play()
-
         // stop timeout/shutdown
         clearTimeout(shutdownTimeout)
+
+        // play music again
+        if (helper.status !== null) {
+          const e = helper.player.pause(true)
+          e.then(argument => console.log(argument)).catch(err => console.log(err))
+        }
 
         // rotate image back
         rotatingImage.classList.remove('state-rotate')
@@ -121,7 +139,7 @@ window.onload = () => {
       {
         title: 'Timer is finished (' + t.msInput / 1000 / 60 + 'min)',
         message: 'The computer is about to shut down (20s) - click here to stop this from happening!',
-        icon: path.join(__dirname, 'icon/icon.png'),
+        icon: path.join(__dirname, 'icon', 'icon.png'),
         sound: true,
         wait: true
       },
@@ -136,7 +154,10 @@ window.onload = () => {
         clearTimeout(shutdownTimeout)
 
         // play music again
-        helper.player.play()
+        if (helper.status !== null) {
+          const e = helper.player.pause(true)
+          e.then(argument => console.log(argument)).catch(err => console.log(err))
+        }
 
         // rotate image
         rotatingImage.classList.remove('state-rotate')
@@ -245,6 +266,12 @@ window.onload = () => {
         if (shutdownTimer.isPaused) shutdownTimer.resume()
         else shutdownTimer.pause()
         break
+      case 82: // *r*ickroll
+        if (helper.status !== null) {
+          const e = helper.player.play('spotify:track:4uLU6hMCjMI75M1A2tKUQC')
+          e.then(argument => console.log(argument)).catch(err => console.log(err))
+        }
+        break
       case 122: // F11
         remote
           .getCurrentWindow()
@@ -261,21 +288,11 @@ window.onload = () => {
     electronTitlebar.style.display = 'block'
   })
 
-  console.log(helper)
-  console.log(helper.player)
-  console.log(helper.player.pause())
-
   const spotifyWebhelperStarted = window.performance.now()
-
-  function millisToMinutesAndSeconds(millis) {
-    var minutes = Math.floor(millis / 60000)
-    var seconds = ((millis % 60000) / 1000).toFixed(0)
-    return minutes + 'min ' + (seconds < 10 ? '0' : '') + seconds + 's'
-  }
 
   helper.player.on('error', err => {
     console.error('Spotify web helper error', err)
-    if (error.message.match(/No user logged in/)) {
+    if (err.message.match(/No user logged in/)) {
       console.error('No user logged in or spotify was closed')
     } else {
       console.error('Spotify not installed or another error')
@@ -283,13 +300,18 @@ window.onload = () => {
   })
   helper.player.on('ready', () => {
     // dialog to inform spotify helper is ready
-    dialogs.alert('Spotify helper is ready (' + millisToMinutesAndSeconds(window.performance.now() - spotifyWebhelperStarted) + ')')
+    const currentlyPlaying = helper.status.track
+    const currentlyPlayingString = 'Have fun listening to ' + currentlyPlaying.track_resource.name + ' by ' + currentlyPlaying.artist_resource.name + ' from ' + currentlyPlaying.album_resource.name
+    const timeString = 'Spotify helper is ready after ' + millisToMinutesAndSeconds(window.performance.now() - spotifyWebhelperStarted)
+
+    // show dialog to inform that spotify helper is ready
+    dialogs.alert(timeString + ' - ' + currentlyPlayingString)
     // show notification to inform that spotify helper is ready
     notifier.notify(
       {
-        title: 'Spotify web helper is ready',
-        message: 'Whohooooo (' + millisToMinutesAndSeconds(window.performance.now() - spotifyWebhelperStarted) + ')',
-        icon: path.join(__dirname, 'icon/icon.png'),
+        title: timeString,
+        message: currentlyPlayingString,
+        icon: path.join(__dirname, 'icon', 'icon.png'),
         sound: true,
         wait: true
       },
@@ -299,10 +321,5 @@ window.onload = () => {
         dialogs.cancel()
       }
     )
-  })
-
-  remote.getCurrentWindow().webContents.sendInputEvent({
-    type: 'keyDown',
-    keyCode: 'MediaPlayPause'
   })
 }

@@ -237,7 +237,7 @@ window.onload = () => {
    */
   reset () {
     // stop timer if active
-    if (this.timerId !== undefined) clearInterval(this.timerId)
+    clearInterval(this.timerId)
 
     // set all variables to undefined
     this.inputTime = undefined
