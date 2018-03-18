@@ -1,168 +1,301 @@
-const shutdown = require('electron-shutdown-command')
-const ElectronTitlebarWindows = require('electron-titlebar-windows')
-const titlebar = new ElectronTitlebarWindows({
-  color: '#ffffff',
-  draggable: true
-})
-const remote = require('electron').remote
-const dialogs = require('dialogs')()
-const notifier = require('node-notifier')
-const path = require('path')
-
-// global variables
-var globalRemainingSeconds
-var globalTimerInterval
-var stateSetting
-var paused = false
-
 /**
- * Function that resets the page
+ * Class that controls a timer
  */
-function resetPage () {
-  stateSetting.classList.remove('state-rotate')
-  document.getElementById('minutes').value = ''
-}
+class ShutdownTimer {
+  constructor () {
+    // variables
+    this.timerId = undefined
+    this.inputTime = undefined
+    this.remainingTime = undefined
 
-/**
- * FUnction that shuts down the computer
- */
-function startBreak () {
-  document.getElementsByTagName('audio')[0].play()
-  stateSetting = document.getElementById('background-setting')
-  stateSetting.classList.add('state-rotate')
-  document.getElementById('minutes').value = 'Good night'
-  setTimeout(resetPage, 5e3)
+    // performance.now
+    this.lastExecutedTime = undefined
+    /**
+     * Indicates if the program is paused:
+     * **true** if paused, **false** if not paused, **undefined** if timer not set or already went of
+     */
+    this.paused = undefined
 
-  const shutdownTimeout = setTimeout(() => {
-    // simple system shutdown with default options
-    shutdown.shutdown({ force: true })
-  }, 15000)
-
-  dialogs.confirm(
-    'Stop the computer from shutting down? (in 15s this will automatically happen)',
-    okWasPressed => {
-      if (okWasPressed) clearTimeout(shutdownTimeout)
+    // callback methods
+    this.alarmCallback = () => {}
+    this.countdownCallback = () => {}
+    this.startCallback = () => {}
+    this.pauseCallback = () => {}
+    this.resumeCallback = () => {}
+    this.stopCallback = () => {}
+    this.resetCallback = () => {}
+    // special callback method that runs every millisecond the timer runs
+    this.timerCallback = () => {
+      if (this.timerId === undefined) {
+        this.countdownCallback(new Error('Callback timer is not defined!'))
+      } else if (this.remainingTime === undefined) {
+        this.countdownCallback(new Error('No remaining time defined!'))
+      } else if (this.remainingTime <= 0) {
+        this.alarm()
+      } else {
+        this.remainingTime -= Math.floor(
+          window.performance.now() - this.lastExecutedTime
+        )
+        this.lastExecutedTime = window.performance.now()
+        this.countdownCallback(null, this.msToObject(this.remainingTime))
+      }
     }
-  )
-}
-
-function tick () {
-  const e = document.getElementById('time-display')
-  var t = Math.floor(globalRemainingSeconds / 60)
-  var n = globalRemainingSeconds - 60 * t
-
-  if (t < 10) t = '0' + t
-  if (n < 10) n = '0' + n
-
-  e.innerHTML = t + ':' + n
-
-  if (globalRemainingSeconds === 0) {
-    clearInterval(globalTimerInterval)
-    startBreak()
   }
 
-  globalRemainingSeconds--
-}
+  /**
+   * Get if the timer was paused or not
+   * @returns {boolean} true if paused, false if currently running, undefined if neither of these actions took place
+   */
+  get isPaused () {
+    return this.paused
+  }
 
-function startTimer () {
-  const e = document.getElementById('minutes').value
-  globalRemainingSeconds = 60 * e
-  if (globalRemainingSeconds < 0 || isNaN(e) || e === '') {
-    resetTimer()
-  } else {
-    clearInterval(globalTimerInterval)
-    globalTimerInterval = setInterval(tick, 1e3)
+  /**
+   * Get if the timer was stopped
+   * @returns {boolean} true if stopped, false if not
+   */
+  get isStopped () {
+    return this.paused === undefined
+  }
+
+  /**
+   * Set callback methods to different events
+   * @param {String} event - Event identifier
+   * @param {Function} callback - Callback function
+   * alarmCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * countdownCallback: ({msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * startCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * pauseCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * startCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   */
+  on (event, callback) {
+    switch (event) {
+      case 'alarmCallback':
+        this.alarmCallback = callback
+        break
+      case 'countdownCallback':
+        this.countdownCallback = callback
+        break
+      case 'startCallback':
+        this.startCallback = callback
+        break
+      case 'pauseCallback':
+        this.pauseCallback = callback
+        break
+      case 'resumeCallback':
+        this.resumeCallback = callback
+        break
+      case 'stopCallback':
+        this.stopCallback = callback
+        break
+      case 'resetCallback':
+        this.resetCallback = callback
+        break
+      default:
+        console.error(new Error('Event does not exist!'))
+    }
+  }
+
+  /**
+   * Alarm callback
+   */
+  alarm () {
+    // error catching
+    if (this.timerId === undefined) {
+      this.alarmCallback(new Error('The timer id was undefined!'))
+      return
+    } else if (this.inputTime === undefined) {
+      this.alarmCallback(new Error('The input time was undefined!'))
+      return
+    }
+
+    // clear interval
+    clearInterval(this.timerId)
+
+    // set paused and remainingTime to undefined
+    this.paused = undefined
+    this.remainingTime = undefined
+
+    // callback function with input time
+    this.alarmCallback(null, this.inputTime)
+  }
+
+  start (milliseconds) {
+    console.log(milliseconds)
+    // error catching
+    if (milliseconds === undefined) {
+      if (this.inputTime === undefined) {
+        this.startCallback(new Error('No milliseconds/saved-input-time found!'))
+        return
+      } else if (this.inputTime.msInput === undefined) {
+        this.startCallback(new Error('Saved input time was not defined!'))
+        return
+      } else {
+        milliseconds = this.inputTime.msInput
+        console.log(
+          'Hint:',
+          `Milliseconds were undefined, but inputTime.msInput (${this.inputTime.msInput}) was not`
+        )
+      }
+    } else if (isNaN(milliseconds)) {
+      this.startCallback(new Error('Given milliseconds is not a number!'))
+      return
+    } else if (milliseconds < 0) {
+      this.startCallback(new Error('Given milliseconds cannot be less than 0!'))
+      return
+    }
+
+    // set new input time if there was an valid input
+    this.inputTime = this.msToObject(milliseconds)
+
+    // set remaining time
+    this.remainingTime = this.inputTime.msInput
+
+    // save time when interval was stared
+    this.lastExecutedTime = window.performance.now()
+
+    // set paused to false
+    this.paused = false
+
+    // set interval
+    this.timerId = setInterval(this.timerCallback, 1)
+
+    // callback function with input time
+    this.startCallback(null, this.inputTime)
+  }
+
+  /**
+   * Pause timer which means the interval will be killed, the remaining time will be saved and paused will be set to true
+   */
+  pause () {
+    // error catching
+    if (this.timerId === undefined) {
+      this.pauseCallback('The timer id was undefined')
+      return
+    } else if (this.paused === undefined) {
+      this.resumeCallback(new Error('The timer was not started before'))
+      return
+    }
+
+    // clear interval
+    clearInterval(this.timerId)
+
+    // set last executedTime undefined
+    this.lastExecutedTime = undefined
+
+    // set paused to true
+    this.paused = true
+
+    // callback function with input time and current time
+    this.pauseCallback(
+      null,
+      this.inputTime,
+      this.msToObject(this.remainingTime)
+    )
+  }
+
+  /**
+   * Resume timer
+   */
+  resume () {
+    // error catching
+    if (this.inputTime === undefined) {
+      this.resumeCallback(new Error('The input time is undefined'))
+      return
+    } else if (this.remainingTime === undefined) {
+      this.resumeCallback(new Error('The remaining time is undefined'))
+      return
+    } else if (this.paused === undefined) {
+      this.resumeCallback(new Error('The timer was not paused before'))
+      return
+    }
+
+    // set last executedTime to right now
+    this.lastExecutedTime = window.performance.now()
+
+    // set new interval
+    this.timerId = setInterval(this.timerCallback, 1)
+
+    // set paused to false
+    this.paused = false
+
+    // callback function with input time and current time
+    this.resumeCallback(
+      null,
+      this.inputTime,
+      this.msToObject(this.remainingTime)
+    )
+  }
+
+  /**
+   * Stop timer
+   */
+  stop () {
+    // error catching
+    if (this.timerId === undefined) {
+      // check if a timer was defined
+      this.stopCallback(new Error('There was no timer defined'))
+      return
+    } else if (this.inputTime === undefined) {
+      // check if there is a saved input time
+      this.stopCallback(new Error('There was no input time defined'))
+      return
+    }
+
+    // clear interval
+    clearInterval(this.timerId)
+
+    // set pause to undefined
+    this.paused = undefined
+
+    // callback function
+    this.stopCallback(null, this.inputTime)
+  }
+
+  /**
+   * Reset timer
+   */
+  reset () {
+    // stop timer if active
+    if (this.timerId !== undefined) clearInterval(this.timerId)
+
+    // set all variables to undefined
+    this.inputTime = undefined
+    this.lastExecutedTime = undefined
+    this.paused = undefined
+    this.remainingTime = undefined
+    this.timerId = undefined
+
+    // callback function
+    this.resetCallback(null)
+  }
+
+  /**
+   * Convert given milliseconds to an object which contains days, hours, minutes, seconds, milliseconds and the original milliseconds number
+   * @param {Number} msInput - Number of milliseconds
+   * @returns {{msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}} - Time object
+   */
+  msToObject (msInput) {
+    var d, h, m, s
+    const newMs = Math.floor(msInput % 1000)
+    s = Math.floor(msInput / 1000)
+    m = Math.floor(s / 60)
+    s = s % 60
+    h = Math.floor(m / 60)
+    m = m % 60
+    d = Math.floor(h / 24)
+    h = h % 24
+    return {
+      msInput: msInput,
+      d: d,
+      h: h,
+      m: m,
+      s: s,
+      ms: newMs
+    }
   }
 }
 
-/**
- * Pause timer
- */
-function pauseTimer () {
-  if (globalRemainingSeconds > 0) {
-    if (paused === false) {
-      this.value = 'Resume'
-      clearInterval(globalTimerInterval)
-    } else {
-      this.value = 'Pause'
-      globalTimerInterval = setInterval(tick, 1e3)
-    }
-    paused = !paused
-  }
-}
-
-/**
- * Reset timer
- */
-function resetTimer () {
-  // clear/reset timer
-  clearInterval(globalTimerInterval)
-  // reset timer display and minutes value
-  document.getElementById('minutes').value = ''
-  document.getElementById('time-display').innerHTML = '00:00'
-}
-
-// titlebar action listener
-titlebar.on('minimize', e => remote.getCurrentWindow().minimize())
-titlebar.on('maximize', e => remote.getCurrentWindow().restore())
-titlebar.on('fullscreen', e => remote.getCurrentWindow().maximize())
-titlebar.on('close', e => remote.getCurrentWindow().close())
-
-window.onload = () => {
-  // append windows titlebar to frameless window at the top
-  titlebar.appendTo(document.getElementById('electron-titlebar'))
-
-  notifier.notify(
-    {
-      title: 'My awesome title',
-      message: 'Hello from node, Mr. User!',
-      icon: path.join(__dirname, 'icon/icon.png'), // Absolute path (doesn't work on balloons)
-      sound: true, // Only Notification Center or Windows Toasters
-      wait: true // Wait with callback, until user action is taken against notification
-    },
-    (err, response) => {
-      if (err) console.error('Error', err)
-      // log the response to the notification
-      console.log('response', response)
-    }
-  )
-
-  notifier.on('click', (notifierObject, options) => {
-    // Triggers if `wait: true` and user clicks notification
-    console.log('click')
-  })
-
-  notifier.on('timeout', (notifierObject, options) => {
-    // Triggers if `wait: true` and notification closes
-    console.log('timeout')
-  })
-
-  // add event listener to the buttons
-  document.getElementById('start').addEventListener('click', startTimer)
-  document.getElementById('stop').addEventListener('click', pauseTimer)
-  document.getElementById('reset').addEventListener('click', resetTimer)
-
-  // event listen for shortcuts
-  document.addEventListener('keydown', e => {
-    // F5
-    if (e.which === 116) remote.getCurrentWindow().reload()
-    // F12
-    if (e.which === 123) remote.getCurrentWindow().toggleDevTools()
-    // F11
-    if (e.which === 122) {
-      remote
-        .getCurrentWindow()
-        .setFullScreen(!remote.getCurrentWindow().isFullScreen())
-    }
-  })
-
-  // if full screen is activated
-  remote.getCurrentWindow().on('enter-full-screen', () => {
-    document.getElementById('electron-titlebar').style.display = 'none'
-    console.log('enter-full-screen')
-  })
-  remote.getCurrentWindow().on('leave-full-screen', () => {
-    document.getElementById('electron-titlebar').style.display = 'block'
-    console.log('leave-full-screen')
-  })
+module.exports = {
+  ShutdownTimer
 }

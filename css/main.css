@@ -1,15 +1,11 @@
-body {
-    background: #c9329e;
-    user-select: none;
-}
-
 * {
     box-sizing: border-box;
 }
 
 body {
-    background: #c9329e url("/img/noise.png");
+    background: #c9329e;
     margin: 0;
+    user-select: none;
 }
 
 p {
@@ -182,4 +178,8 @@ input:focus:-moz-placeholder {
 
 .state-rotate {
     transform: translateX(-50%) rotate(0deg);
+}
+
+.deactivated {
+    background: gray;
 }

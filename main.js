@@ -3,25 +3,34 @@ const { app, BrowserWindow } = require('electron')
 const path = require('path')
 const url = require('url')
 
-// Global variable for the window
-var win = null
+// global variable for the main window
+var mainWindow = null
 
-const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
-  // Someone tried to run a second instance, we should focus our window.
-  if (win) {
-    if (win.isMinimized()) win.restore()
-    win.focus()
+// check if there is already an instance of this program running
+const shouldQuit = app.makeSingleInstance(() => {
+  // if there is a main window
+  if (mainWindow) {
+    // restore it if it's minimized
+    if (mainWindow.isMinimized()) mainWindow.restore()
+    // focus the already opened main window
+    mainWindow.focus()
   }
 })
 
+// another instance of this program was found running
 if (shouldQuit) {
+  // quit this instance of the program
   app.quit()
 }
 
+/**
+ * Create the main window
+ */
 function createWindow () {
-  // Create a window
-  win = new BrowserWindow({
+  // Create a BrowserWindow object
+  mainWindow = new BrowserWindow({
     title: 'little shutdown program',
+    titleBarStyle: 'hidden',
     backgroundColor: '#c9329e',
     minWidth: 400,
     minHeight: 500,
@@ -33,8 +42,8 @@ function createWindow () {
     icon: 'icon.ico'
   })
 
-  // Load in the window the 'index.html' file
-  win.loadURL(
+  // Load the 'index.html' file in the window
+  mainWindow.loadURL(
     url.format({
       pathname: path.join(__dirname, 'index.html'),
       protocol: 'file:',
@@ -42,19 +51,20 @@ function createWindow () {
     })
   )
 
-  // uncomment for instant debugging
-  // win.webContents.openDevTools()
+  // Uncomment for instant debugging (from start opened dev tools)
+  mainWindow.webContents.openDevTools()
 
-  // show window if everythin loaded
-  win.on('ready-to-show', () => {
-    win.show()
-    win.focus()
+  // The renderer process has rendered the page for the first time
+  mainWindow.on('ready-to-show', () => {
+    // show window
+    mainWindow.show()
+    // focus window
+    mainWindow.focus()
   })
 
-  // Window gets closed
-  win.on('closed', () => {
-    // Dereference the window object
-    win = null
+  // Window was closed: Dereference the window object
+  mainWindow.on('closed', () => {
+    mainWindow = null
   })
 }
 
@@ -69,5 +79,5 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
   // macOS: Re-create a window in the app when the dock icon is clicked and there are no other open windows
-  if (win === null) createWindow()
+  if (mainWindow) createWindow()
 })
