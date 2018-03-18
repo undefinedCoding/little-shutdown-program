@@ -9,12 +9,14 @@ const path = require('path')
 const SpotifyWebHelper = require('spotify-web-helper')
 const helper = SpotifyWebHelper()
 
-// global objects
+// global objects/variables
 const shutdownTimer = new ShutdownTimer()
 const titlebar = new ElectronTitlebarWindows({
   color: '#ffffff',
-  draggable: true
+  draggable: true,
+  backgroundColor: '#a1287f'
 })
+var spotifySupport
 
 /**
  * Add leading zeroes (only works for numbers smaller than 3 and the maxium length is 3)
@@ -102,9 +104,9 @@ window.onload = () => {
     rotatingImage.classList.add('state-rotate')
 
     // pause music
-    if (helper.status !== null) {
+    if (spotifySupport === true && helper.status !== null) {
       const e = helper.player.pause()
-      e.then(argument => console.log(argument)).catch(err => console.log(err))
+      e.then(argument => console.log(argument)).catch(err => console.error(err))
     }
 
     // start timeout (20s) for forcefully shutting down the computer
@@ -125,9 +127,9 @@ window.onload = () => {
         clearTimeout(shutdownTimeout)
 
         // play music again
-        if (helper.status !== null) {
+        if (spotifySupport === true && helper.status !== null) {
           const e = helper.player.pause(true)
-          e.then(argument => console.log(argument)).catch(err => console.log(err))
+          if (e !== undefined) e.then(argument => console.log(argument)).catch(err => console.error(err))
         }
 
         // rotate image back
@@ -154,9 +156,9 @@ window.onload = () => {
         clearTimeout(shutdownTimeout)
 
         // play music again
-        if (helper.status !== null) {
+        if (spotifySupport === true && helper.status !== null) {
           const e = helper.player.pause(true)
-          e.then(argument => console.log(argument)).catch(err => console.log(err))
+          if (e !== undefined) e.then(argument => console.log(argument)).catch(err => console.error(err))
         }
 
         // rotate image
@@ -267,9 +269,9 @@ window.onload = () => {
         else shutdownTimer.pause()
         break
       case 82: // *r*ickroll
-        if (helper.status !== null) {
+        if (spotifySupport === true && helper.status !== null) {
           const e = helper.player.play('spotify:track:4uLU6hMCjMI75M1A2tKUQC')
-          e.then(argument => console.log(argument)).catch(err => console.log(err))
+          if (e !== undefined) e.then(argument => console.log(argument)).catch(err => console.error(err))
         }
         break
       case 122: // F11
@@ -291,12 +293,9 @@ window.onload = () => {
   const spotifyWebhelperStarted = window.performance.now()
 
   helper.player.on('error', err => {
-    console.error('Spotify web helper error', err)
-    if (err.message.match(/No user logged in/)) {
-      console.error('No user logged in or spotify was closed')
-    } else {
-      console.error('Spotify not installed or another error')
-    }
+    console.error(new Error('Connection to Spotify could not be established or was killed'))
+    console.error(err)
+    spotifySupport = false
   })
   helper.player.on('ready', () => {
     // dialog to inform spotify helper is ready
@@ -321,5 +320,8 @@ window.onload = () => {
         dialogs.cancel()
       }
     )
+
+    // activate spotify support
+    spotifySupport = true
   })
 }

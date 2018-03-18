@@ -174,7 +174,7 @@ input:focus:-moz-placeholder {
     bottom: 0;
     height: 30px;
     width: 100%;
-    background: rgba(0, 0, 0, 0.2);
+    background: #a1287f;
 }
 
 .state-rotate {
