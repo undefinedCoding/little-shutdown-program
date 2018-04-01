@@ -28,8 +28,7 @@ const spotifyHandler = new SpotifyHandler()
  * Open a given URL externally in the default browser
  * @param {String} url - Normal URL
  */
-function openLinkExternally (url) {
-  // eslint-disable-line no-unused-vars
+function openLinkExternally (url) { // eslint-disable-line no-unused-vars
   shell.openExternal(url)
 }
 
@@ -310,14 +309,10 @@ spotifySVG.addEventListener('click', () => {
   spotifySVG.src = 'data/spotify_logo_by_wikimedia_disabled.svg'
 })
 
-// timer control buttons
-timerButtonPauseResume.addEventListener('click', () => {
-  // resume timer or pause if running
-  if (shutdownTimer.isPaused) shutdownTimer.resume()
-  else shutdownTimer.pause()
-})
-timerButtonStartStop.addEventListener('click', () => {
-  // start timer or stop if running
+/**
+ * Start stimer with the inputted time or stop it if it's running
+ */
+function startstopTimer () {
   if (!shutdownTimer.isStopped) shutdownTimer.stop()
   else {
     const seconds =
@@ -327,6 +322,17 @@ timerButtonStartStop.addEventListener('click', () => {
       timerInputSeconds.value
     shutdownTimer.start(seconds * 1000)
   }
+}
+
+// timer control buttons
+timerButtonPauseResume.addEventListener('click', () => {
+  // resume timer or pause if running
+  if (shutdownTimer.isPaused) shutdownTimer.resume()
+  else shutdownTimer.pause()
+})
+timerButtonStartStop.addEventListener('click', () => {
+  // start timer or stop if running
+  startstopTimer()
 })
 timerButtonClear.addEventListener('click', () => {
   shutdownTimer.reset()
@@ -581,6 +587,9 @@ document.addEventListener('keydown', e => {
 // event listen for click shortcuts
 document.addEventListener('keyup', e => {
   switch (e.which) {
+    case 13: // Enter
+      startstopTimer()
+      break
     case 32: // space bar - Resume/Pause
       if (shutdownTimer.isPaused) shutdownTimer.resume()
       else shutdownTimer.pause()
