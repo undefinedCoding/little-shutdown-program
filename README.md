@@ -5,7 +5,7 @@ Just a little program, that shuts down a (Windows 10) computer after a, from the
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 [![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 
-##How does it look like
+## How does it look like
 
 Here's a screenshot of this beautiful program:
 
@@ -19,7 +19,7 @@ Here's a Screenshot from the Setting Page:
 
 The only thing that may seem strange is the Spotify Logo and the Spotify Setting. It has to do with the feature of the program, that it automatically stops your actual playing Spotify Song, when the Timer ends.
 
-##Installation
+## Installation
 
 Just go to the [GitHub Release Site](https://github.com/undefinedCoding/little-shutdown-program/releases) from this Project and download the latest release.
 
