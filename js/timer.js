@@ -1,21 +1,3 @@
-const shutdown = require('electron-shutdown-command')
-const ElectronTitlebarWindows = require('electron-titlebar-windows')
-const titlebar = new ElectronTitlebarWindows({
-  color: '#ffffff',
-  draggable: true
-})
-const remote = require('electron').remote
-const dialogs = require('dialogs')()
-const notifier = require('node-notifier')
-const path = require('path')
-
-// global variables
-var globalRemainingSeconds
-var globalTimerInterval
-var stateSetting
-var paused = false
-var emergencyStop = false
-
 /**
  * Class that controls a timer
  */
@@ -26,55 +8,125 @@ class ShutdownTimer {
     this.inputTime = undefined
     this.remainingTime = undefined
 
-/**
- * Function that shuts down the computer
- */
-function startBreak () {
-  document.getElementsByTagName('audio')[0].play()
-  stateSetting = document.getElementById('background-setting')
-  stateSetting.classList.add('state-rotate')
-  document.getElementById('minutes').value = 'Good night'
-  setTimeout(resetPage, 5e3)
+    // performance.now
+    this.lastExecutedTime = undefined
+    /**
+     * Indicates if the program is paused:
+     * **true** if paused, **false** if not paused, **undefined** if timer not set or already went of
+     */
+    this.paused = undefined
 
-  //alert("Just a Joke :D, but if this was real, the Computer would shut down")
-  
-  const shutdownTimeout = setTimeout(() => {
-    // simple system shutdown with default options
-    shutdown.shutdown({ force: true })
-  }, 15000)
+    // callback methods
+    this.alarmCallback = () => {}
+    this.countdownCallback = () => {}
+    this.startCallback = () => {}
+    this.pauseCallback = () => {}
+    this.resumeCallback = () => {}
+    this.stopCallback = () => {}
+    this.resetCallback = () => {}
+    // special callback method that runs every millisecond the timer runs
+    this.timerCallback = () => {
+      if (this.timerId === undefined) {
+        this.countdownCallback(new Error('Callback timer is not defined!'))
+      } else if (this.remainingTime === undefined) {
+        this.countdownCallback(new Error('No remaining time defined!'))
+      } else {
+        this.remainingTime -= Math.floor(
+          window.performance.now() - this.lastExecutedTime
+        )
 
-  /*dialogs.confirm(
-    'Stop the computer from shutting down? (in 15s this will automatically happen)',
-    okWasPressed => {
-      if (okWasPressed) clearTimeout(shutdownTimeout)
+        if (this.remainingTime <= 0) {
+          this.alarm()
+        } else {
+          this.lastExecutedTime = window.performance.now()
+          this.countdownCallback(null, this.msToObject(this.remainingTime))
+        }
+      }
     }
-  )*/
-}
+  }
 
-function startWarningDialog () {
-  //later (windows native notification):
-  //https://github.com/felixrieseberg/electron-windows-interactive-notifications 
+  /**
+   * Get if the timer was paused or not
+   * @returns {boolean} true if paused, false if currently running, undefined if neither of these actions took place
+   */
+  get isPaused () {
+    return this.paused
+  }
 
-  dialogs.confirm(
-    'Stop the computer from shutting down? (in 15s this will automatically happen)',
-    okWasPressed => {
-      if (okWasPressed) emergencyStop = true
+  /**
+   * Get if the timer was stopped
+   * @returns {boolean} true if stopped, false if not
+   */
+  get isStopped () {
+    return this.paused === undefined
+  }
+
+  get state () {
+    console.log('isPaused', this.isPaused)
+    console.log('isStopped', this.isStopped)
+    console.log('timerCallback', this.timerCallback)
+  }
+
+  /**
+   * Set callback methods to different events
+   * @param {String} event - Event identifier
+   * @param {Function} callback - Callback function
+   * alarmCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * countdownCallback: ({msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * startCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * pauseCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * startCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   */
+  on (event, callback) {
+    switch (event) {
+      case 'alarmCallback':
+        this.alarmCallback = callback
+        break
+      case 'countdownCallback':
+        this.countdownCallback = callback
+        break
+      case 'startCallback':
+        this.startCallback = callback
+        break
+      case 'pauseCallback':
+        this.pauseCallback = callback
+        break
+      case 'resumeCallback':
+        this.resumeCallback = callback
+        break
+      case 'stopCallback':
+        this.stopCallback = callback
+        break
+      case 'resetCallback':
+        this.resetCallback = callback
+        break
+      default:
+        console.error(new Error('Event does not exist!'))
     }
-  )
-}
+  }
 
-function tick () {
-  const e = document.getElementById('time-display')
-  var remainingMinutes = Math.floor(globalRemainingSeconds / 60)
-  var remainingSeconds = globalRemainingSeconds - 60 * remainingMinutes
+  /**
+   * Alarm callback
+   */
+  alarm () {
+    // error catching
+    if (this.timerId === undefined) {
+      this.alarmCallback(new Error('The timer id was undefined!'))
+      return
+    } else if (this.inputTime === undefined) {
+      this.alarmCallback(new Error('The input time was undefined!'))
+      return
+    }
 
-  if (remainingMinutes < 10) remainingMinutes = '0' + remainingMinutes //add 0, when there's only one digit
-  if (remainingSeconds < 10) remainingSeconds = '0' + remainingSeconds //also adds 0, when there's only one digit
+    // clear interval
+    clearInterval(this.timerId)
 
-  e.innerHTML = remainingMinutes + ':' + remainingSeconds 
+    // set paused and remainingTime to undefined
+    this.paused = undefined
+    this.remainingTime = undefined
 
-  if (globalRemainingSeconds == 15) {
-    startWarningDialog()
+    // callback function with input time
+    this.alarmCallback(null, this.inputTime)
   }
 
   start (milliseconds) {
@@ -114,27 +166,11 @@ function tick () {
     this.paused = false
 
     // set interval
-    this.timerId = setInterval(this.timerCallback, 1)
+    this.timerId = setInterval(this.timerCallback, 100)
 
-  if (globalRemainingSeconds === 0) {
-    console.log("Wow you let the Timer count to 0")
-    clearInterval(globalTimerInterval)
-    startBreak()
+    // callback function with input time
+    this.startCallback(null, this.inputTime)
   }
-  globalRemainingSeconds--
-}
-
-function startTimer () {
-  const e = document.getElementById('minutes').value
-  globalRemainingSeconds = 60 * e
-  if (globalRemainingSeconds < 0 || isNaN(e) || e === '') {
-    //Notification if the Input was not accepted
-    alert("Interesting Input, but that's not what i expected. Only insert Natural Numbers as Minutes")
-    resetTimer()
-  } else {
-    clearInterval(globalTimerInterval)
-    //1e3 = 1E3 = 1 * 10^3 = 1 * 1000 = 1000 (party)
-    globalTimerInterval = setInterval(tick, 1e3) //setInterval keeps calling the tick function every 1e3 seconds
 
   /**
    * Pause timer which means the interval will be killed, the remaining time will be saved and paused will be set to true
@@ -186,7 +222,7 @@ function startTimer () {
     this.lastExecutedTime = window.performance.now()
 
     // set new interval
-    this.timerId = setInterval(this.timerCallback, 1)
+    this.timerId = setInterval(this.timerCallback, 100)
 
     // set paused to false
     this.paused = false
@@ -199,28 +235,20 @@ function startTimer () {
     )
   }
 
-// titlebar action listener
-titlebar.on('minimize', e => remote.getCurrentWindow().minimize())
-titlebar.on('maximize', e => remote.getCurrentWindow().restore())
-titlebar.on('fullscreen', e => remote.getCurrentWindow().maximize())
-titlebar.on('close', e => remote.getCurrentWindow().close())
-
-window.onload = () => {
-  // append windows titlebar to frameless window at the top
-  titlebar.appendTo(document.getElementById('electron-titlebar'))
-
-  notifier.notify(
-    {
-      title: 'Whooohooooo',
-      message: 'Did you get scared? - I did',
-      icon: path.join(__dirname, 'icon/icon.png'), // Absolute path (doesn't work on balloons)
-      sound: true, // Only Notification Center or Windows Toasters
-      wait: true // Wait with callback, until user action is taken against notification
-    },
-    (err, response) => {
-      if (err) console.error('Error', err)
-      // log the response to the notification
-      console.log('response', response)
+  /**
+   * Stop timer
+   */
+  stop () {
+    // error catching
+    if (this.timerId === undefined) {
+      // check if a timer was defined
+      this.stopCallback(new Error('There was no timer defined'))
+      return
+    } else if (this.inputTime === undefined) {
+      // check if there is a saved input time
+      this.stopCallback(new Error('There was no input time defined'))
+      return
+    }
 
     // clear interval
     clearInterval(this.timerId)

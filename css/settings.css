@@ -1,0 +1,169 @@
+@charset "UTF-8";
+
+/* Layouts */
+
+
+/* Every settings entry and every ::before in the entry */
+
+.settings-entry,
+.settings-entry ::before {
+    /* Set as layout the border box layout */
+    box-sizing: border-box;
+}
+
+/* Set font, line height and color */
+
+#settings{
+    font-family: Open sans, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: white;
+    max-width: 35rem;
+    margin: 3rem auto;
+    display: none;
+}
+
+#settings fieldset {
+    border: 0;
+}
+
+#settings legend.bigtitle {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 300;
+}
+
+
+/* The real input checkboxes */
+
+.settings-entry input[type="checkbox"] {
+    /* Hide the real "normal" checkboxes by not even rendering them */
+    display: none;
+}
+
+
+/* Every settings entry */
+
+.settings-entry {
+    /* No margin or padding */
+    margin: 0;
+    padding: 0;
+    /* Add space below each entry */
+    margin-bottom: 1rem;
+}
+
+
+/* Every settings entry's checkbox */
+
+.settings-windows10-checkbox {
+    float: right;
+}
+
+
+/* Every settings entry's legend */
+
+.settings-entry legend {
+    margin: 0;
+    /* Add left padding because of float */
+    padding: 0;
+    float: left;
+}
+
+
+/* Every settings entry's legend title text */
+
+.settings-entry legend.title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 2rem;
+    margin: 0 2rem 0 0;
+}
+
+
+/* Every settings entry's legend descripton text */
+
+.settings-entry legend.descripton {
+    clear: left;
+    font-size: 0.75rem;
+    font-weight: 300;
+    width: 65%;
+}
+
+.settings-entry input[type="checkbox"]+label {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    line-height: 1.3rem;
+    margin-top: 15px;
+}
+
+.settings-entry input[type="checkbox"]+label:before {
+    width: 2.3rem;
+    height: 1.3rem;
+    font-family: Arial, sans-serif;
+    display: inline-block;
+    content: '•';
+    -webkit-transition: all 0.2s ease;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-size: 2.25rem;
+    line-height: 1rem;
+    float: left;
+    overflow: hidden;
+    color: white;
+    border: 0.18rem solid white;
+    border-radius: 0.65rem;
+    margin: auto 0;
+}
+
+
+/* Hide the label if the screen is not as wide as specified below */
+
+.settings-entry input[type="checkbox"]+label:after {
+    display: none;
+}
+
+
+/* Show the label if the screen is at least as wide as specified */
+
+@media screen and (min-width: 25rem) {
+    .settings-entry input[type="checkbox"]+label:before {
+        margin-right: 0.5rem;
+    }
+    .settings-entry input[type="checkbox"]+label:after {
+        width: 1.75rem;
+        display: inline-block;
+    }
+}
+
+.settings-entry input[type="checkbox"]:checked+label:before {
+    border-color: #00AC64;
+    background: #00AC64;
+    text-align: right;
+    color: white;
+}
+
+/* If a settings checkbox was checked change the content to "On" */
+.settings-entry input[type="checkbox"]:checked+label:after {
+    content: "On";
+}
+
+/* If a settings checkbox was NOT checked change the content to "Off" */
+.settings-entry input[type="checkbox"]+label:after {
+    content: "Off";
+}
+
+.settings-entry input[type="checkbox"]+label:active:before,
+.settings-entry input[type="checkbox"]:checked+label:active:before {
+    border-color: #808B8D;
+    background: #808B8D;
+    color: white;
+}
+
+@media screen and (min-width: 25rem) {
+     :root {
+        font-size: 18px;
+    }
+}
+

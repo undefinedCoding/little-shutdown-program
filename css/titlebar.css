@@ -1,0 +1,121 @@
+#titlebar-windows-10 {
+    display: block;
+    height: 32px;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0.14);
+    -webkit-app-region: drag;
+    cursor: default;
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+#titlebar-windows-10 .title {
+    float: left;
+    margin-top: 6px;
+    margin-left: 6px;
+    color: white;
+    font-family: "Segoe UI";
+    font-size: 14px;
+}
+
+#titlebar-windows-10 .actions .titlebar-help {
+    color: white;
+    font-family: "Segoe UI";
+    font-size: 14px;
+}
+
+#titlebar-windows-10 .actions {
+    float: right;
+    text-align: left;
+    -webkit-app-region: no-drag;
+}
+
+#titlebar-windows-10:after,
+.actions:after {
+    content: ' ';
+    display: table;
+    clear: both;
+}
+
+.titlebar-minimize,
+.titlebar-resize,
+.titlebar-close,
+.titlebar-help {
+    float: left;
+    width: 45px;
+    height: 31px;
+    margin: 1px 1px 0 0;
+    text-align: center;
+    line-height: 29px;
+    transition: background-color .2s;
+}
+
+.titlebar.draggable .titlebar-minimize,
+.titlebar.draggable .titlebar-resize,
+.titlebar.draggable .titlebar-close {
+    -webkit-app-region: no-drag;
+}
+
+.titlebar-minimize svg,
+.titlebar-resize svg.maximize-svg,
+.titlebar-resize svg.fullscreen-svg,
+.titlebar-close svg {
+    width: 10px;
+    height: 10px;
+    shape-rendering: crispEdges;
+}
+
+.titlebar-close svg polygon {
+    transition: fill .2s;
+}
+
+:not(.fullscreen) svg.maximize-svg {
+    display: none;
+}
+
+.fullscreen svg.maximize-svg {
+    display: block;
+    margin: 10px;
+    margin-left: 18px;
+}
+
+.fullscreen svg.fullscreen-svg {
+    display: none;
+}
+
+.titlebar-minimize:hover,
+.titlebar-resize:hover,
+.titlebar-fullscreen:hover,
+.titlebar-help:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+#titlebar-windows-10 .titlebar-minimize:hover,
+#titlebar-windows-10 .titlebar-resize:hover,
+#titlebar-windows-10 .titlebar-fullscreen:hover,
+#titlebar-windows-10 .titlebar-help:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.titlebar-close:hover {
+    background-color: rgba(232, 17, 35, 0.9);
+}
+
+.titlebar-close:hover svg polygon {
+    fill: rgba(255, 255, 255, 1);
+}
+
+#titlebar-windows-10 .titlebar-close:hover {
+    fill: rgba(0, 0, 0, 1);
+}
+
+#titlebar-windows-10 svg polygon,
+#titlebar-windows-10 svg rect,
+#titlebar-windows-10 svg>path {
+    fill: rgba(255, 255, 255, 1);
+}
+
+#titlebar-windows-10 .titlebar-close:hover {
+    background-color: rgba(232, 17, 35, 0.9);
+}

@@ -44,19 +44,19 @@ input:focus {
     outline: 0;
 }
 
- ::-webkit-input-placeholder {
+::-webkit-input-placeholder {
     color: white;
 }
 
- :-moz-placeholder {
+:-moz-placeholder {
     color: white;
 }
 
- ::-moz-placeholder {
+::-moz-placeholder {
     color: white;
 }
 
- :-ms-input-placeholder {
+:-ms-input-placeholder {
     color: white;
 }
 
@@ -183,4 +183,148 @@ input:focus:-moz-placeholder {
 
 .button-deactivated {
     background: gray;
+}
+
+/* NEW */
+
+#main-container,
+#settings,
+#about {
+    transition: transform .2s ease-in-out;
+}
+
+#main-container {
+    position: absolute;
+    top: 32px;
+    width: 100vw;
+    padding: 20px;
+}
+
+body {
+    overflow-x: hidden;
+    margin: 0;
+    user-select: none;
+}
+
+#spotify-indicator {
+    display: grid;
+    grid-template-areas: "1fr spotify-logo";
+    margin-bottom: 20px;
+}
+
+#spotify-logo {
+    width: 150px;
+    grid-area: spotify-logo;
+}
+
+#time-inputs {
+    display: grid;
+    grid-template-areas: "input-days input-hours input-minutes input-seconds";
+    grid-gap: 10px;
+    margin-left: 10vw;
+    margin-right: 10vw;
+    margin-bottom: 20px;
+    padding: 15px;
+}
+
+#timer-buttons {
+    display: grid;
+    grid-template-areas: "button-pause-resume button-start-stop button-clear";
+    grid-gap: 10px;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-bottom: 20px;
+    grid-auto-columns: 1fr;
+}
+
+#timer-buttons input {
+    background-color: rgba(250, 250, 250, 0.4);
+    border: 1px transparent solid;
+    mix-blend-mode: screen;
+    padding: 15px;
+}
+
+#timer-buttons input:hover {
+    background-color: rgba(250, 250, 250, 0.6);
+    border: 1px white solid;
+}
+
+#button_pause_resume {
+    grid-area: button-pause-resume;
+}
+
+#button_start_stop {
+    grid-area: button-start-stop;
+}
+
+#button_clear {
+    grid-area: button-clear;
+}
+
+#timer_d {
+    grid-area: input-days;
+}
+
+#timer_d:before {
+    content: 'DD'
+}
+
+#timer_h {
+    grid-area: input-hours;
+}
+
+#timer_h:before {
+    content: 'HH'
+}
+
+#timer_m {
+    grid-area: input-minutes;
+}
+
+#timer_s {
+    grid-area: input-seconds;
+}
+
+#about {
+    font-family: Open sans, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: white;
+    display: none;
+    position: absolute;
+    width: 100vw;
+    top: 32px;
+    height: 100vh;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+}
+
+#about_container {
+
+    max-width: 800px;
+    margin-top: 20px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+#about_container h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 300;
+    font-family: Open sans, sans-serif;
+    line-height: 1.5;
+    color: white;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+ 
+::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.14);
+}
+ 
+::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.44);
+    border-radius: 4px;
 }
