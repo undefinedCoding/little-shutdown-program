@@ -11,8 +11,7 @@ It's perfect for just lying in your bed and for example hearing music on your co
 
 ## Development state
 
-- at the moment it only works on windows (only tested there)
-- there is a lot of copied code 🙈
+Only tested on Windows, but there everything works
 
 ## Reasons for existing
 
@@ -20,6 +19,5 @@ Iiiiiii just made this program because I'm too lazy to get up after I laid down,
 
 ## Disclaimer
 
-This program is currently not perfect or has many feautures.
-It's just a timer for shutting the system off.
-Maybe - if it's possible - I add that it *shuts down if the  song ends* or something like that, but right now this is very unrealistic .
+This program is not perfect and was not written by professionals.
+If you miss features or find bugs please open an issue.
