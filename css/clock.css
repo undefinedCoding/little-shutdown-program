@@ -24,7 +24,7 @@
     border-color: #272e38;
 }
 
-#cloc #digits div.dots:before,
+#clock #digits div.dots:before,
 #clock #digits div.dots:after {
     background-color: #272e38;
 }
