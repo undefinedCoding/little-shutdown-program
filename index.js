@@ -28,7 +28,8 @@ const spotifyHandler = new SpotifyHandler()
  * Open a given URL externally in the default browser
  * @param {String} url - Normal URL
  */
-function openLinkExternally (url) { // eslint-disable-line no-unused-vars
+function openLinkExternally (url) {
+  // eslint-disable-line no-unused-vars
   shell.openExternal(url)
 }
 
@@ -371,7 +372,7 @@ function setTime (days, hours, minutes, seconds) {
   for (
     let index = 0, index2 = 0;
     index < timeArray.length;
-    index++, index2 += 2
+    index++, (index2 += 2)
   ) {
     if (timeArray[index].length > 1) {
       digits[index2].className = digitClasses[Number(timeArray[index][0])]
@@ -484,6 +485,10 @@ shutdownTimer.on('alarmCallback', (err, t) => {
       (err, response) => {
         if (err) console.error(err)
         if (response === 'the toast has timed out') return
+
+        // close open dialogs when notification gets clicked
+        dialogs.cancel()
+
         // restore window if it's minimized
         if (remote.getCurrentWindow().isMinimized()) {
           remote.getCurrentWindow().restore()
@@ -504,7 +509,6 @@ shutdownTimer.on('countdownCallback', (err, t) => {
     setTime(t.d, t.h, t.m, t.s)
     oldT = t
   }
-
 })
 shutdownTimer.on('resumeCallback', err => {
   if (err) {
