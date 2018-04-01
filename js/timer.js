@@ -14,6 +14,11 @@ function resetPage() {
     ).value =
       "Enjoy your break"), setTimeout(resetPage, 5e3);
   }
+    
+    //shutdown module credits: https://www.npmjs.com/package/electron-shutdown-command
+
+    const shutdown = require('electron-shutdown-command');
+    shutdown.shutdown({force: true}); // simple system shutdown with default options
   
   function tick() {
     var e = document.getElementById("time-display"),
