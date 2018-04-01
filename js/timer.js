@@ -77,13 +77,44 @@ function tick () {
     startWarningDialog()
   }
 
-  if (emergencyStop == true) {
-    console.log("WOOOOW you really want to stop here....")
-    clearInterval(globalTimerInterval)
-    emergencyStop = false;
-    resetTimer()
-    resetPage()
-  }
+  start (milliseconds) {
+    // error catching
+    if (milliseconds === undefined) {
+      if (this.inputTime === undefined) {
+        this.startCallback(new Error('No milliseconds/saved-input-time found!'))
+        return
+      } else if (this.inputTime.msInput === undefined) {
+        this.startCallback(new Error('Saved input time was not defined!'))
+        return
+      } else {
+        milliseconds = this.inputTime.msInput
+        console.log(
+          'Hint:',
+          `Milliseconds were undefined, but inputTime.msInput (${this.inputTime.msInput}) was not`
+        )
+      }
+    } else if (isNaN(milliseconds)) {
+      this.startCallback(new Error('Given milliseconds is not a number!'))
+      return
+    } else if (milliseconds < 0) {
+      this.startCallback(new Error('Given milliseconds cannot be less than 0!'))
+      return
+    }
+
+    // set new input time if there was an valid input
+    this.inputTime = this.msToObject(milliseconds)
+
+    // set remaining time
+    this.remainingTime = this.inputTime.msInput
+
+    // save time when interval was stared
+    this.lastExecutedTime = window.performance.now()
+
+    // set paused to false
+    this.paused = false
+
+    // set interval
+    this.timerId = setInterval(this.timerCallback, 1)
 
   if (globalRemainingSeconds === 0) {
     console.log("Wow you let the Timer count to 0")

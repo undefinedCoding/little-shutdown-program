@@ -36,31 +36,6 @@ window.onload = () => {
   const electronTitlebar = document.getElementById('electron-titlebar')
   titlebar.appendTo(electronTitlebar)
 
-  notifier.notify(
-    {
-      title: 'My awesome title',
-      message: 'Hello from node, Mr. User!',
-      icon: path.join(__dirname, 'icon/icon.png'), // Absolute path (doesn't work on balloons)
-      sound: true, // Only Notification Center or Windows Toasters
-      wait: true // Wait with callback, until user action is taken against notification
-    },
-    (err, response) => {
-      if (err) console.error('Error', err)
-      // log the response to the notification
-      console.log('response', response)
-    }
-  )
-
-  notifier.on('click', (notifierObject, options) => {
-    // Triggers if `wait: true` and user clicks notification
-    console.log('click')
-  })
-
-  notifier.on('timeout', (notifierObject, options) => {
-    // Triggers if `wait: true` and notification closes
-    console.log('timeout')
-  })
-
   // rotating image
   const rotatingImage = document.getElementById('background-setting')
 
@@ -127,6 +102,30 @@ window.onload = () => {
         if (!okWasPressed) return
         clearTimeout(shutdownTimeout)
         rotatingImage.classList.remove('state-rotate')
+      }
+    )
+
+    notifier.notify(
+      {
+        title: 'Timer is finished (' + (t.msInput / 1000 / 60) + 'min)',
+        message: 'The computer is about to shut down (20s) - click here to stop this from happening!',
+        icon: path.join(__dirname, 'icon/icon.png'), // Absolute path (doesn't work on balloons)
+        sound: true, // Only Notification Center or Windows Toasters
+        wait: true // Wait with callback, until user action is taken against notification
+      },
+      (err, response) => {
+        if (err) console.error('Error', err)
+        // log the response to the notification
+        if (response === 'the toast has timed out') return
+
+        dialogs.cancel()
+        clearTimeout(shutdownTimeout)
+        rotatingImage.classList.remove('state-rotate')
+
+        // restore it if it's minimized
+        if (remote.getCurrentWindow().isMinimized()) remote.getCurrentWindow().restore()
+        // focus the already opened main window
+        remote.getCurrentWindow().focus()
       }
     )
   })
