@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>shut it down</title>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+</head>
+<body>
+    <!--
+        Credits for this timer:
+        https://codepen.io/DylanMacnab/pen/EVBPzK?q=Javascript+Timer&limit=all&type=type-pens
+    -->
+    <div class="timer-container">
+            <audio>
+            <source src="https://dylanmacnab.github.io/focus-timer/sounds/timer-bell.mp3"></source>
+            <source src="https://dylanmacnab.github.io/focus-timer/sounds/timer-bell.ogg"></source>
+            </audio>
+        
+            <input id="minutes" class="timer-input" type="text" name="minutes" placeholder="How many minutes?" autocomplete="off"></input>
+            <div class="timer-controls">
+            <input id="stop" class="timer-button" type="button" value="Pause"></input>
+            <input id="start" class="timer-button timer-start" type="button" value="Start Timer"></input>
+            <input id="reset" class="timer-button" type="button" value="Reset"></input>
+            </div>
+            <h1 id="time-display" class="timer-display">00:00</h1>
+    </div>
+        
+    <div class="state-floor"></div>
+    <img id="background-setting" class="state-setting" src="https://dylanmacnab.github.io/focus-timer/img/desk-tea.svg">
+    <script src="js/timer.js"></script>
+
+</body>
+</html>
