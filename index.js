@@ -1,25 +1,34 @@
 // imports
 const { ShutdownTimer } = require('./js/timer')
 const { SpotifyHandler } = require('./js/spotifyHandler')
-const settings = require('./js/settings')
-const {
-  app,
-  globalShortcut,
-  shell,
-  remote,
-  ipcRenderer,
-  dialog
-} = require('electron')
 const shutdown = require('electron-shutdown-command')
 const dialogs = require('dialogs')()
 const notifier = require('node-notifier')
 const path = require('path')
+const { shell, ipcRenderer, remote } = require('electron')
 
-// global objects/variables
+/*
+ * Global objects
+ */
+
+/**
+ * ShutdownTimer object - controls the timer
+ */
 const shutdownTimer = new ShutdownTimer()
+/**
+ * SpotifyHandler object - controls Spotify desktop
+ */
 const spotifyHandler = new SpotifyHandler()
 
-function openLinkExternally (url) {
+/*
+ * Global functions
+ */
+
+/**
+ * Open a given URL externally in the default browser
+ * @param {String} url - Normal URL
+ */
+function openLinkExternally (url) { // eslint-disable-line no-unused-vars
   shell.openExternal(url)
 }
 
@@ -27,81 +36,38 @@ function openLinkExternally (url) {
  * Convert milliseconds to min sec string
  * @param {number} milliseconds - The number of milliseconds
  * @returns {string} XXmin and XXs formatted string
+ * @author Dan - https://stackoverflow.com/a/8212878
  */
 function millisecondsToStr (milliseconds) {
   function numberEnding (number) {
     return number > 1 ? 's' : ''
   }
-
   var temp = Math.floor(milliseconds / 1000)
-  var years = Math.floor(temp / 31536000)
-  if (years) {
-    return years + ' year' + numberEnding(years)
-  }
-  // TODO: Months! Maybe weeks?
-  var days = Math.floor((temp %= 31536000) / 86400)
+  const days = Math.floor((temp %= 31536000) / 86400)
   if (days) {
     return days + ' day' + numberEnding(days)
   }
-  var hours = Math.floor((temp %= 86400) / 3600)
+  const hours = Math.floor((temp %= 86400) / 3600)
   if (hours) {
     return hours + ' hour' + numberEnding(hours)
   }
-  var minutes = Math.floor((temp %= 3600) / 60)
+  const minutes = Math.floor((temp %= 3600) / 60)
   if (minutes) {
     return minutes + ' minute' + numberEnding(minutes)
   }
-  var seconds = temp % 60
+  const seconds = temp % 60
   if (seconds) {
     return seconds + ' second' + numberEnding(seconds)
   }
-  return 'less than a second' // 'just now' //or other string you like;
+  return 'less than a second'
 }
 
-const titlebar = document.getElementById('titlebar-windows-10')
-
-const titlebarSettings = document.getElementById('titelbar-settings')
-const titlebarHelp = document.getElementById('titelbar-help')
-const titlebarMinimize = document.getElementById('titelbar-minimize')
-const titlebarResize = document.getElementById('titelbar-resize')
-const titlebarClose = document.getElementById('titelbar-close')
-
-const mainContainer = document.getElementById('main-container')
-const settingsContainer = document.getElementById('settings')
-const aboutContainer = document.getElementById('about')
-
-const timerButtonPauseResume = document.getElementById('button_pause_resume')
-const timerButtonStartStop = document.getElementById('button_start_stop')
-const timerButtonClear = document.getElementById('button_clear')
-
-const timerInputDays = document.getElementById('timer_d')
-const timerInputHours = document.getElementById('timer_h')
-const timerInputMinutes = document.getElementById('timer_m')
-const timerInputSeconds = document.getElementById('timer_s')
-
-const spotifySVG = document.getElementById('spotify-logo')
-
-const digits = document.getElementById('digits')
-const children = []
-const c = digits.children
-
-for (let i = 0; i < c.length; i++) {
-  if (c[i].className !== 'dots') children.push(c[i])
-}
-
-const versionNumber = document.getElementById('version-number')
-
-const checkboxShutdown = document.getElementById('checkbox-shutdown')
-const checkboxSpotify = document.getElementById('checkbox-spotify')
-const checkboxTray = document.getElementById('checkbox-tray')
-
-versionNumber.innerText = ipcRenderer.sendSync('get-version')
-
-// try on load to connect to spotify
-if (ipcRenderer.sendSync('get-settings', 'spotify')) spotifyHandler.connect()
-
-var animationPause = false
-
+/**
+ * Create fancy slide animation between two elements that are both as wide as the screen
+ * @param {HTMLElement} currentElement - HTML element that is shown right now and should slide out
+ * @param {HTMLElement} elementToShow - HTML element that should slide in
+ * @param {Boolean} directionRight - The direction of the slide
+ */
 function slideAnimation (currentElement, elementToShow, directionRight = true) {
   if (animationPause) return
   // do not allow another animation
@@ -137,30 +103,127 @@ function slideAnimation (currentElement, elementToShow, directionRight = true) {
   }, 440)
 }
 
-aboutContainer.style.transform = 'translateX(-100vw)'
-settingsContainer.style.transform = 'translateX(-100vw)'
-mainContainer.style.transform = ''
+/*
+ * Global variables
+ */
+
+// titlebar
+const titlebar = document.getElementById('titlebar-windows-10')
+// titlebar >> action buttons
+const titlebarSettings = document.getElementById('titelbar-settings')
+const titlebarHelp = document.getElementById('titelbar-help')
+const titlebarMinimize = document.getElementById('titelbar-minimize')
+const titlebarResize = document.getElementById('titelbar-resize')
+const titlebarClose = document.getElementById('titelbar-close')
+
+// mainContainer (start view)
+const mainContainer = document.getElementById('main-container')
+// mainContainer >> Time inputs
+const timerInputDays = document.getElementById('timer_d')
+const timerInputHours = document.getElementById('timer_h')
+const timerInputMinutes = document.getElementById('timer_m')
+const timerInputSeconds = document.getElementById('timer_s')
+// mainContainer >> Timer control buttons
+const timerButtonPauseResume = document.getElementById('button_pause_resume')
+const timerButtonStartStop = document.getElementById('button_start_stop')
+const timerButtonClear = document.getElementById('button_clear')
+// mainContainer >> spotify connection indicator
+const spotifySVG = document.getElementById('spotify-logo')
+// mainContainer >> the digits of the time display
+const digitsAndDots = document.getElementById('digits')
+const digits = []
+const temp = digitsAndDots.children
+for (let i = 0; i < temp.length; i++) {
+  if (temp[i].className !== 'dots') digits.push(temp[i])
+}
+
+// settingsContainer
+const settingsContainer = document.getElementById('settings')
+// settingsContainer >> setting entry checkboxes
+const checkboxShutdown = document.getElementById('checkbox-shutdown')
+const checkboxSpotify = document.getElementById('checkbox-spotify')
+const checkboxTray = document.getElementById('checkbox-tray')
+
+// aboutContainer
+const aboutContainer = document.getElementById('about')
+// version number
+const versionNumber = document.getElementById('version-number')
+
+// indicator if right now an animation is played
+var animationPause = false
+
+// save time to not render more than is necessary
+var oldT
+
+// measure how long spotify needs to connect (after update not rly necessary :)
+var spotifyWebHelperStarted
+
+/*
+ * Setup >> Text/Styles
+ */
+
+// try on load to connect to spotify if setting is true
+if (ipcRenderer.sendSync('get-settings', 'spotify')) {
+  spotifyHandler.connect()
+  spotifyWebHelperStarted = window.performance.now()
+}
+
+// set correct version number on the about page
+versionNumber.innerText = ipcRenderer.sendSync('get-version')
+
+// set checkboxes in the settings to their correct position
+checkboxShutdown.checked = ipcRenderer.sendSync('get-settings', 'shutdown')
+checkboxSpotify.checked = ipcRenderer.sendSync('get-settings', 'spotify')
+checkboxTray.checked = ipcRenderer.sendSync('get-settings', 'tray')
+
+// move the containers to their correct place
 aboutContainer.style.display = 'none'
 settingsContainer.style.display = 'none'
-mainContainer.style.display = 'block'
+aboutContainer.style.transform = 'translateX(-100vw)'
+settingsContainer.style.transform = 'translateX(+100vw)'
 
+// get from settings the last time input and set it
+const timeInputLastTime = ipcRenderer.sendSync('get-settings', 'timeInput')
+timerInputDays.value = timeInputLastTime.d
+timerInputHours.value = timeInputLastTime.h
+timerInputMinutes.value = timeInputLastTime.m
+timerInputSeconds.value = timeInputLastTime.s
+
+// digit classes for CSS
+const digitClasses = [
+  'zero',
+  'one',
+  'two',
+  'three',
+  'four',
+  'five',
+  'six',
+  'seven',
+  'eight',
+  'nine'
+]
+
+// set time display to 00:00:00:00
+setTime(0, 0, 0, 0)
+
+/*
+ * Setup >> Event listener
+ */
+
+// titlebar event listeners
 titlebarSettings.addEventListener('click', () => {
   if (aboutContainer.style.transform === '') {
     slideAnimation(aboutContainer, settingsContainer, true)
   } else if (mainContainer.style.transform === '') {
     slideAnimation(mainContainer, settingsContainer, true)
-  } else {
-    slideAnimation(settingsContainer, mainContainer, false)
-  }
+  } else slideAnimation(settingsContainer, mainContainer, false)
 })
 titlebarHelp.addEventListener('click', () => {
   if (settingsContainer.style.transform === '') {
     slideAnimation(settingsContainer, aboutContainer, false)
   } else if (mainContainer.style.transform === '') {
     slideAnimation(mainContainer, aboutContainer, false)
-  } else {
-    slideAnimation(aboutContainer, mainContainer, true)
-  }
+  } else slideAnimation(aboutContainer, mainContainer, true)
 })
 titlebarMinimize.addEventListener('click', () => {
   remote.getCurrentWindow().minimize()
@@ -168,74 +231,59 @@ titlebarMinimize.addEventListener('click', () => {
 titlebarResize.addEventListener('click', () => {
   if (remote.getCurrentWindow().isMaximized()) {
     remote.getCurrentWindow().restore()
-  } else {
-    remote.getCurrentWindow().maximize()
-  }
+  } else remote.getCurrentWindow().maximize()
 })
 titlebarClose.addEventListener('click', () => {
-  // if timer is still running
-  shutdownTimer.state
-  if (shutdownTimer.isPaused !== undefined) {
+  // if timer is still running ask if the program really should be closed
+  if (!shutdownTimer.isStopped) {
     dialogs.confirm(
       'Do you really want to close the program because there is still a timer running?',
       okWasPressed => {
         if (okWasPressed) remote.getCurrentWindow().close()
       }
     )
-  } else {
-    remote.getCurrentWindow().close()
-  }
+  } else remote.getCurrentWindow().close()
 })
 
+// settings checkbox event listener
 checkboxShutdown.addEventListener('click', () => {
-  console.log('ipcRenderer "set-settings"', {
-    name: 'shutdown',
-    value: checkboxShutdown.checked
-  })
   ipcRenderer.send('set-settings', {
     name: 'shutdown',
     value: checkboxShutdown.checked
   })
 })
 checkboxSpotify.addEventListener('click', () => {
-  console.log('ipcRenderer "set-settings"', {
-    name: 'spotify',
-    value: checkboxSpotify.checked
-  })
   ipcRenderer.send('set-settings', {
     name: 'spotify',
     value: checkboxSpotify.checked
   })
-
-  if (!checkboxSpotify.checked) {
+  // if checkbox gets checked (re-)connect to Spotify
+  if (checkboxSpotify.checked) {
+    spotifyHandler.connect()
+    spotifyWebHelperStarted = window.performance.now()
+  } else {
+    // else disconnect and then change the picture
     spotifyHandler.disconnect()
     spotifySVG.src = 'data/spotify_logo_by_wikimedia_disabled.svg'
-  } else {
-    spotifyHandler.connect()
   }
 })
 checkboxTray.addEventListener('click', () => {
+  // every time the checkbox is clicked ask for a restart of the program
+  // to add/remove the tray
   dialogs.confirm(
     'To change this option you need to restart the program',
     okWasPressed => {
       if (okWasPressed) {
-        console.log('ipcRenderer "set-settings"', {
-          name: 'tray',
-          value: checkboxTray.checked
-        })
         ipcRenderer.send('set-settings', {
           name: 'tray',
           value: checkboxTray.checked
         })
+        // relaunch after setting setting entry
         ipcRenderer.send('relaunch')
-      } else return
+      } else checkboxTray.checked = ipcRenderer.send('get-settings', 'tray')
     }
   )
 })
-
-checkboxShutdown.checked = ipcRenderer.sendSync('get-settings', 'shutdown')
-checkboxSpotify.checked = ipcRenderer.sendSync('get-settings', 'spotify')
-checkboxTray.checked = ipcRenderer.sendSync('get-settings', 'tray')
 
 // onclick listener for the spotify picture
 spotifySVG.addEventListener('click', () => {
@@ -249,21 +297,19 @@ spotifySVG.addEventListener('click', () => {
             name: 'spotify',
             value: true
           })
-        } else return
+        }
       }
     )
   }
 
   // try to (re-)connect
   spotifyHandler.connect()
+  spotifyWebHelperStarted = window.performance.now()
   // disable active spotify picture
   spotifySVG.src = 'data/spotify_logo_by_wikimedia_disabled.svg'
 })
 
-// setup timer buttons
-timerButtonPauseResume.classList.add('button-deactivated')
-timerButtonStartStop.classList.add('button-deactivated')
-
+// timer control buttons
 timerButtonPauseResume.addEventListener('click', () => {
   // resume timer or pause if running
   if (shutdownTimer.isPaused) shutdownTimer.resume()
@@ -283,22 +329,13 @@ timerButtonStartStop.addEventListener('click', () => {
 })
 timerButtonClear.addEventListener('click', () => {
   shutdownTimer.reset()
-  timerInputDays.value = ''
-  timerInputHours.value = ''
-  timerInputMinutes.value = ''
-  timerInputSeconds.value = ''
 })
 
+// save the input time in the settings
+/**
+ * Saves current inputted time in the settings
+ */
 function saveInput () {
-  console.log('ipcRenderer "set-settings"', {
-    name: 'timeInput',
-    value: {
-      d: timerInputDays.value,
-      h: timerInputHours.value,
-      m: timerInputMinutes.value,
-      s: timerInputSeconds.value
-    }
-  })
   ipcRenderer.send('set-settings', {
     name: 'timeInput',
     value: {
@@ -309,93 +346,64 @@ function saveInput () {
     }
   })
 }
-
-// save the input time in the settings
 timerInputDays.addEventListener('change', saveInput)
 timerInputHours.addEventListener('change', saveInput)
 timerInputMinutes.addEventListener('change', saveInput)
 timerInputSeconds.addEventListener('change', saveInput)
 
-// div which contains the time
-const timeDisplay = document.getElementById('time-display')
-
-const digitClasses = [
-  'zero',
-  'one',
-  'two',
-  'three',
-  'four',
-  'five',
-  'six',
-  'seven',
-  'eight',
-  'nine'
-]
-
+// set time on display
+/**
+ * Sets given time on display
+ * @param {Number} days - Number of days
+ * @param {Number} hours - Number of hours
+ * @param {Number} minutes - Number of minutes
+ * @param {Number} seconds - Number of seconds
+ */
 function setTime (days, hours, minutes, seconds) {
-  const day = days.toString().split('')
-  const hour = hours.toString().split('')
-  const minute = minutes.toString().split('')
-  const second = seconds.toString().split('')
-
-  if (day.length > 1) {
-    children[0].className = digitClasses[Number(day[0])]
-    children[1].className = digitClasses[Number(day[1])]
-  } else {
-    children[0].className = digitClasses[0]
-    children[1].className = digitClasses[Number(day[0])]
-  }
-  if (hour.length > 1) {
-    children[2].className = digitClasses[Number(hour[0])]
-    children[3].className = digitClasses[Number(hour[1])]
-  } else {
-    children[2].className = digitClasses[0]
-    children[3].className = digitClasses[Number(hour[0])]
-  }
-  if (minute.length > 1) {
-    children[4].className = digitClasses[Number(minute[0])]
-    children[5].className = digitClasses[Number(minute[1])]
-  } else {
-    children[4].className = digitClasses[0]
-    children[5].className = digitClasses[Number(minute[0])]
-  }
-  if (second.length > 1) {
-    children[6].className = digitClasses[Number(second[0])]
-    children[7].className = digitClasses[Number(second[1])]
-  } else {
-    children[6].className = digitClasses[0]
-    children[7].className = digitClasses[Number(second[0])]
+  // save all chars in an array
+  const timeArray = [
+    days.toString().split(''),
+    hours.toString().split(''),
+    minutes.toString().split(''),
+    seconds.toString().split('')
+  ]
+  // add for every time thing two numbers
+  for (
+    let index = 0, index2 = 0;
+    index < timeArray.length;
+    index++, index2 += 2
+  ) {
+    if (timeArray[index].length > 1) {
+      digits[index2].className = digitClasses[Number(timeArray[index][0])]
+      digits[index2 + 1].className = digitClasses[Number(timeArray[index][1])]
+    } else {
+      digits[index2].className = digitClasses[0]
+      digits[index2 + 1].className = digitClasses[Number(timeArray[index][0])]
+    }
   }
 }
 
-// let lastTimeInput = settings.get('timeInput')
-// setTime(lastTimeInput.d, lastTimeInput.h, lastTimeInput.m, lastTimeInput.s)
-console.log('ipcRenderer "get-settings"', 'timeInput')
-const timeInputLastTime = ipcRenderer.sendSync('get-settings', 'timeInput')
-timerInputDays.value = timeInputLastTime.d
-timerInputHours.value = timeInputLastTime.h
-timerInputMinutes.value = timeInputLastTime.m
-timerInputSeconds.value = timeInputLastTime.s
-
-setTime(0, 0, 0, 0)
-
-// shutdownTimer callba ck methods
+// shutdownTimer event listener/callbacks
 shutdownTimer.on('alarmCallback', (err, t) => {
+  // gets called when the timer has finished
   if (err) {
     console.error(err)
     return
   }
 
+  // reset button texts
+  timerButtonPauseResume.value = 'Pause'
   timerButtonStartStop.value = 'Start'
 
-  // change button values and styles
+  // reset time display to 00:00:00:00
   setTime(0, 0, 0, 0)
 
-  // pause music
+  // pause music if wanted
   if (ipcRenderer.sendSync('get-settings', 'spotify')) {
     spotifyHandler.pauseMusic()
   }
 
+  // shutdown the computer if wanted
   if (ipcRenderer.sendSync('get-settings', 'shutdown')) {
     // start timeout (20s) for forcefully shutting down the computer
     const shutdownTimeout = setTimeout(() => {
@@ -405,7 +413,7 @@ shutdownTimer.on('alarmCallback', (err, t) => {
       })
     }, 20000)
 
-    // start dialog to inform, that the computer will be shut down in 20s
+    // start dialog to inform that the computer will be shut down in 20s (for preventing it)
     dialogs.confirm(
       'Stop the computer from shutting down? (in 20s this will automatically happen)',
       okWasPressed => {
@@ -414,13 +422,13 @@ shutdownTimer.on('alarmCallback', (err, t) => {
         // stop timeout/shutdown
         clearTimeout(shutdownTimeout)
 
-        // play music again
+        // play music again if wanted (and if it was played before the alarm went off)
         if (ipcRenderer.sendSync('get-settings', 'spotify')) {
           spotifyHandler.playMusic()
         }
       }
     )
-
+    // start a notification to inform that the computer will be shut down in 20s (for preventing it)
     notifier.notify(
       {
         title: 'Timer is finished (' + millisecondsToStr(t.msInput) + ')',
@@ -433,13 +441,13 @@ shutdownTimer.on('alarmCallback', (err, t) => {
         if (err) console.error(err)
         if (response === 'the toast has timed out') return
 
-        // close open dialogs
+        // close open dialogs when notification gets clicked
         dialogs.cancel()
 
         // clear timeout / stop shutdown
         clearTimeout(shutdownTimeout)
 
-        // play music again
+        // play music again if wanted and it was played before
         if (ipcRenderer.sendSync('get-settings', 'spotify')) {
           spotifyHandler.playMusic()
         }
@@ -453,15 +461,28 @@ shutdownTimer.on('alarmCallback', (err, t) => {
       }
     )
   } else {
+    // if no shutdown is wished just prompt that the timer has finished and the time
+    dialogs.alert(
+      'Timer has finished (after ' + millisecondsToStr(t.msInput) + ')',
+      okWasPressed => {
+        // play music again
+        if (ipcRenderer.sendSync('get-settings', 'spotify')) {
+          spotifyHandler.playMusic()
+        }
+      }
+    )
     notifier.notify(
       {
-        title: 'Timer is finished (' + millisecondsToStr(t.msInput) + ')',
+        title: 'Timer has finished (after ' +
+          millisecondsToStr(t.msInput) +
+          ')',
         message: ':)',
         icon: path.join(__dirname, 'icon', 'icon.png'),
         sound: true,
         wait: true
       },
       (err, response) => {
+        if (err) console.error(err)
         if (response === 'the toast has timed out') return
         // restore window if it's minimized
         if (remote.getCurrentWindow().isMinimized()) {
@@ -471,15 +492,6 @@ shutdownTimer.on('alarmCallback', (err, t) => {
         remote.getCurrentWindow().focus()
       }
     )
-    dialogs.alert(
-      'Timer is finished (' + millisecondsToStr(t.msInput) + ')',
-      okWasPressed => {
-        // play music again
-        if (ipcRenderer.sendSync('get-settings', 'spotify')) {
-          spotifyHandler.playMusic()
-        }
-      }
-    )
   }
 })
 shutdownTimer.on('countdownCallback', (err, t) => {
@@ -487,14 +499,19 @@ shutdownTimer.on('countdownCallback', (err, t) => {
     console.error(err)
     return
   }
-  setTime(t.d, t.h, t.m, t.s)
+  // update time display if something is new
+  if (t.d !== oldT.d || t.h !== oldT.h || t.m !== oldT.m || t.s !== oldT.s) {
+    setTime(t.d, t.h, t.m, t.s)
+    oldT = t
+  }
+
 })
 shutdownTimer.on('resumeCallback', err => {
   if (err) {
     console.error(err)
     return
   }
-  // change button values and styles
+  // change timerButtonPauseResume value
   timerButtonPauseResume.value = 'Pause'
 })
 shutdownTimer.on('pauseCallback', err => {
@@ -502,35 +519,39 @@ shutdownTimer.on('pauseCallback', err => {
     console.error(err)
     return
   }
-  // change button values and styles
+  // change timerButtonPauseResume value
   timerButtonPauseResume.value = 'Resume'
 })
-shutdownTimer.on('startCallback', err => {
+shutdownTimer.on('startCallback', (err, t) => {
   if (err) {
     console.error(err)
     return
   }
-  // change button values and styles
+  // change button values
   timerButtonStartStop.value = 'Stop'
   timerButtonPauseResume.value = 'Pause'
+  // set time
+  setTime(t.d, t.h, t.m, t.s)
+  oldT = t
 })
 shutdownTimer.on('stopCallback', (err, t) => {
   if (err) {
     console.error(err)
     return
   }
-  // change button values and styles
-  setTime(0, 0, 0, 0)
+  // change button values
   timerButtonStartStop.value = 'Start'
   timerButtonPauseResume.value = 'Pause'
+  // set time
+  setTime(t.d, t.h, t.m, t.s)
+  oldT = t
 })
 shutdownTimer.on('resetCallback', err => {
   if (err) {
     console.error(err)
     return
   }
-  // change button values and styles
-  setTime(0, 0, 0, 0)
+  // change button values
   timerButtonStartStop.value = 'Start'
   timerButtonPauseResume.value = 'Pause'
   // clear time input
@@ -538,9 +559,11 @@ shutdownTimer.on('resetCallback', err => {
   timerInputHours.value = ''
   timerInputMinutes.value = ''
   timerInputSeconds.value = ''
+  // reset time
+  setTime(0, 0, 0, 0)
 })
 
-// event listen for shortcuts
+// event listener for dev shortcuts
 document.addEventListener('keydown', e => {
   switch (e.which) {
     case 116: // F5
@@ -554,14 +577,14 @@ document.addEventListener('keydown', e => {
 // event listen for click shortcuts
 document.addEventListener('keyup', e => {
   switch (e.which) {
-    case 32: // space bar
+    case 32: // space bar - Resume/Pause
       if (shutdownTimer.isPaused) shutdownTimer.resume()
       else shutdownTimer.pause()
       break
-    case 82: // r
+    case 82: // r - ickroll
       spotifyHandler.rickroll()
       break
-    case 122: // F11
+    case 122: // F11 - Fullscreen
       remote
         .getCurrentWindow()
         .setFullScreen(!remote.getCurrentWindow().isFullScreen())
@@ -576,9 +599,10 @@ remote.getCurrentWindow().on('enter-full-screen', () => {
 })
 remote.getCurrentWindow().on('leave-full-screen', () => {
   titlebar.style.display = 'block'
-  mainContainer.style.top = '42px'
+  mainContainer.style.top = '32px'
 })
 
+// if window is maximized add class to titlebar for new icon and otherwise
 remote.getCurrentWindow().on('maximize', () => {
   titlebar.classList.add('fullscreen')
 })
@@ -586,13 +610,12 @@ remote.getCurrentWindow().on('unmaximize', () => {
   titlebar.classList.remove('fullscreen')
 })
 
-const spotifyWebHelperStarted = window.performance.now()
-
+// spotify handler callbacks if an error comes up or a connection is initiated
 spotifyHandler.on('error', () => {
   console.log('Connection to Spotify could not be established or was killed')
 })
 spotifyHandler.on('ready', status => {
-  // dialog to inform spotify helper is ready
+  // log successful spotify connection
   const currentlyPlayingString =
     'Have fun listening to ' +
     status.track.track_resource.name +
@@ -603,8 +626,7 @@ spotifyHandler.on('ready', status => {
   const timeString =
     'Spotify helper is ready after ' +
     millisecondsToStr(window.performance.now() - spotifyWebHelperStarted)
-
   console.log(currentlyPlayingString, timeString)
-
+  // change spotify logo to a white on
   spotifySVG.src = 'data/spotify_logo_by_wikimedia.svg'
 })

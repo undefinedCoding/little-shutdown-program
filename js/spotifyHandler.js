@@ -13,6 +13,9 @@ class SpotifyHandler {
     this.errorCallback = () => {}
     this.readyCallback = () => {}
   }
+  /**
+   * Get if a connection to Spotify exists
+   */
   get isConnected () {
     return this.connected
   }
@@ -40,6 +43,9 @@ class SpotifyHandler {
     this.disconnect()
     // create new SpotifyWebHelper object
     this.spotifyWebHelper = SpotifyWebHelper()
+
+    // error callback if SpotifyWebHelper encounters an error
+    // while connecting/during connection
     this.spotifyWebHelper.player.on('error', err => {
       if (err !== undefined) {
         console.log('Spotify Handler - error detected')

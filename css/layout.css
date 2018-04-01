@@ -300,7 +300,6 @@ body {
 }
 
 #about_container {
-
     max-width: 800px;
     margin-top: 20px;
     margin-right: auto;
@@ -316,15 +315,20 @@ body {
     color: white;
 }
 
+#logo {
+    width: 128px;
+    float: right;
+    margin-right: 20px;
+}
+
 ::-webkit-scrollbar {
     width: 12px;
 }
- 
+
 ::-webkit-scrollbar-track {
-    background-color: rgba(0, 0, 0, 0.14);
+    background-color: transparent;
 }
- 
+
 ::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.44);
-    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.14);
 }

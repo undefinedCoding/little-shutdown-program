@@ -22,9 +22,6 @@ class Settings {
    * @param {{configName:string,defaults:{}}} options - Name of file and default values
    */
   setup (options) {
-    if (app === undefined) {
-      console.log('Why the fuck does this happen?')
-    }
     this.pathSettingsFile = path.join(
       app.getPath('userData'),
       options.configName + '.json'

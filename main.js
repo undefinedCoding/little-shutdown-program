@@ -1,17 +1,8 @@
 // Import modules
-const {
-  app,
-  BrowserWindow,
-  Tray,
-  Menu,
-  dialog,
-  nativeImage,
-  ipcMain
-} = require('electron')
+const { app, BrowserWindow, Tray, Menu, ipcMain } = require('electron')
 const path = require('path')
 const url = require('url')
 const settings = require('./js/settings')
-console.log(app.getPath('userData'))
 
 // global variable for the main window
 var mainWindow = null
@@ -33,11 +24,10 @@ if (shouldQuit) {
   app.quit()
 }
 
-// setup of the settings
+// setup of the settings with file name and defaults
 settings.setup({
   configName: 'user-preferences',
   defaults: {
-    tray: false,
     windowBounds: { width: 500, height: 600, x: 0, y: 0 },
     timeInput: { d: 0, h: 0, m: 0, s: 0 },
     shutdown: true,
@@ -46,27 +36,23 @@ settings.setup({
   }
 })
 
+// IPC communication interfaces
 ipcMain.on('get-settings', (event, arg) => {
-  console.log('ipcMain "get-settings"', arg, settings.get(arg))
   event.returnValue = settings.get(arg)
 })
-
 ipcMain.on('set-settings', (event, arg) => {
-  console.log('ipcMain "set-settings"', arg)
   settings.set(arg.name, arg.value)
 })
-
 ipcMain.on('get-version', event => {
   event.returnValue = app.getVersion()
 })
-
 ipcMain.on('get-name', event => {
   event.returnValue = app.getName()
 })
-
 ipcMain.on('relaunch', () => {
-  settings.save()
-  console.log('relaunch app')
+  // save settings before closing the app
+  saveSettings()
+  // close and reopen the app
   app.relaunch({ args: process.argv.slice(1).concat(['--relaunch']) })
   app.exit(0)
 })
@@ -75,7 +61,7 @@ ipcMain.on('relaunch', () => {
  * Create the main window
  */
 function createWindow () {
-  // get custom window width and height
+  // get custom window width and height from settings
   let windowBounds = settings.get('windowBounds')
 
   // Create a BrowserWindow object
@@ -92,8 +78,7 @@ function createWindow () {
     frame: false,
     fullscreen: false,
     show: false,
-    icon: path.join(__dirname, 'icon.ico') // ,
-    // alwaysOnTop: true // for debugging, because I am too poor for two monitors
+    icon: path.join(__dirname, 'icon.ico')
   })
 
   // Load the 'index.html' file in the window
@@ -104,30 +89,31 @@ function createWindow () {
       slashes: true
     })
   )
+
+  // create tray icon if settings say so
   if (settings.get('tray')) {
-    let tray = new Tray(path.join(__dirname, 'icon.ico'))
-    /*
+    const tray = new Tray(path.join(__dirname, 'icon.ico'))
+
+    // create menu for left click on tray icon
     const trayMenu = Menu.buildFromTemplate([
       {
-        label: 'Show app',
-        enabled: false
-      },
-      {
-        label: 'Help',
+        label: 'Exit',
         click: () => {
-          mainWindow.show()
-          mainWindow.focus()
+          mainWindow.close()
         }
       }
     ])
-
     tray.setContextMenu(trayMenu)
-    */
+
+    // create tooltip if tray icon is hovered
     tray.setToolTip('Click to hide or show the app')
 
+    // if tray icon is clicked the window will either be hidden or shown
     tray.on('click', () => {
       mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
     })
+
+    // highlight icon if window currently shown
     mainWindow.on('show', () => {
       tray.setHighlightMode('always')
     })
@@ -136,7 +122,7 @@ function createWindow () {
     })
   }
 
-  // Uncomment for instant debugging (from start opened dev tools)
+  // Uncomment for instant debugging (from start open dev tools)
   // mainWindow.webContents.openDevTools()
 
   // The renderer process has rendered the page for the first time
@@ -147,23 +133,27 @@ function createWindow () {
     mainWindow.focus()
   })
 
-  // Window was closed: Dereference the window object
+  // Window was closed
   mainWindow.on('closed', () => {
+    // Dereference the window object
     mainWindow = null
   })
 
   // Window was minimized
   mainWindow.on('minimize', event => {
-    if (settings.get('tray')) mainWindow.hide() // for tray
+    // if tray activated hide window from taskbar
+    if (settings.get('tray')) mainWindow.hide()
   })
 
   // Window was closed
-  mainWindow.on('close', event => {
-    // save window size and position before closing
-    settings.set('windowBounds', mainWindow.getBounds())
-    // save custom settings
-    settings.save()
-  })
+  mainWindow.on('close', saveSettings)
+}
+
+function saveSettings () {
+  // save window size and position before closing in settings
+  settings.set('windowBounds', mainWindow.getBounds())
+  // save settings in file
+  settings.save()
 }
 
 // Electron is finished initializing and ready to create browser windows

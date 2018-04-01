@@ -7,6 +7,7 @@ class ShutdownTimer {
     this.timerId = undefined
     this.inputTime = undefined
     this.remainingTime = undefined
+    this.updateRateMs = undefined
 
     // performance.now
     this.lastExecutedTime = undefined
@@ -34,7 +35,6 @@ class ShutdownTimer {
         this.remainingTime -= Math.floor(
           window.performance.now() - this.lastExecutedTime
         )
-
         if (this.remainingTime <= 0) {
           this.alarm()
         } else {
@@ -61,21 +61,17 @@ class ShutdownTimer {
     return this.paused === undefined
   }
 
-  get state () {
-    console.log('isPaused', this.isPaused)
-    console.log('isStopped', this.isStopped)
-    console.log('timerCallback', this.timerCallback)
-  }
-
   /**
    * Set callback methods to different events
    * @param {String} event - Event identifier
    * @param {Function} callback - Callback function
    * alarmCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
-   * countdownCallback: ({msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * countdownCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
    * startCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
-   * pauseCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
-   * startCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * pauseCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number},{msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * resumeCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number},{msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * stopCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * resetCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
    */
   on (event, callback) {
     switch (event) {
@@ -129,7 +125,7 @@ class ShutdownTimer {
     this.alarmCallback(null, this.inputTime)
   }
 
-  start (milliseconds) {
+  start (milliseconds, updateRateMs = 100) {
     // error catching
     if (milliseconds === undefined) {
       if (this.inputTime === undefined) {
@@ -153,6 +149,9 @@ class ShutdownTimer {
       return
     }
 
+    // set update rate
+    this.updateRateMs = updateRateMs
+
     // set new input time if there was an valid input
     this.inputTime = this.msToObject(milliseconds)
 
@@ -166,7 +165,7 @@ class ShutdownTimer {
     this.paused = false
 
     // set interval
-    this.timerId = setInterval(this.timerCallback, 100)
+    this.timerId = setInterval(this.timerCallback, this.updateRateMs)
 
     // callback function with input time
     this.startCallback(null, this.inputTime)
@@ -222,7 +221,7 @@ class ShutdownTimer {
     this.lastExecutedTime = window.performance.now()
 
     // set new interval
-    this.timerId = setInterval(this.timerCallback, 100)
+    this.timerId = setInterval(this.timerCallback, this.updateRateMs)
 
     // set paused to false
     this.paused = false
