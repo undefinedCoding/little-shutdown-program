@@ -11,7 +11,7 @@ It's perfect for just lying in your bed and for example hearing music on your co
 
 ## Development state
 
-Only tested on Windows, but there everything works
+Only tested on Windows, but there everything works.
 
 ## Reasons for existing
 
