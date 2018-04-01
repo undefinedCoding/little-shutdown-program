@@ -29,7 +29,7 @@ settings.setup({
   configName: 'user-preferences',
   defaults: {
     windowBounds: { width: 500, height: 600, x: 0, y: 0 },
-    timeInput: { d: 0, h: 0, m: 0, s: 0 },
+    timeInput: { d: '', h: '', m: '', s: '' },
     shutdown: true,
     spotify: true,
     tray: false
@@ -69,8 +69,8 @@ function createWindow () {
     title: 'little shutdown program',
     titleBarStyle: 'hidden',
     backgroundColor: '#c9329e',
-    minWidth: 500,
-    minHeight: 520,
+    minWidth: 550,
+    minHeight: 550,
     width: windowBounds.width,
     height: windowBounds.height,
     x: windowBounds.x,
@@ -78,7 +78,8 @@ function createWindow () {
     frame: false,
     fullscreen: false,
     show: false,
-    icon: path.join(__dirname, 'icon.ico')
+    icon: path.join(__dirname, 'icon.ico'),
+    center: windowBounds.x === 0 && windowBounds.y === 0
   })
 
   // Load the 'index.html' file in the window

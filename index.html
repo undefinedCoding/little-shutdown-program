@@ -9,7 +9,6 @@
     <!-- CSS stylesheets -->
     <link rel="stylesheet" type="text/css" href="css/titlebar.css">
     <link rel="stylesheet" type="text/css" href="css/layout.css">
-    <link rel="stylesheet" type="text/css" href="css/buttons.css">
     <link rel="stylesheet" type="text/css" href="css/settings.css">
     <link rel="stylesheet" type="text/css" href="css/clock.css">
 </head>
@@ -86,9 +85,7 @@
 
         <div id=about_container>
 
-            <img id="logo" src="icon/icon.svg" alt="logo">
-
-            <h2 class="bigtitle">About</h2>
+            <h2>About</h2>
 
             <p>Version:
                 <span id="version-number"></span>
@@ -144,9 +141,9 @@
                 </li>
             </ul>
 
-            <button onclick="https://github.com/undefinedCoding/little-shutdown-program/issues')">Report a bug or issue another problem</button>
+            <button class="big-button" onclick="https://github.com/undefinedCoding/little-shutdown-program/issues')">Report a bug or issue another problem</button>
 
-            <button onclick="openLinkExternally('https://github.com/undefinedCoding/little-shutdown-program')">View source code on GitHub</button>
+            <button class="big-button" onclick="openLinkExternally('https://github.com/undefinedCoding/little-shutdown-program')">View source code on GitHub</button>
 
         </div>
 
@@ -156,10 +153,10 @@
 
         <!-- Überwache inputs, das nur Zahlen eingegeben werden -->
         <div id="time-inputs" class="time-input">
-            <input id="timer_d" placeholder="DD" class="timer-input" type="number" min="0" max="99">
-            <input id="timer_h" placeholder="HH" class="timer-input" type="number" min="0" max="99">
-            <input id="timer_m" placeholder="MM" class="timer-input" type="number" min="0" max="99">
-            <input id="timer_s" placeholder="SS" class="timer-input" type="number" min="0" max="99">
+            <input id="timer_d" placeholder="DD" type="number" min="0" max="99">
+            <input id="timer_h" placeholder="HH" type="number" min="0" max="99">
+            <input id="timer_m" placeholder="MM" type="number" min="0" max="99">
+            <input id="timer_s" placeholder="SS" type="number" min="0" max="99">
         </div>
 
         <div id="timer-buttons">

@@ -34,15 +34,12 @@ class Settings {
    * Load settings file
    */
   load () {
-    // for debugging as long as there is no release leave the next line uncommented:
-    console.log(
-      `Load settings from file ("${this.pathSettingsFile}")`,
-      JSON.parse(fs.readFileSync(this.pathSettingsFile))
-    )
     try {
       return JSON.parse(fs.readFileSync(this.pathSettingsFile))
     } catch (error) {
-      console.err(error)
+      console.log('File does not exist (yet) or another error:')
+      console.error(error)
+      return {}
     }
   }
 
@@ -61,9 +58,6 @@ class Settings {
    * @param {*} value - Value of the setting
    */
   set (name, value) {
-    console.log(this.data)
-    console.log(name, value)
-
     this.data[name] = value
   }
 
@@ -71,9 +65,12 @@ class Settings {
    * Save the settings object to a local file
    */
   save () {
-    // for debugging as long as there is no release leave the next line uncommented:
-    console.log(`Save settings to file ("${this.pathSettingsFile}")`, this.data)
-    fs.writeFileSync(this.pathSettingsFile, JSON.stringify(this.data))
+    try {
+      fs.writeFileSync(this.pathSettingsFile, JSON.stringify(this.data))
+    } catch (error) {
+      console.log('File could not be written or another error:')
+      console.error(error)
+    }
   }
 }
 

@@ -1,252 +1,109 @@
-* {
-    box-sizing: border-box;
-}
-
 body {
-    background: #c9329e;
+    /* Quick reset */
     margin: 0;
+    padding: 0;
+    /* Do not allow to select anything */
     user-select: none;
-}
-
-p {
-    margin-top: 0;
-    margin-bottom: 1rem;
-}
-
-a {
-    color: blue;
-    text-decoration: none;
-}
-
-a:hover,
-a:active {
-    color: blue;
-    text-decoration: underline;
-}
-
-img {
-    vertical-align: middle;
-    max-width: 100%;
-}
-
-[role="button"] {
-    cursor: pointer;
-}
-
-input {
-    font-family: Futura, "Trebuchet MS", Arial, sans-serif;
-    border: none;
-    color: white;
-    letter-spacing: 0.05rem;
-}
-
-input:focus {
-    outline: 0;
-}
-
-::-webkit-input-placeholder {
-    color: white;
-}
-
-:-moz-placeholder {
-    color: white;
-}
-
-::-moz-placeholder {
-    color: white;
-}
-
-:-ms-input-placeholder {
-    color: white;
-}
-
-input:focus::-webkit-input-placeholder {
-    color: transparent;
-}
-
-input:focus:-moz-placeholder {
-    color: transparent;
-}
-
-.timer-container {
-    width: 90%;
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.timer-input {
-    width: 100%;
-    padding: 25px;
-    background: rgba(255, 255, 255, 0.25);
-    border: none;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    color: white;
-    font-size: 18px;
-    text-align: center;
-    padding-top: 40px;
-}
-
-@media (min-width: 992px) {
-    .timer-input {
-        font-size: 20px;
-    }
-}
-
-.timer-input:active,
-.timer-input:focus {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.timer-controls {
-    display: flex;
-    margin-top: 30px;
-    justify-content: space-between;
-}
-
-.timer-button {
-    background: rgba(0, 0, 0, 0.1);
-    width: 30%;
-    padding: 15px;
-    font-size: 12px;
-}
-
-@media (min-width: 992px) {
-    .timer-button {
-        font-size: 14px;
-    }
-}
-
-.timer-button:hover:not(.button-deactivated) {
-    background: rgba(0, 0, 0, 0.15);
-    cursor: pointer;
-}
-
-.timer-start {
-    background: #6400d8;
-}
-
-.timer-start:hover {
-    background: #4c00a5;
-}
-
-.timer-display {
-    display: block;
-    line-height: 1;
-    margin: 0 auto;
-    margin-top: 30px;
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 100px;
-    text-align: center;
-    color: rgba(0, 0, 0, 0.15);
-}
-
-@media (min-width: 992px) {
-    .timer-display {
-        font-size: 140px;
-    }
-}
-
-.state-setting {
-    position: fixed;
-    bottom: -185px;
-    left: 50%;
-    transform: translateX(-50%) rotate(-180deg);
-    transition: transform 1s;
-    width: 300px;
-}
-
-@media (min-width: 768px) {
-    .state-setting {
-        width: 500px;
-        bottom: -310px;
-    }
-}
-
-@media (min-width: 992px) {
-    .state-setting {
-        width: 700px;
-        bottom: -435px;
-    }
-}
-
-.state-floor {
-    position: fixed;
-    bottom: 0;
-    height: 30px;
-    width: 100%;
-    background: #a1287f;
-}
-
-.state-rotate {
-    transform: translateX(-50%) rotate(0deg);
-}
-
-.button-deactivated {
-    background: gray;
-}
-
-/* NEW */
-
-#main-container,
-#settings,
-#about {
-    transition: transform .2s ease-in-out;
-}
-
-#main-container {
-    position: absolute;
-    top: 32px;
-    width: 100vw;
-    padding: 20px;
-}
-
-body {
+    /* Hide horizontal scrollbars */
     overflow-x: hidden;
-    margin: 0;
-    user-select: none;
 }
 
-#spotify-indicator {
+:not(button):not(input):not(#spotify-logo):not(label) {
+    /* Show everywhere the normal mouse cursor */
+    cursor: default;
+}
+
+button,
+input,
+#spotify-logo,
+label {
+    /* Show on this objects the pointer cursor to signale something can be clicked */
+    cursor: pointer;
+}
+
+#time-inputs input {
+    cursor: text;
+}
+
+#time-inputs,
+#timer-buttons {
     display: grid;
-    grid-template-areas: "1fr spotify-logo";
-    margin-bottom: 20px;
-}
-
-#spotify-logo {
-    width: 150px;
-    grid-area: spotify-logo;
+    grid-gap: 10px;
+    padding: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    /* All buttons share the same width */
+    grid-auto-columns: 1fr;
 }
 
 #time-inputs {
-    display: grid;
     grid-template-areas: "input-days input-hours input-minutes input-seconds";
-    grid-gap: 10px;
-    margin-left: 10vw;
-    margin-right: 10vw;
-    margin-bottom: 20px;
-    padding: 15px;
+    max-width: 650px;
 }
 
 #timer-buttons {
-    display: grid;
     grid-template-areas: "button-pause-resume button-start-stop button-clear";
-    grid-gap: 10px;
-    margin-left: 10%;
-    margin-right: 10%;
-    margin-bottom: 20px;
-    grid-auto-columns: 1fr;
+    max-width: 500px;
+}
+
+#time-inputs input,
+#timer-buttons input {
+    text-align: center;
+    padding: 15px;
+    font-size: 25px;
+    font-family: 'Open Sans';
+    font-weight: 300;
+    color: white;
+    outline: none;
+    transition: all 0.25s;
+}
+
+#time-inputs input {
+    border: 0px solid grey;
+    background: black;
 }
 
 #timer-buttons input {
     background-color: rgba(250, 250, 250, 0.4);
     border: 1px transparent solid;
     mix-blend-mode: screen;
-    padding: 15px;
 }
 
-#timer-buttons input:hover {
+#time-inputs input:hover,
+#time-inputs input:active,
+#time-inputs input:focus {
+    background: rgb(41, 41, 41);
+}
+
+#timer-buttons input:hover,
+#timer-buttons input:focus {
     background-color: rgba(250, 250, 250, 0.6);
     border: 1px white solid;
+}
+
+#spotify-logo {
+    width: 150px;
+    padding: 20px;
+    border-radius: 10px;
+    grid-area: spotify-logo;
+    transition: background-color 0.1s;
+}
+
+#spotify-logo:hover {
+    background-color: rgba(250, 250, 250, 0.6);
+}
+
+#main-container {
+    position: absolute;
+    top: 32px;
+    width: 100vw;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#spotify-indicator {
+    display: grid;
+    grid-template-areas: "1fr spotify-logo";
 }
 
 #button_pause_resume {
@@ -265,16 +122,8 @@ body {
     grid-area: input-days;
 }
 
-#timer_d:before {
-    content: 'DD'
-}
-
 #timer_h {
     grid-area: input-hours;
-}
-
-#timer_h:before {
-    content: 'HH'
 }
 
 #timer_m {
@@ -297,28 +146,49 @@ body {
     height: 100vh;
     max-height: calc(100vh - 32px);
     overflow-y: auto;
+    padding-left: 25px;
+    padding-right: 25px;
+    padding-bottom: 25px;
 }
 
 #about_container {
+    display: grid;
+    padding: 10px;
+    margin-left: auto;
+    margin-right: auto;
     max-width: 800px;
     margin-top: 20px;
-    margin-right: auto;
-    margin-left: auto;
 }
 
-#about_container h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    font-weight: 300;
-    font-family: Open sans, sans-serif;
-    line-height: 1.5;
+#about_container ul {
+    margin-top: -10px;
+}
+
+#about_container button {
+    background-color: rgba(250, 250, 250, 0.4);
+    border: 1px transparent solid;
+    mix-blend-mode: screen;
     color: white;
 }
 
-#logo {
-    width: 128px;
-    float: right;
-    margin-right: 20px;
+#about_container button:hover,
+#about_container button:focus {
+    background-color: rgba(250, 250, 250, 0.6);
+    border: 1px white solid;
+}
+
+#about_container button.big-button {
+    padding: 15px;
+    font-size: 20px;
+    max-width: 400px;
+    margin-top: 10px;
+}
+
+#about_container h2 {
+    margin-top: 0;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 300;
 }
 
 ::-webkit-scrollbar {
