@@ -9,13 +9,13 @@ Just a little program, that shuts down a (Windows 10) computer after a, from the
 
 Here's a screenshot of this beautiful program:
 
-![ittle-shutdown-program-screensho](D:\donttouch\unknown\Bilder\niklas_skype\little-shutdown-program-screenshot.JPG)
+![ittle-shutdown-program-screensho](https://undefined-something.lima-city.de/undefinedimg/little-shutdown-program-screenshot.JPG)
 
 -> functions should be self-explaining ^^
 
 Here's a Screenshot from the Setting Page:
 
-![ittle-shutdown-program-settings-screensho](D:\donttouch\unknown\Bilder\niklas_skype\little-shutdown-program-settings-screenshot.JPG)
+![ittle-shutdown-program-settings-screensho](https://undefined-something.lima-city.de/undefinedimg/little-shutdown-program-settings-screenshot.JPG)
 
 The only thing that may seem strange is the Spotify Logo and the Spotify Setting. It has to do with the feature of the program, that it automatically stops your actual playing Spotify Song, when the Timer ends.
 
