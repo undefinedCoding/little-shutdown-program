@@ -7,13 +7,10 @@ function resetPage() {
   
   function startBreak() {
     var e = document.getElementsByTagName("audio")[0];
-    e.play(), (stateSetting = document.getElementById(
-      "background-setting"
-    )), stateSetting.classList.add("state-rotate"), (document.getElementById(
-      "minutes"
-    ).value =
-      "Enjoy your break"), setTimeout(resetPage, 5e3);
-  }
+    e, (stateSetting = document.getElementById("background-setting")), 
+    stateSetting.classList.add("state-rotate"), 
+    (document.getElementById("minutes").value = "Enjoy your break"), 
+    setTimeout(resetPage, 5e3);
     
     //shutdown module credits: https://www.npmjs.com/package/electron-shutdown-command
 
