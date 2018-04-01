@@ -1,22 +1,40 @@
 // Import modules
-const {app, BrowserWindow} = require('electron')
+const { app, BrowserWindow } = require('electron')
 const path = require('path')
 const url = require('url')
-
 
 // Global variable for the window
 let win
 
 function createWindow () {
   // Create a window
-  win = new BrowserWindow({width: 1200, height: 720, frame: false, fullscreen: true})
+  win = new BrowserWindow({
+    title: 'little shutdown program',
+    backgroundColor: '#c9329e',
+    minWidth: 400,
+    minHeight: 500,
+    width: 1200,
+    height: 720,
+    frame: false,
+    fullscreen: false,
+    show: false,
+    icon: 'icon/icon.png'
+  })
 
   // Load in the window the 'index.html' file
-  win.loadURL(url.format({
-    pathname: path.join(__dirname, 'index.html'),
-    protocol: 'file:',
-    slashes: true
-  }))
+  win.loadURL(
+    url.format({
+      pathname: path.join(__dirname, 'index.html'),
+      protocol: 'file:',
+      slashes: true
+    })
+  )
+
+  // show window if everythin loaded
+  win.on('ready-to-show', ()=> {
+    win.show()
+    win.focus()
+  })
 
   // Window gets closed
   win.on('closed', () => {

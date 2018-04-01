@@ -10,13 +10,37 @@
   },
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build-win": "npx electron-builder . --win"
   },
   "dependencies": {
-    "cross-spawn": "^6.0.5",
-    "electron-shutdown-command": "0.0.8"
+    "electron-shutdown-command": "0.0.8",
+    "electron-titlebar-windows": "^3.0.0"
   },
   "devDependencies": {
-    "electron": "^1.8.3"
+    "electron": "^1.8.3",
+    "electron-builder": "^20.4.1"
+  },
+  "bugs": "https://github.com/undefinedCoding/little-shutdown-program/issues",
+  "author": {
+    "name": "undefinedCoding",
+    "url": "https://github.com/undefinedCoding"
+  },
+  "contributors": [
+    {
+      "name": "undefinedCoding",
+      "url": "https://github.com/undefinedCoding"
+    },
+    {
+      "name": "AnonymerNiklasistanonym",
+      "url": "https://github.com/AnonymerNiklasistanonym"
+    }
+  ],
+  "build": {
+    "appId": "little-shutdown-program",
+    "win": {
+      "target": "nsis",
+      "icon": "icon.png"
+    }
   }
 }

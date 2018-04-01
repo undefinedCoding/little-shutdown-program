@@ -1,75 +1,114 @@
-function resetPage() {
-    stateSetting.classList.remove("state-rotate"), (document.getElementById(
-      "minutes"
-    ).value =
-      "");
-  }
-  
-  function startBreak() {
-    var e = document.getElementsByTagName("audio")[0];
-    e.play(), (stateSetting = document.getElementById(
-      "background-setting"
-    )), stateSetting.classList.add("state-rotate"), (document.getElementById(
-      "minutes"
-    ).value =
-      "Enjoy your break"), setTimeout(resetPage, 5e3);
-    
-    //shutdown module credits: https://www.npmjs.com/package/electron-shutdown-command
+const shutdown = require('electron-shutdown-command')
+const ElectronTitlebarWindows = require('electron-titlebar-windows')
+const titlebar = new ElectronTitlebarWindows({
+  color: '#ffffff',
+  draggable: true
+})
+const remote = require('electron').remote
 
-    const shutdown = require('electron-shutdown-command');
-    shutdown.shutdown({force: true}); // simple system shutdown with default options
-  
-  function tick() {
-    var e = document.getElementById("time-display"),
-      t = Math.floor(secondsRemaining / 60),
-      n = secondsRemaining - 60 * t;
-    10 > t && (t = "0" + t), 10 > n && (n = "0" + n);
-    var a = t + ":" + n;
-    (e.innerHTML = a), 0 === secondsRemaining &&
-      (clearInterval(timerInterval), startBreak()), secondsRemaining--;
+// global variables
+var globalRemainingSeconds, globalTimerInterval, stateSetting, paused = false
+
+/**
+ * Function that resets the page
+ */
+function resetPage () {
+  stateSetting.classList.remove('state-rotate')
+  document.getElementById('minutes').value = ''
+}
+
+/**
+ * FUnction that shuts down the computer
+ */
+function startBreak () {
+  const e = document.getElementsByTagName('audio')[0]
+  e.play()
+  stateSetting = document.getElementById('background-setting')
+  stateSetting.classList.add('state-rotate')
+  document.getElementById('minutes').value = 'Enjoy your break'
+  setTimeout(resetPage, 5e3)
+
+  var load = setTimeout(() => {
+    shutdown.shutdown({ force: true }) // simple system shutdown with default options
+  }, 15000)
+}
+
+function tick () {
+  const e = document.getElementById('time-display')
+  var t = Math.floor(globalRemainingSeconds / 60)
+  var n = globalRemainingSeconds - 60 * t
+
+  if (t < 10) t = '0' + t
+  if (n < 10) n = '0' + n
+
+  e.innerHTML = t + ':' + n
+
+  if (globalRemainingSeconds === 0) {
+    clearInterval(globalTimerInterval)
+    startBreak()
   }
-  
-  function startTimer() {
-    var e = document.getElementById("minutes").value;
-    return (secondsRemaining = 60 * e), 0 > secondsRemaining ||
-      isNaN(e) ||
-      "" === e
-      ? (
-          (document.getElementById("minutes").value = ""),
-          (document.getElementById("time-display").innerHTML = "00:00"),
-          void clearInterval(timerInterval)
-        )
-      : (
-          clearInterval(timerInterval),
-          void (timerInterval = setInterval(tick, 1e3))
-        );
+
+  globalRemainingSeconds--
+}
+
+function startTimer () {
+  const e = document.getElementById('minutes').value
+  globalRemainingSeconds = 60 * e
+  if (globalRemainingSeconds < 0 || isNaN(e) || e === '') {
+    resetTimer()
+  } else {
+    clearInterval(globalTimerInterval)
+    globalTimerInterval = setInterval(tick, 1e3)
   }
-  
-  function pauseTimer() {
-    secondsRemaining > 0 &&
-      (paused === !1
-        ? ((paused = !0), (this.value = "Resume"), clearInterval(timerInterval))
-        : (
-            (paused = !1),
-            (this.value = "Pause"),
-            (timerInterval = setInterval(tick, 1e3))
-          ));
+}
+
+/**
+ * Pause timer
+ */
+function pauseTimer () {
+  if (globalRemainingSeconds > 0) {
+    if (paused === false) {
+      this.value = 'Resume'
+      clearInterval(globalTimerInterval)
+    } else {
+      this.value = 'Pause'
+      globalTimerInterval = setInterval(tick, 1e3)
+    }
+    paused = !paused
   }
-  
-  function resetTimer() {
-    clearInterval(timerInterval), (document.getElementById("minutes").value =
-      ""), (document.getElementById("time-display").innerHTML = "00:00");
-  }
-  var secondsRemaining,
-    timerInterval,
-    stateSetting,
-    paused = !1;
-  window.onload = function() {
-    var e = document.getElementById("start");
-    e.addEventListener("click", startTimer);
-    var t = document.getElementById("stop");
-    t.addEventListener("click", pauseTimer);
-    var n = document.getElementById("reset");
-    n.addEventListener("click", resetTimer);
-  };
-  
+}
+
+/**
+ * Reset timer
+ */
+function resetTimer () {
+  // clear/reset timer
+  clearInterval(globalTimerInterval)
+  // reset timer display and minutes value
+  document.getElementById('minutes').value = ''
+  document.getElementById('time-display').innerHTML = '00:00'
+}
+
+// titlebar action listener
+titlebar.on('minimize', e => remote.getCurrentWindow().minimize())
+titlebar.on('maximize', e => remote.getCurrentWindow().restore())
+titlebar.on('fullscreen', e => remote.getCurrentWindow().maximize())
+titlebar.on('close', e => remote.getCurrentWindow().close())
+
+window.onload = () => {
+  // append windows titlebar to frameless window at the top
+  titlebar.appendTo(document.getElementById('electron-titlebar'))
+
+  // add event listener to the buttons
+  document.getElementById('start').addEventListener('click', startTimer)
+  document.getElementById('stop').addEventListener('click', pauseTimer)
+  document.getElementById('reset').addEventListener('click', resetTimer)
+
+  // event listen for shortcuts
+  document.addEventListener('keydown', e => {
+    // F5
+    if (e.which === 116) location.reload()
+    // F12
+    if (e.which === 123) remote.getCurrentWindow().toggleDevTools()
+  })
+}

@@ -1,83 +1,84 @@
 body {
     background: #c9329e;
-  }
-  
-  * {
+    user-select: none;
+}
+
+* {
     box-sizing: border-box;
-  }
-  
-  body {
+}
+
+body {
     background: #c9329e url("/img/noise.png");
-    padding-top: 40px;
-  }
-  
-  p {
+    margin: 0;
+}
+
+p {
     margin-top: 0;
     margin-bottom: 1rem;
-  }
-  
-  a {
+}
+
+a {
     color: blue;
     text-decoration: none;
-  }
-  
-  a:hover,
-  a:active {
+}
+
+a:hover,
+a:active {
     color: blue;
     text-decoration: underline;
-  }
-  
-  img {
+}
+
+img {
     vertical-align: middle;
     max-width: 100%;
-  }
-  
-  [role="button"] {
+}
+
+[role="button"] {
     cursor: pointer;
-  }
-  
-  input {
+}
+
+input {
     font-family: Futura, "Trebuchet MS", Arial, sans-serif;
     border: none;
     color: white;
     letter-spacing: 0.05rem;
-  }
-  
-  input:focus {
+}
+
+input:focus {
     outline: 0;
-  }
-  
-  ::-webkit-input-placeholder {
+}
+
+ ::-webkit-input-placeholder {
     color: white;
-  }
-  
-  :-moz-placeholder {
+}
+
+ :-moz-placeholder {
     color: white;
-  }
-  
-  ::-moz-placeholder {
+}
+
+ ::-moz-placeholder {
     color: white;
-  }
-  
-  :-ms-input-placeholder {
+}
+
+ :-ms-input-placeholder {
     color: white;
-  }
-  
-  input:focus::-webkit-input-placeholder {
+}
+
+input:focus::-webkit-input-placeholder {
     color: transparent;
-  }
-  
-  input:focus:-moz-placeholder {
+}
+
+input:focus:-moz-placeholder {
     color: transparent;
-  }
-  
-  .timer-container {
+}
+
+.timer-container {
     width: 90%;
     max-width: 600px;
     margin: 0 auto;
-  }
-  
-  .timer-input {
+}
+
+.timer-input {
     width: 100%;
     padding: 25px;
     background: rgba(255, 255, 255, 0.25);
@@ -86,51 +87,52 @@ body {
     color: white;
     font-size: 18px;
     text-align: center;
-  }
-  
-  @media (min-width: 992px) {
+    padding-top: 40px;
+}
+
+@media (min-width: 992px) {
     .timer-input {
-      font-size: 20px;
+        font-size: 20px;
     }
-  }
-  
-  .timer-input:active,
-  .timer-input:focus {
+}
+
+.timer-input:active,
+.timer-input:focus {
     background: rgba(255, 255, 255, 0.3);
-  }
-  
-  .timer-controls {
+}
+
+.timer-controls {
     display: flex;
     margin-top: 30px;
     justify-content: space-between;
-  }
-  
-  .timer-button {
+}
+
+.timer-button {
     background: rgba(0, 0, 0, 0.1);
     width: 30%;
     padding: 15px;
     font-size: 12px;
-  }
-  
-  @media (min-width: 992px) {
+}
+
+@media (min-width: 992px) {
     .timer-button {
-      font-size: 14px;
+        font-size: 14px;
     }
-  }
-  
-  .timer-button:hover {
+}
+
+.timer-button:hover {
     background: rgba(0, 0, 0, 0.15);
-  }
-  
-  .timer-start {
+}
+
+.timer-start {
     background: #6400d8;
-  }
-  
-  .timer-start:hover {
+}
+
+.timer-start:hover {
     background: #4c00a5;
-  }
-  
-  .timer-display {
+}
+
+.timer-display {
     display: block;
     line-height: 1;
     margin: 0 auto;
@@ -139,46 +141,45 @@ body {
     font-size: 100px;
     text-align: center;
     color: rgba(0, 0, 0, 0.15);
-  }
-  
-  @media (min-width: 992px) {
+}
+
+@media (min-width: 992px) {
     .timer-display {
-      font-size: 140px;
+        font-size: 140px;
     }
-  }
-  
-  .state-setting {
+}
+
+.state-setting {
     position: fixed;
     bottom: -185px;
     left: 50%;
     transform: translateX(-50%) rotate(-180deg);
     transition: transform 1s;
     width: 300px;
-  }
-  
-  @media (min-width: 768px) {
+}
+
+@media (min-width: 768px) {
     .state-setting {
-      width: 500px;
-      bottom: -310px;
+        width: 500px;
+        bottom: -310px;
     }
-  }
-  
-  @media (min-width: 992px) {
+}
+
+@media (min-width: 992px) {
     .state-setting {
-      width: 700px;
-      bottom: -435px;
+        width: 700px;
+        bottom: -435px;
     }
-  }
-  
-  .state-floor {
+}
+
+.state-floor {
     position: fixed;
     bottom: 0;
     height: 30px;
     width: 100%;
     background: rgba(0, 0, 0, 0.2);
-  }
-  
-  .state-rotate {
+}
+
+.state-rotate {
     transform: translateX(-50%) rotate(0deg);
-  }
-  
+}
