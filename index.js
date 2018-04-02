@@ -108,6 +108,7 @@ function slideAnimation (currentElement, elementToShow, directionRight = true) {
  */
 
 // titlebar
+const customTitleBar = !ipcRenderer.sendSync('get-settings', 'nativeTitleBar')
 const titlebar = document.getElementById('titlebar-windows-10')
 // titlebar >> action buttons
 const titlebarSettings = document.getElementById('titelbar-settings')
@@ -143,6 +144,9 @@ const settingsContainer = document.getElementById('settings')
 const checkboxShutdown = document.getElementById('checkbox-shutdown')
 const checkboxSpotify = document.getElementById('checkbox-spotify')
 const checkboxTray = document.getElementById('checkbox-tray')
+const checkboxNativeTitleBar = document.getElementById(
+  'checkbox-nativeTitleBar'
+)
 
 // aboutContainer
 const aboutContainer = document.getElementById('about')
@@ -175,6 +179,10 @@ versionNumber.innerText = ipcRenderer.sendSync('get-version')
 checkboxShutdown.checked = ipcRenderer.sendSync('get-settings', 'shutdown')
 checkboxSpotify.checked = ipcRenderer.sendSync('get-settings', 'spotify')
 checkboxTray.checked = ipcRenderer.sendSync('get-settings', 'tray')
+checkboxNativeTitleBar.checked = ipcRenderer.sendSync(
+  'get-settings',
+  'nativeTitleBar'
+)
 
 // move the containers to their correct place
 aboutContainer.style.display = 'none'
@@ -210,40 +218,57 @@ setTime(0, 0, 0, 0)
  * Setup >> Event listener
  */
 
-// titlebar event listeners
-titlebarSettings.addEventListener('click', () => {
+ /**
+  * Toggle the settings container
+  */
+function toggleSettings () {
   if (aboutContainer.style.transform === '') {
     slideAnimation(aboutContainer, settingsContainer, true)
   } else if (mainContainer.style.transform === '') {
     slideAnimation(mainContainer, settingsContainer, true)
   } else slideAnimation(settingsContainer, mainContainer, false)
-})
-titlebarHelp.addEventListener('click', () => {
+}
+
+/**
+ * Toggle the about container
+ */
+function toggleAbout () {
   if (settingsContainer.style.transform === '') {
     slideAnimation(settingsContainer, aboutContainer, false)
   } else if (mainContainer.style.transform === '') {
     slideAnimation(mainContainer, aboutContainer, false)
   } else slideAnimation(aboutContainer, mainContainer, true)
-})
-titlebarMinimize.addEventListener('click', () => {
-  remote.getCurrentWindow().minimize()
-})
-titlebarResize.addEventListener('click', () => {
-  if (remote.getCurrentWindow().isMaximized()) {
-    remote.getCurrentWindow().restore()
-  } else remote.getCurrentWindow().maximize()
-})
-titlebarClose.addEventListener('click', () => {
-  // if timer is still running ask if the program really should be closed
-  if (!shutdownTimer.isStopped) {
-    dialogs.confirm(
-      'Do you really want to close the program because there is still a timer running?',
-      okWasPressed => {
-        if (okWasPressed) remote.getCurrentWindow().close()
-      }
-    )
-  } else remote.getCurrentWindow().close()
-})
+}
+
+if (customTitleBar) {
+  // titlebar event listeners
+  titlebarSettings.addEventListener('click', toggleSettings)
+  titlebarHelp.addEventListener('click', toggleAbout)
+  titlebarMinimize.addEventListener('click', () => {
+    remote.getCurrentWindow().minimize()
+  })
+  titlebarResize.addEventListener('click', () => {
+    if (remote.getCurrentWindow().isMaximized()) {
+      remote.getCurrentWindow().restore()
+    } else remote.getCurrentWindow().maximize()
+  })
+  titlebarClose.addEventListener('click', () => {
+    // if timer is still running ask if the program really should be closed
+    if (!shutdownTimer.isStopped) {
+      dialogs.confirm(
+        'Do you really want to close the program because there is still a timer running?',
+        okWasPressed => {
+          if (okWasPressed) remote.getCurrentWindow().close()
+        }
+      )
+    } else remote.getCurrentWindow().close()
+  })
+} else {
+  ipcRenderer.on('toggleSettings', toggleSettings)
+  ipcRenderer.on('toggleAbout', toggleAbout)
+  titlebar.style.display = 'none'
+  mainContainer.style.top = '0px'
+}
 
 // settings checkbox event listener
 checkboxShutdown.addEventListener('click', () => {
@@ -281,6 +306,28 @@ checkboxTray.addEventListener('click', () => {
         // relaunch after setting setting entry
         ipcRenderer.send('relaunch')
       } else checkboxTray.checked = ipcRenderer.send('get-settings', 'tray')
+    }
+  )
+})
+checkboxNativeTitleBar.addEventListener('click', () => {
+  // every time the checkbox is clicked ask for a restart of the program
+  // to add/remove the tray
+  dialogs.confirm(
+    'To change this option you need to restart the program',
+    okWasPressed => {
+      if (okWasPressed) {
+        ipcRenderer.send('set-settings', {
+          name: 'nativeTitleBar',
+          value: checkboxNativeTitleBar.checked
+        })
+        // relaunch after setting setting entry
+        ipcRenderer.send('relaunch')
+      } else {
+        checkboxNativeTitleBar.checked = ipcRenderer.send(
+          'get-settings',
+          'nativeTitleBar'
+        )
+      }
     }
   )
 })
@@ -607,20 +654,24 @@ document.addEventListener('keyup', e => {
 
 // if full screen is activated hide windows title bar and otherwise
 remote.getCurrentWindow().on('enter-full-screen', () => {
-  titlebar.style.display = 'none'
-  mainContainer.style.top = '0px'
+  if (customTitleBar) {
+    titlebar.style.display = 'none'
+    mainContainer.style.top = '0px'
+  }
 })
 remote.getCurrentWindow().on('leave-full-screen', () => {
-  titlebar.style.display = 'block'
-  mainContainer.style.top = '32px'
+  if (customTitleBar) {
+    titlebar.style.display = 'block'
+    mainContainer.style.top = '32px'
+  }
 })
 
 // if window is maximized add class to titlebar for new icon and otherwise
 remote.getCurrentWindow().on('maximize', () => {
-  titlebar.classList.add('fullscreen')
+  if (customTitleBar) titlebar.classList.add('fullscreen')
 })
 remote.getCurrentWindow().on('unmaximize', () => {
-  titlebar.classList.remove('fullscreen')
+  if (customTitleBar) titlebar.classList.remove('fullscreen')
 })
 
 // spotify handler callbacks if an error comes up or a connection is initiated

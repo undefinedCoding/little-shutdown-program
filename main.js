@@ -32,7 +32,8 @@ settings.setup({
     timeInput: { d: '', h: '', m: '', s: '' },
     shutdown: true,
     spotify: true,
-    tray: false
+    tray: false,
+    nativeTitleBar: false
   }
 })
 
@@ -70,12 +71,12 @@ function createWindow () {
     titleBarStyle: 'hidden',
     backgroundColor: '#c9329e',
     minWidth: 550,
-    minHeight: 550,
+    minHeight: settings.get('nativeTitleBar') ? 580 : 550,
     width: windowBounds.width,
     height: windowBounds.height,
     x: windowBounds.x,
     y: windowBounds.y,
-    frame: false,
+    frame: settings.get('nativeTitleBar'),
     fullscreen: false,
     show: false,
     icon: path.join(__dirname, 'icon.ico'),
@@ -90,6 +91,26 @@ function createWindow () {
       slashes: true
     })
   )
+
+  if (settings.get('nativeTitleBar')) {
+    const template = [
+      {
+        label: 'Settings',
+        click () {
+          mainWindow.webContents.send('toggleSettings')
+        }
+      },
+      {
+        label: 'About',
+        click () {
+          mainWindow.webContents.send('toggleAbout')
+        }
+      }
+    ]
+
+    const menu = Menu.buildFromTemplate(template)
+    Menu.setApplicationMenu(menu)
+  }
 
   // create tray icon if settings say so
   if (settings.get('tray')) {
