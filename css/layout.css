@@ -4,8 +4,8 @@ body {
     padding: 0;
     /* Do not allow to select anything */
     user-select: none;
-    /* Hide horizontal scrollbars */
-    overflow-x: hidden;
+    /* Hide all scrollbars */
+    overflow: hidden;
 }
 
 :not(button):not(input):not(#spotify-logo):not(label) {
@@ -146,14 +146,12 @@ label {
     height: 100vh;
     max-height: calc(100vh - 32px);
     overflow-y: auto;
-    padding-left: 25px;
-    padding-right: 25px;
     padding-bottom: 25px;
 }
 
 #about_container {
     display: grid;
-    padding: 10px;
+    padding: 25px;
     margin-left: auto;
     margin-right: auto;
     max-width: 800px;
@@ -200,5 +198,5 @@ label {
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.14);
+    background-color: #b52d8e /*rgba(0, 0, 0, 0.14)*/;
 }

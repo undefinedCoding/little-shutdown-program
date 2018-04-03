@@ -2,12 +2,13 @@
     display: block;
     height: 32px;
     padding: 0;
-    background-color: rgba(0, 0, 0, 0.14);
+    background-color: #b52d8e /*rgba(0, 0, 0, 0.14)*/;
     -webkit-app-region: drag;
     cursor: default;
     position: fixed;
     top: 0;
     width: 100%;
+    z-index: 999;
 }
 
 #titlebar-windows-10 .title {
