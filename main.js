@@ -79,7 +79,7 @@ function createWindow () {
     frame: settings.get('nativeTitleBar'),
     fullscreen: false,
     show: false,
-    icon: path.join(__dirname, 'icon.ico'),
+    icon: path.join(__dirname, 'icon', 'icon.ico'),
     center: windowBounds.x === 0 && windowBounds.y === 0
   })
 
@@ -114,7 +114,7 @@ function createWindow () {
 
   // create tray icon if settings say so
   if (settings.get('tray')) {
-    const tray = new Tray(path.join(__dirname, 'icon.ico'))
+    const tray = new Tray(path.join(__dirname, 'icon', 'icon.ico'))
 
     // create menu for left click on tray icon
     const trayMenu = Menu.buildFromTemplate([

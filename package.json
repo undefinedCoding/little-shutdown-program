@@ -47,8 +47,19 @@
   "build": {
     "appId": "little-shutdown-program",
     "win": {
-      "target": "nsis",
-      "icon": "icon.ico"
+      "icon": "icon/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "license": "LICENSE",
+      "installerIcon": "icon/icon.ico",
+      "uninstallerIcon": "icon/uninstall_icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "publish": {
+      "provider": "github"
     }
   }
 }

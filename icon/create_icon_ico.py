@@ -6,7 +6,7 @@ Create .ico file
 '''
 
 import os
-from PIL import Image
+from PIL import Image, ImageEnhance
 
 
 def create_program_ico_icon(source_file, output_path_ico):
@@ -20,6 +20,15 @@ def create_program_ico_icon(source_file, output_path_ico):
 
         print("- \"" + source_file +
               "\" was converted to " + output_path_ico)
+
+        img = Image.open(source_file)
+        img = ImageEnhance.Color(img).enhance(0.0)
+        icon_sizes = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
+        img.save("uninstall_" + output_path_ico, sizes=icon_sizes)
+
+        print("- \"" + source_file +
+              "\" was converted to uninstall_" + output_path_ico)
+
     else:
         print("- \"" + source_file + "\" was not found")
 
