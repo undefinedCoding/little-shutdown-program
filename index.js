@@ -154,6 +154,8 @@ const checkboxNativeTitleBar = document.getElementById(
 const aboutContainer = document.getElementById('about')
 // version number
 const versionNumber = document.getElementById('version-number')
+// version update
+const versionUpdate = document.getElementById('newVersionNumber')
 
 // indicator if right now an animation is played
 var animationPause = false
@@ -216,13 +218,33 @@ const digitClasses = [
 // set time display to 00:00:00:00
 setTime(0, 0, 0, 0)
 
+// set new version button if one was found
+function newVersionDetected () {
+  const newTag = ipcRenderer.sendSync('get-settings', 'newTag')
+  versionUpdate.style.display = 'inline'
+  versionUpdate.innerText = 'New version found: ' + newTag
+  versionUpdate.onclick = () => {
+    openLinkExternally(
+      'https://github.com/undefinedCoding/little-shutdown-program/releases/tag/' +
+        newTag
+    )
+  }
+}
+if (
+  ipcRenderer.sendSync('get-settings', 'tag') !==
+  ipcRenderer.sendSync('get-settings', 'newTag')
+) {
+  newVersionDetected()
+}
+ipcRenderer.on('newVersionDetected', newVersionDetected)
+
 /*
  * Setup >> Event listener
  */
 
- /**
-  * Toggle the settings container
-  */
+/**
+ * Toggle the settings container
+ */
 function toggleSettings () {
   if (aboutContainer.style.transform === '') {
     slideAnimation(aboutContainer, settingsContainer, true)

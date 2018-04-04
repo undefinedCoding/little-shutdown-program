@@ -1,5 +1,14 @@
 // Import modules
-const { app, BrowserWindow, Tray, Menu, ipcMain } = require('electron')
+const {
+  app,
+  dialog,
+  BrowserWindow,
+  Tray,
+  Menu,
+  ipcMain,
+  net,
+  shell
+} = require('electron')
 const path = require('path')
 const url = require('url')
 const settings = require('./js/settings')
@@ -33,7 +42,9 @@ settings.setup({
     shutdown: true,
     spotify: true,
     tray: false,
-    nativeTitleBar: false
+    nativeTitleBar: false,
+    tag: 'v' + app.getVersion(),
+    newTag: 'v' + app.getVersion()
   }
 })
 
@@ -153,6 +164,51 @@ function createWindow () {
     mainWindow.show()
     // focus window
     mainWindow.focus()
+
+    const request = net.request(
+      'https://api.github.com/repos/undefinedCoding/little-shutdown-program/tags'
+    )
+    request.on('response', response => {
+      if (response.statusCode === 200) {
+        response.on('data', jsonDocument => {
+          try {
+            const releaseArray = JSON.parse(jsonDocument)
+            // if new version was found:
+            if (settings.get('tag') !== releaseArray[0].name) {
+              settings.set('newTag', releaseArray[0].name)
+              mainWindow.webContents.send('newVersionDetected')
+              dialog.showMessageBox(
+                mainWindow,
+                {
+                  type: 'info',
+                  title: 'New version avaible',
+                  message: 'Do you want to install the new version?',
+                  buttons: ['OK', 'NO'],
+                  detail: 'Installed: ' + settings.get('tag') + ', New: ' + releaseArray[0].name
+                },
+                response => {
+                  if (response === 0) {
+                    shell.openExternal(
+                      'https://github.com/undefinedCoding/little-shutdown-program/releases/tag/' +
+                        releaseArray[0].name
+                    )
+                  }
+                }
+              )
+            }
+          } catch (e) {
+            console.error(e)
+          }
+        })
+      }
+      request.on('error', error => {
+        console.log('connection could not be established', error)
+      })
+      response.on('end', () => {
+        console.log('No more data in response.')
+      })
+    })
+    request.end()
   })
 
   // Window was closed

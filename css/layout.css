@@ -203,6 +203,11 @@ body {
     font-weight: 300;
 }
 
+.newVersion {
+    display: none;
+    margin-left: 10px;
+}
+
 ::-webkit-scrollbar {
     width: 12px;
 }
