@@ -13,6 +13,7 @@ class SpotifyHandler {
     this.errorCallback = () => {}
     this.readyCallback = () => {}
   }
+
   /**
    * Get if a connection to Spotify exists
    */
@@ -36,6 +37,7 @@ class SpotifyHandler {
       default:
         console.error(new Error('Event does not exist!'))
     }
+    return this
   }
 
   connect () {
@@ -48,13 +50,11 @@ class SpotifyHandler {
     // while connecting/during connection
     this.spotifyWebHelper.player.on('error', err => {
       if (err !== undefined) {
-        console.log('Spotify Handler - error detected')
-        console.log(err)
+        console.log('Spotify Handler - error detected', err)
         this.errorCallback(err)
         this.connected = false
       }
-    })
-    this.spotifyWebHelper.player.on('ready', () => {
+    }).on('ready', () => {
       this.readyCallback(this.spotifyWebHelper.status)
       this.connected = true
     })

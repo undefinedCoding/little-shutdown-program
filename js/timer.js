@@ -99,6 +99,7 @@ class ShutdownTimer {
       default:
         console.error(new Error('Event does not exist!'))
     }
+    return this
   }
 
   /**

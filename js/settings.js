@@ -37,8 +37,7 @@ class Settings {
     try {
       return JSON.parse(fs.readFileSync(this.pathSettingsFile))
     } catch (error) {
-      console.log('File does not exist (yet) or another error:')
-      console.error(error)
+      console.error('File does not exist (yet) or another error', error)
       return {}
     }
   }
@@ -59,6 +58,7 @@ class Settings {
    */
   set (name, value) {
     this.data[name] = value
+    return this
   }
 
   /**
@@ -68,8 +68,7 @@ class Settings {
     try {
       fs.writeFileSync(this.pathSettingsFile, JSON.stringify(this.data))
     } catch (error) {
-      console.log('File could not be written or another error:')
-      console.error(error)
+      console.error('File could not be written or another error', error)
     }
   }
 }

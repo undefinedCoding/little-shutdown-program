@@ -1,11 +1,19 @@
 // imports
-const { ShutdownTimer } = require('./js/timer')
-const { SpotifyHandler } = require('./js/spotifyHandler')
+const {
+  ShutdownTimer
+} = require('./js/timer')
+const {
+  SpotifyHandler
+} = require('./js/spotifyHandler')
 const shutdown = require('electron-shutdown-command')
 const dialogs = require('dialogs')()
 const notifier = require('node-notifier')
 const path = require('path')
-const { shell, ipcRenderer, remote } = require('electron')
+const {
+  shell,
+  ipcRenderer,
+  remote
+} = require('electron')
 
 /*
  * Global objects
@@ -28,7 +36,7 @@ const spotifyHandler = new SpotifyHandler()
  * Open a given URL externally in the default browser
  * @param {String} url - Normal URL
  */
-function openLinkExternally (url) { // eslint-disable-line no-unused-vars
+function openLinkExternally (url) {
   shell.openExternal(url)
 }
 
@@ -226,7 +234,7 @@ function newVersionDetected () {
   versionUpdate.onclick = () => {
     openLinkExternally(
       'https://github.com/undefinedCoding/little-shutdown-program/releases/tag/' +
-        newTag
+      newTag
     )
   }
 }
@@ -265,8 +273,7 @@ function toggleAbout () {
 }
 
 if (nativeTitleBar) {
-  ipcRenderer.on('toggleSettings', toggleSettings)
-  ipcRenderer.on('toggleAbout', toggleAbout)
+  ipcRenderer.on('toggleSettings', toggleSettings).on('toggleAbout', toggleAbout)
   titlebar.style.display = 'none'
   mainContainer.style.top = '0px'
   aboutContainer.style.top = '0px'
@@ -450,9 +457,7 @@ function setTime (days, hours, minutes, seconds) {
   ]
   // add for every time thing two numbers
   for (
-    let index = 0, index2 = 0;
-    index < timeArray.length;
-    index++, (index2 += 2)
+    let index = 0, index2 = 0; index < timeArray.length; index++, (index2 += 2)
   ) {
     if (timeArray[index].length > 1) {
       digits[index2].className = digitClasses[Number(timeArray[index][0])]
@@ -465,53 +470,53 @@ function setTime (days, hours, minutes, seconds) {
 }
 
 // shutdownTimer event listener/callbacks
-shutdownTimer.on('alarmCallback', (err, t) => {
-  // gets called when the timer has finished
-  if (err) {
-    console.error(err)
-    return
-  }
+shutdownTimer
+  .on('alarmCallback', (err, t) => {
+    // gets called when the timer has finished
+    if (err) {
+      console.error(err)
+      return
+    }
 
-  // reset button texts
-  timerButtonPauseResume.value = 'Pause'
-  timerButtonStartStop.value = 'Start'
+    // reset button texts
+    timerButtonPauseResume.value = 'Pause'
+    timerButtonStartStop.value = 'Start'
 
-  // reset time display to 00:00:00:00
-  setTime(0, 0, 0, 0)
+    // reset time display to 00:00:00:00
+    setTime(0, 0, 0, 0)
 
-  // pause music if wanted
-  if (ipcRenderer.sendSync('get-settings', 'spotify')) {
-    spotifyHandler.pauseMusic()
-  }
+    // pause music if wanted
+    if (ipcRenderer.sendSync('get-settings', 'spotify')) {
+      spotifyHandler.pauseMusic()
+    }
 
-  // shutdown the computer if wanted
-  if (ipcRenderer.sendSync('get-settings', 'shutdown')) {
-    // start timeout (20s) for forcefully shutting down the computer
-    const shutdownTimeout = setTimeout(() => {
-      // simple system shutdown with default options
-      shutdown.shutdown({
-        force: true
-      })
-    }, 20000)
+    // shutdown the computer if wanted
+    if (ipcRenderer.sendSync('get-settings', 'shutdown')) {
+      // start timeout (20s) for forcefully shutting down the computer
+      const shutdownTimeout = setTimeout(() => {
+        // simple system shutdown with default options
+        shutdown.shutdown({
+          force: true
+        })
+      }, 20000)
 
-    // start dialog to inform that the computer will be shut down in 20s (for preventing it)
-    dialogs.confirm(
-      'Stop the computer from shutting down? (in 20s this will automatically happen)',
-      okWasPressed => {
-        if (!okWasPressed) return
+      // start dialog to inform that the computer will be shut down in 20s (for preventing it)
+      dialogs.confirm(
+        'Stop the computer from shutting down? (in 20s this will automatically happen)',
+        okWasPressed => {
+          if (!okWasPressed) return
 
-        // stop timeout/shutdown
-        clearTimeout(shutdownTimeout)
+          // stop timeout/shutdown
+          clearTimeout(shutdownTimeout)
 
-        // play music again if wanted (and if it was played before the alarm went off)
-        if (ipcRenderer.sendSync('get-settings', 'spotify')) {
-          spotifyHandler.playMusic()
+          // play music again if wanted (and if it was played before the alarm went off)
+          if (ipcRenderer.sendSync('get-settings', 'spotify')) {
+            spotifyHandler.playMusic()
+          }
         }
-      }
-    )
-    // start a notification to inform that the computer will be shut down in 20s (for preventing it)
-    notifier.notify(
-      {
+      )
+      // start a notification to inform that the computer will be shut down in 20s (for preventing it)
+      notifier.notify({
         title: 'Timer is finished (' + millisecondsToStr(t.msInput) + ')',
         message: 'The computer is about to shut down (20s) - click here to stop this from happening!',
         icon: path.join(__dirname, 'icon', 'icon.png'),
@@ -540,23 +545,22 @@ shutdownTimer.on('alarmCallback', (err, t) => {
         // focus the window
         remote.getCurrentWindow().focus()
       }
-    )
-  } else {
-    // if no shutdown is wished just prompt that the timer has finished and the time
-    dialogs.alert(
-      'Timer has finished (after ' + millisecondsToStr(t.msInput) + ')',
-      okWasPressed => {
-        // play music again
-        if (ipcRenderer.sendSync('get-settings', 'spotify')) {
-          spotifyHandler.playMusic()
+      )
+    } else {
+      // if no shutdown is wished just prompt that the timer has finished and the time
+      dialogs.alert(
+        'Timer has finished (after ' + millisecondsToStr(t.msInput) + ')',
+        okWasPressed => {
+          // play music again
+          if (ipcRenderer.sendSync('get-settings', 'spotify')) {
+            spotifyHandler.playMusic()
+          }
         }
-      }
-    )
-    notifier.notify(
-      {
+      )
+      notifier.notify({
         title: 'Timer has finished (after ' +
-          millisecondsToStr(t.msInput) +
-          ')',
+            millisecondsToStr(t.msInput) +
+            ')',
         message: ':)',
         icon: path.join(__dirname, 'icon', 'icon.png'),
         sound: true,
@@ -576,76 +580,70 @@ shutdownTimer.on('alarmCallback', (err, t) => {
         // focus the window
         remote.getCurrentWindow().focus()
       }
-    )
-  }
-})
-shutdownTimer.on('countdownCallback', (err, t) => {
-  if (err) {
-    console.error(err)
-    return
-  }
-  // update time display if something is new
-  if (t.d !== oldT.d || t.h !== oldT.h || t.m !== oldT.m || t.s !== oldT.s) {
+      )
+    }
+  }).on('countdownCallback', (err, t) => {
+    if (err) {
+      console.error(err)
+      return
+    }
+    // update time display if something is new
+    if (t.d !== oldT.d || t.h !== oldT.h || t.m !== oldT.m || t.s !== oldT.s) {
+      setTime(t.d, t.h, t.m, t.s)
+      oldT = t
+    }
+  }).on('resumeCallback', err => {
+    if (err) {
+      console.error(err)
+      return
+    }
+    // change timerButtonPauseResume value
+    timerButtonPauseResume.value = 'Pause'
+  }).on('pauseCallback', err => {
+    if (err) {
+      console.error(err)
+      return
+    }
+    // change timerButtonPauseResume value
+    timerButtonPauseResume.value = 'Resume'
+  }).on('startCallback', (err, t) => {
+    if (err) {
+      console.error(err)
+      return
+    }
+    // change button values
+    timerButtonStartStop.value = 'Stop'
+    timerButtonPauseResume.value = 'Pause'
+    // set time
     setTime(t.d, t.h, t.m, t.s)
     oldT = t
-  }
-})
-shutdownTimer.on('resumeCallback', err => {
-  if (err) {
-    console.error(err)
-    return
-  }
-  // change timerButtonPauseResume value
-  timerButtonPauseResume.value = 'Pause'
-})
-shutdownTimer.on('pauseCallback', err => {
-  if (err) {
-    console.error(err)
-    return
-  }
-  // change timerButtonPauseResume value
-  timerButtonPauseResume.value = 'Resume'
-})
-shutdownTimer.on('startCallback', (err, t) => {
-  if (err) {
-    console.error(err)
-    return
-  }
-  // change button values
-  timerButtonStartStop.value = 'Stop'
-  timerButtonPauseResume.value = 'Pause'
-  // set time
-  setTime(t.d, t.h, t.m, t.s)
-  oldT = t
-})
-shutdownTimer.on('stopCallback', (err, t) => {
-  if (err) {
-    console.error(err)
-    return
-  }
-  // change button values
-  timerButtonStartStop.value = 'Start'
-  timerButtonPauseResume.value = 'Pause'
-  // set time
-  setTime(t.d, t.h, t.m, t.s)
-  oldT = t
-})
-shutdownTimer.on('resetCallback', err => {
-  if (err) {
-    console.error(err)
-    return
-  }
-  // change button values
-  timerButtonStartStop.value = 'Start'
-  timerButtonPauseResume.value = 'Pause'
-  // clear time input
-  timerInputDays.value = ''
-  timerInputHours.value = ''
-  timerInputMinutes.value = ''
-  timerInputSeconds.value = ''
-  // reset time
-  setTime(0, 0, 0, 0)
-})
+  }).on('stopCallback', (err, t) => {
+    if (err) {
+      console.error(err)
+      return
+    }
+    // change button values
+    timerButtonStartStop.value = 'Start'
+    timerButtonPauseResume.value = 'Pause'
+    // set time
+    setTime(t.d, t.h, t.m, t.s)
+    oldT = t
+  }).on('resetCallback', err => {
+    if (err) {
+      console.error(err)
+      return
+    }
+    // change button values
+    timerButtonStartStop.value = 'Start'
+    timerButtonPauseResume.value = 'Pause'
+    // clear time input
+    timerInputDays.value = ''
+    timerInputHours.value = ''
+    timerInputMinutes.value = ''
+    timerInputSeconds.value = ''
+    // reset time
+    setTime(0, 0, 0, 0)
+  })
 
 // event listener for dev shortcuts
 document.addEventListener('keydown', e => {
@@ -657,8 +655,6 @@ document.addEventListener('keydown', e => {
       remote.getCurrentWindow().toggleDevTools()
   }
 })
-
-// event listen for click shortcuts
 document.addEventListener('keyup', e => {
   switch (e.which) {
     case 13: // Enter
@@ -680,44 +676,46 @@ document.addEventListener('keyup', e => {
 })
 
 // if full screen is activated hide windows title bar and otherwise
-remote.getCurrentWindow().on('enter-full-screen', () => {
-  if (!nativeTitleBar) {
-    titlebar.style.display = 'none'
-    mainContainer.style.top = '0px'
-  }
-})
-remote.getCurrentWindow().on('leave-full-screen', () => {
-  if (!nativeTitleBar) {
-    titlebar.style.display = 'block'
-    mainContainer.style.top = '32px'
-  }
-})
-
-// if window is maximized add class to titlebar for new icon and otherwise
-remote.getCurrentWindow().on('maximize', () => {
-  if (!nativeTitleBar) titlebar.classList.add('fullscreen')
-})
-remote.getCurrentWindow().on('unmaximize', () => {
-  if (!nativeTitleBar) titlebar.classList.remove('fullscreen')
-})
+remote
+  .getCurrentWindow()
+  .on('enter-full-screen', () => {
+    if (!nativeTitleBar) {
+      titlebar.style.display = 'none'
+      mainContainer.style.top = '0px'
+    }
+  })
+  .on('leave-full-screen', () => {
+    if (!nativeTitleBar) {
+      titlebar.style.display = 'block'
+      mainContainer.style.top = '32px'
+    }
+  })
+  .on('maximize', () => {
+    // if window is maximized add class to titlebar for new icon and otherwise
+    if (!nativeTitleBar) titlebar.classList.add('fullscreen')
+  })
+  .on('unmaximize', () => {
+    if (!nativeTitleBar) titlebar.classList.remove('fullscreen')
+  })
 
 // spotify handler callbacks if an error comes up or a connection is initiated
-spotifyHandler.on('error', () => {
-  console.log('Connection to Spotify could not be established or was killed')
-})
-spotifyHandler.on('ready', status => {
-  // log successful spotify connection
-  const currentlyPlayingString =
-    'Have fun listening to ' +
-    status.track.track_resource.name +
-    ' by ' +
-    status.track.artist_resource.name +
-    ' from ' +
-    status.track.album_resource.name
-  const timeString =
-    'Spotify helper is ready after ' +
-    millisecondsToStr(window.performance.now() - spotifyWebHelperStarted)
-  console.log(currentlyPlayingString, timeString)
-  // change spotify logo to a white on
-  spotifySVG.src = 'data/spotify_logo_by_wikimedia.svg'
-})
+spotifyHandler
+  .on('error', () => {
+    console.log('Connection to Spotify could not be established or was killed')
+  })
+  .on('ready', status => {
+    // log successful spotify connection
+    const currentlyPlayingString =
+      'Have fun listening to ' +
+      status.track.track_resource.name +
+      ' by ' +
+      status.track.artist_resource.name +
+      ' from ' +
+      status.track.album_resource.name
+    const timeString =
+      'Spotify helper is ready after ' +
+      millisecondsToStr(window.performance.now() - spotifyWebHelperStarted)
+    console.log(currentlyPlayingString, timeString)
+    // change spotify logo to a white on
+    spotifySVG.src = 'data/spotify_logo_by_wikimedia.svg'
+  })
