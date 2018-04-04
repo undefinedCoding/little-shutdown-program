@@ -79,6 +79,22 @@ npx electron-builder . --win
 
 We used [Visual Studio Code](https://code.visualstudio.com/) for editing/creating this project because of the many helping plugins for linting and auto formatting our code and the integrated console.
 
+#### Code style
+
+If you edit code, please check that your code style is [JavaScript standard](https://standardjs.com/). Thanks to eslint you can before you commit clean all your code to this style guide by running:
+
+```bash
+eslint FILE --fix
+```
+
+T use this command you need to install the eslint module with the command:
+
+```bash
+npm install eslint -g
+```
+
+There is even an script named [`eslintJsFiles.sh`](eslintJsFiles.sh) which can be run and then automatically fixes the code style in all files.
+
 ## Disclaimer
 
 This program is not perfect and was not written by professionals.
