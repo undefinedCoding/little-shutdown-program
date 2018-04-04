@@ -270,6 +270,7 @@ if (nativeTitleBar) {
   titlebar.style.display = 'none'
   mainContainer.style.top = '0px'
   aboutContainer.style.top = '0px'
+  aboutContainer.style.maxHeight = 'calc(100vh - 25px)'
   settingsContainer.style.marginTop = '25px'
 } else {
   // titlebar event listeners
