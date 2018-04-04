@@ -107,8 +107,10 @@ function slideAnimation (currentElement, elementToShow, directionRight = true) {
  * Global variables
  */
 
+// constant settings
+const nativeTitleBar = ipcRenderer.sendSync('get-settings', 'nativeTitleBar')
+
 // titlebar
-const customTitleBar = !ipcRenderer.sendSync('get-settings', 'nativeTitleBar')
 const titlebar = document.getElementById('titlebar-windows-10')
 // titlebar >> action buttons
 const titlebarSettings = document.getElementById('titelbar-settings')
@@ -240,7 +242,14 @@ function toggleAbout () {
   } else slideAnimation(aboutContainer, mainContainer, true)
 }
 
-if (customTitleBar) {
+if (nativeTitleBar) {
+  ipcRenderer.on('toggleSettings', toggleSettings)
+  ipcRenderer.on('toggleAbout', toggleAbout)
+  titlebar.style.display = 'none'
+  mainContainer.style.top = '0px'
+  aboutContainer.style.top = '0px'
+  settingsContainer.style.marginTop = '25px'
+} else {
   // titlebar event listeners
   titlebarSettings.addEventListener('click', toggleSettings)
   titlebarHelp.addEventListener('click', toggleAbout)
@@ -263,11 +272,6 @@ if (customTitleBar) {
       )
     } else remote.getCurrentWindow().close()
   })
-} else {
-  ipcRenderer.on('toggleSettings', toggleSettings)
-  ipcRenderer.on('toggleAbout', toggleAbout)
-  titlebar.style.display = 'none'
-  mainContainer.style.top = '0px'
 }
 
 // settings checkbox event listener
@@ -654,13 +658,13 @@ document.addEventListener('keyup', e => {
 
 // if full screen is activated hide windows title bar and otherwise
 remote.getCurrentWindow().on('enter-full-screen', () => {
-  if (customTitleBar) {
+  if (!nativeTitleBar) {
     titlebar.style.display = 'none'
     mainContainer.style.top = '0px'
   }
 })
 remote.getCurrentWindow().on('leave-full-screen', () => {
-  if (customTitleBar) {
+  if (!nativeTitleBar) {
     titlebar.style.display = 'block'
     mainContainer.style.top = '32px'
   }
@@ -668,10 +672,10 @@ remote.getCurrentWindow().on('leave-full-screen', () => {
 
 // if window is maximized add class to titlebar for new icon and otherwise
 remote.getCurrentWindow().on('maximize', () => {
-  if (customTitleBar) titlebar.classList.add('fullscreen')
+  if (!nativeTitleBar) titlebar.classList.add('fullscreen')
 })
 remote.getCurrentWindow().on('unmaximize', () => {
-  if (customTitleBar) titlebar.classList.remove('fullscreen')
+  if (!nativeTitleBar) titlebar.classList.remove('fullscreen')
 })
 
 // spotify handler callbacks if an error comes up or a connection is initiated

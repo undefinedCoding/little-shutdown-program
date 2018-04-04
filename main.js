@@ -28,7 +28,7 @@ if (shouldQuit) {
 settings.setup({
   configName: 'user-preferences',
   defaults: {
-    windowBounds: { width: 500, height: 600, x: 0, y: 0 },
+    windowBounds: { width: 600, height: 600, x: 0, y: 0 },
     timeInput: { d: '', h: '', m: '', s: '' },
     shutdown: true,
     spotify: true,
@@ -70,8 +70,8 @@ function createWindow () {
     title: 'little shutdown program',
     titleBarStyle: 'hidden',
     backgroundColor: '#c9329e',
-    minWidth: 550,
-    minHeight: settings.get('nativeTitleBar') ? 580 : 550,
+    minWidth: 600,
+    minHeight: 600,
     width: windowBounds.width,
     height: windowBounds.height,
     x: windowBounds.x,

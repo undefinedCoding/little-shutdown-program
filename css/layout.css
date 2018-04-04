@@ -1,72 +1,96 @@
 body {
-    /* Quick reset */
+    /* Reset default margin */
     margin: 0;
+    /* Hide overflow/scroll bars */
+    overflow: hidden;
+    /* Reset default padding */
     padding: 0;
     /* Do not allow to select anything */
     user-select: none;
-    /* Hide all scrollbars */
-    overflow: hidden;
-}
-
-:not(button):not(input):not(#spotify-logo):not(label) {
-    /* Show everywhere the normal mouse cursor */
+    /* Set the mouse cursor to default everywhere */
     cursor: default;
 }
 
-button,
-input,
-#spotify-logo,
-label {
-    /* Show on this objects the pointer cursor to signale something can be clicked */
-    cursor: pointer;
+#settings,
+#main-container,
+#about,
+#time-inputs input,
+#timer-buttons input {
+    /* Font color */
+    color: white;
+    /* Specify a Windows 10 like font */
+    font-family: Open sans, sans-serif;
 }
 
-#time-inputs input {
-    cursor: text;
+#settings,
+#about_container {
+    margin: 1rem auto;
+    padding: 25px;
+    max-width: 800px;
+    line-height: 1.5;
+}
+
+#settings,
+#about {
+    display: none;
+}
+
+#timer-buttons input,
+#about_container button,
+#spotify-logo,
+.settings-entry label::before {
+    /* Show on this objects the pointer cursor to signal something can be clicked */
+    cursor: pointer;
 }
 
 #time-inputs,
 #timer-buttons {
+    /* Needed for displaying the buttons with the same width and next to each other */
     display: grid;
-    grid-gap: 10px;
-    padding: 10px;
-    margin-left: auto;
-    margin-right: auto;
-    /* All buttons share the same width */
+    /* All buttons in these divs share the same width */
     grid-auto-columns: 1fr;
+    /* Add space between the buttons */
+    grid-gap: 10px;
+    /* No margin, but center vertically */
+    margin: 0px auto;
+    /* Add padding around the button divs */
+    padding: 10px;
 }
 
 #time-inputs {
+    /* Order of the inputs */
     grid-template-areas: "input-days input-hours input-minutes input-seconds";
+    /* Maximum width so that it's not to wide on widescreens */
     max-width: 650px;
 }
 
 #timer-buttons {
+    /* Order of the buttons */
     grid-template-areas: "button-pause-resume button-start-stop button-clear";
-    max-width: 500px;
+    /* Maximum width so that it's not to wide on widescreens */
+    max-width: 575px;
 }
 
 #time-inputs input,
 #timer-buttons input {
-    text-align: center;
-    padding: 15px;
+    /* Button/input font size */
     font-size: 25px;
-    font-family: 'Open Sans';
+    /* BUtton/input font weight */
     font-weight: 300;
-    color: white;
     outline: none;
-    transition: all 0.25s;
+    padding: 15px;
+    text-align: center;
+    transition: border 0.25s ease-in-out, background 0.25s ease-in-out;
 }
 
 #time-inputs input {
-    border: 0px solid grey;
+    border: 0px solid;
     background: black;
 }
 
 #timer-buttons input {
     background-color: rgba(250, 250, 250, 0.4);
     border: 1px transparent solid;
-    mix-blend-mode: screen;
 }
 
 #time-inputs input:hover,
@@ -89,7 +113,8 @@ label {
     transition: background-color 0.1s;
 }
 
-#spotify-logo:hover {
+#spotify-logo:hover,
+#spotify-logo:focus {
     background-color: rgba(250, 250, 250, 0.6);
 }
 
@@ -135,27 +160,16 @@ label {
 }
 
 #about {
-    font-family: Open sans, sans-serif;
-    font-size: 16px;
-    line-height: 1.5;
-    color: white;
+    /* Do not display this div at the beginning */
     display: none;
-    position: absolute;
-    width: 100vw;
-    top: 32px;
     height: 100vh;
+    line-height: 1.5;
     max-height: calc(100vh - 32px);
     overflow-y: auto;
     padding-bottom: 25px;
-}
-
-#about_container {
-    display: grid;
-    padding: 25px;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 800px;
-    margin-top: 20px;
+    position: absolute;
+    top: 32px;
+    width: 100vw;
 }
 
 #about_container ul {
@@ -198,5 +212,6 @@ label {
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: #b52d8e /*rgba(0, 0, 0, 0.14)*/;
+    background-color: #b52d8e/*rgba(0, 0, 0, 0.14)*/
+    ;
 }
