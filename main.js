@@ -201,12 +201,12 @@ function createWindow () {
           }
         })
       }
-      request.on('error', error => {
-        console.log('connection could not be established', error)
-      })
       response.on('end', () => {
         console.log('No more data in response.')
       })
+    })
+    request.on('error', error => {
+      console.log('connection could not be established', error)
     })
     request.end()
   })
