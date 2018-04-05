@@ -142,11 +142,13 @@ const timerButtonClear = document.getElementById('button_clear')
 // mainContainer >> spotify connection indicator
 const spotifySVG = document.getElementById('spotify-logo')
 // mainContainer >> the digits of the time display
-const digitsAndDots = document.getElementById('digits')
-const digits = []
-const temp = digitsAndDots.children
-for (let i = 0; i < temp.length; i++) {
-  if (temp[i].className !== 'dots') digits.push(temp[i])
+var digits = document.getElementById('digits')
+digits = Array.from(digits.children)
+for (let i = 0; i < digits.length; i++) {
+  if (digits[i].className === 'dots') {
+    digits.splice(i, 1)
+    i--
+  }
 }
 
 // settingsContainer
@@ -166,6 +168,9 @@ const versionNumber = document.getElementById('version-number')
 // version update
 const versionUpdate = document.getElementById('newVersionNumber')
 
+// spotify startup setting
+const spotifyStateOnStart = ipcRenderer.sendSync('get-settings', 'spotify')
+
 // indicator if right now an animation is played
 var animationPause = false
 
@@ -180,7 +185,7 @@ var spotifyWebHelperStarted
  */
 
 // try on load to connect to spotify if setting is true
-if (ipcRenderer.sendSync('get-settings', 'spotify')) {
+if (spotifyStateOnStart) {
   spotifyHandler.connect()
   spotifyWebHelperStarted = window.performance.now()
 }
@@ -190,7 +195,7 @@ versionNumber.innerText = ipcRenderer.sendSync('get-version')
 
 // set checkboxes in the settings to their correct position
 checkboxShutdown.checked = ipcRenderer.sendSync('get-settings', 'shutdown')
-checkboxSpotify.checked = ipcRenderer.sendSync('get-settings', 'spotify')
+checkboxSpotify.checked = spotifyStateOnStart
 checkboxTray.checked = ipcRenderer.sendSync('get-settings', 'tray')
 checkboxNativeTitleBar.checked = ipcRenderer.sendSync(
   'get-settings',
@@ -202,13 +207,6 @@ aboutContainer.style.display = 'none'
 settingsContainer.style.display = 'none'
 aboutContainer.style.transform = 'translateX(-100vw)'
 settingsContainer.style.transform = 'translateX(+100vw)'
-
-// get from settings the last time input and set it
-const timeInputLastTime = ipcRenderer.sendSync('get-settings', 'timeInput')
-timerInputDays.value = timeInputLastTime.d
-timerInputHours.value = timeInputLastTime.h
-timerInputMinutes.value = timeInputLastTime.m
-timerInputSeconds.value = timeInputLastTime.s
 
 // digit classes for CSS
 const digitClasses = [
@@ -224,11 +222,16 @@ const digitClasses = [
   'nine'
 ]
 
-// set time display to 00:00:00:00
-setTime(0, 0, 0, 0)
+// get from settings the last time input and set it
+const timeInputLastTime = ipcRenderer.sendSync('get-settings', 'timeInput')
+timerInputDays.value = timeInputLastTime.d
+timerInputHours.value = timeInputLastTime.h
+timerInputMinutes.value = timeInputLastTime.m
+timerInputSeconds.value = timeInputLastTime.s
+setTime((timeInputLastTime.d === '') ? 0 : timeInputLastTime.d, (timeInputLastTime.h === '') ? 0 : timeInputLastTime.h, (timeInputLastTime.m === '') ? 0 : timeInputLastTime.m, (timeInputLastTime.s === '') ? 0 : timeInputLastTime.s)
 
 // set new version button if one was found
-function newVersionDetected () {
+ipcRenderer.on('newVersionDetected', () => {
   const newTag = ipcRenderer.sendSync('get-settings', 'newTag')
   versionUpdate.style.display = 'inline'
   versionUpdate.innerText = 'New version found: ' + newTag
@@ -238,14 +241,7 @@ function newVersionDetected () {
       newTag
     )
   }
-}
-if (
-  ipcRenderer.sendSync('get-settings', 'tag') !==
-  ipcRenderer.sendSync('get-settings', 'newTag')
-) {
-  newVersionDetected()
-}
-ipcRenderer.on('newVersionDetected', newVersionDetected)
+})
 
 /*
  * Setup >> Event listener
@@ -440,20 +436,30 @@ timerButtonClear.addEventListener('click', () => {
  * Saves current inputted time in the settings
  */
 function saveInput () {
+  const currentTime = {
+    d: timerInputDays.value,
+    h: timerInputHours.value,
+    m: timerInputMinutes.value,
+    s: timerInputSeconds.value
+  }
   ipcRenderer.send('set-settings', {
     name: 'timeInput',
-    value: {
-      d: timerInputDays.value,
-      h: timerInputHours.value,
-      m: timerInputMinutes.value,
-      s: timerInputSeconds.value
-    }
+    value: currentTime
   })
+  if (shutdownTimer.isStopped) setTime(currentTime.d, currentTime.h, currentTime.m, currentTime.s)
 }
 timerInputDays.addEventListener('change', saveInput)
 timerInputHours.addEventListener('change', saveInput)
 timerInputMinutes.addEventListener('change', saveInput)
 timerInputSeconds.addEventListener('change', saveInput)
+timerInputDays.addEventListener('click', saveInput)
+timerInputHours.addEventListener('click', saveInput)
+timerInputMinutes.addEventListener('click', saveInput)
+timerInputSeconds.addEventListener('click', saveInput)
+timerInputDays.addEventListener('keyup', saveInput)
+timerInputHours.addEventListener('keyup', saveInput)
+timerInputMinutes.addEventListener('keyup', saveInput)
+timerInputSeconds.addEventListener('keyup', saveInput)
 
 // set time on display
 /**
@@ -464,6 +470,11 @@ timerInputSeconds.addEventListener('change', saveInput)
  * @param {Number} seconds - Number of seconds
  */
 function setTime (days, hours, minutes, seconds) {
+  days = (days === '') ? 0 : days
+  hours = (hours === '') ? 0 : hours
+  minutes = (minutes === '') ? 0 : minutes
+  seconds = (seconds === '') ? 0 : seconds
+
   // save all chars in an array
   const timeArray = [
     days.toString().split(''),
@@ -642,8 +653,14 @@ shutdownTimer
     timerButtonStartStop.value = 'Start'
     timerButtonPauseResume.value = 'Pause'
     // set time
-    setTime(t.d, t.h, t.m, t.s)
-    oldT = t
+    const currentTime = {
+      d: timerInputDays.value,
+      h: timerInputHours.value,
+      m: timerInputMinutes.value,
+      s: timerInputSeconds.value
+    }
+    setTime(currentTime.d, currentTime.h, currentTime.m, currentTime.s)
+    oldT = currentTime
   }).on('resetCallback', err => {
     if (err) {
       console.error(err)
