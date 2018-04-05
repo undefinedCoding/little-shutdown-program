@@ -14,6 +14,7 @@ const {
   ipcRenderer,
   remote
 } = require('electron')
+const Hammer = require('hammerjs')
 
 /*
  * Global objects
@@ -271,6 +272,21 @@ function toggleAbout () {
     slideAnimation(mainContainer, aboutContainer, false)
   } else slideAnimation(aboutContainer, mainContainer, true)
 }
+
+// touch gesture listener
+new Hammer(document.body).on('panright', () => {
+  if (settingsContainer.style.transform === '') {
+    slideAnimation(settingsContainer, mainContainer, false)
+  } else if (mainContainer.style.transform === '') {
+    slideAnimation(mainContainer, aboutContainer, false)
+  }
+}).on('panleft', () => {
+  if (aboutContainer.style.transform === '') {
+    slideAnimation(aboutContainer, mainContainer, true)
+  } else if (mainContainer.style.transform === '') {
+    slideAnimation(mainContainer, settingsContainer, true)
+  }
+})
 
 if (nativeTitleBar) {
   ipcRenderer.on('toggleSettings', toggleSettings).on('toggleAbout', toggleAbout)

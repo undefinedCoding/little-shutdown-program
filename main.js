@@ -141,30 +141,30 @@ function checkForNewVersion () {
  * Create the main window
  */
 function createWindow () {
-  // get custom window width and height from settings
-  const windowBounds = settings.get('windowBounds')
-  const nativeTitleBar = settings.get('nativeTitleBar')
+  // get settings
+  const settingsWindowBounds = settings.get('windowBounds')
+  const settingsNativeTitleBar = settings.get('nativeTitleBar')
+  const settingsTray = settings.get('tray')
 
   // Create a BrowserWindow object
   mainWindow = new BrowserWindow({
-    title: 'little shutdown program',
+    title: nameOfApp,
     titleBarStyle: 'hidden',
     backgroundColor: '#c9329e',
     minWidth: 600,
     minHeight: 600,
-    width: windowBounds.width,
-    height: windowBounds.height,
-    x: windowBounds.x,
-    y: windowBounds.y,
-    frame: nativeTitleBar,
-    fullscreen: false,
-    show: false,
+    width: settingsWindowBounds.width,
+    height: settingsWindowBounds.height,
+    x: settingsWindowBounds.x,
+    y: settingsWindowBounds.y,
+    frame: settingsNativeTitleBar,
+    show: false, // do not show the window before content is loaded
     icon: path.join(__dirname, 'icon', 'icon.ico'),
-    center: windowBounds.x === 0 && windowBounds.y === 0
+    center: settingsWindowBounds.x === 0 && settingsWindowBounds.y === 0
   })
 
+  // Load the 'index.html' file in the window
   mainWindow.loadURL(
-    // Load the 'index.html' file in the window
     url.format({
       pathname: path.join(__dirname, 'index.html'),
       protocol: 'file:',
@@ -172,9 +172,8 @@ function createWindow () {
     })
   )
 
-  // if a native title bar is wanted
-  if (nativeTitleBar) {
-    // add a menu bar with two buttons instead of the custom title bar icons
+  // if a native title bar is wanted add a menu bar with two buttons instead of the custom title bar icons
+  if (settingsNativeTitleBar) {
     Menu.setApplicationMenu(
       Menu.buildFromTemplate([
         {
@@ -194,7 +193,7 @@ function createWindow () {
   }
 
   // create tray icon if settings say so
-  if (settings.get('tray')) {
+  if (settingsTray) {
     // create tray icon
     const tray = new Tray(
       path.join(__dirname, 'icon', 'icon.ico')
@@ -203,8 +202,8 @@ function createWindow () {
       mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
     })
 
+    // create menu for left click on tray icon
     tray.setContextMenu(
-      // create menu for left click on tray icon
       Menu.buildFromTemplate([
         {
           label: 'Exit',
@@ -216,7 +215,7 @@ function createWindow () {
     )
     tray.setToolTip('Click to hide or show the app')
 
-    // highlight icon if window currently shown
+    // highlight icon if window currently shown and do the opposite if not
     mainWindow.on('show', () => {
       tray.setHighlightMode('always')
     }).on('hide', () => {
@@ -238,9 +237,9 @@ function createWindow () {
   }).on('closed', () => {
     // Dereference the window object
     mainWindow = null
-  }).on('minimize', event => {
+  }).on('minimize', () => {
     // if tray activated hide window from taskbar
-    if (settings.get('tray')) mainWindow.hide()
+    if (settingsTray) mainWindow.hide()
   }).on('close', saveSettings)
 }
 
