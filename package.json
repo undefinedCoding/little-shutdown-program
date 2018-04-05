@@ -1,6 +1,6 @@
 {
   "name": "little-shutdown-program",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "url": "https://github.com/undefinedCoding/little-shutdown-program",
   "description": "A little program that turns off the computer if a set timer is done",
   "license": "MIT",

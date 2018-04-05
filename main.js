@@ -91,10 +91,11 @@ function checkForNewVersion () {
               if (
                 releaseArray !== undefined &&
                 releaseArray[0] !== undefined &&
-                releaseArray.name !== undefined
+                releaseArray[0].name !== undefined
               ) {
                 const newestTag = releaseArray[0].name
                 const currentTag = settings.get('tag')
+                console.log('newestTag: ', newestTag, ' currentTag: ', currentTag)
 
                 if (newestTag !== currentTag) {
                   settings.set('newTag', newestTag)
@@ -125,8 +126,7 @@ function checkForNewVersion () {
             } catch (e) {
               console.error(e)
             }
-          })
-          .on('end', () => {
+          }).on('end', () => {
             console.log('No more data in response.')
           })
       }
