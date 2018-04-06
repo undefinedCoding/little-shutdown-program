@@ -191,7 +191,7 @@ if (spotifyStateOnStart) {
 }
 
 // set correct version number on the about page
-versionNumber.innerText = ipcRenderer.sendSync('get-version')
+versionNumber.innerText = ipcRenderer.sendSync('get-settings', 'tag')
 
 // set checkboxes in the settings to their correct position
 checkboxShutdown.checked = ipcRenderer.sendSync('get-settings', 'shutdown')
