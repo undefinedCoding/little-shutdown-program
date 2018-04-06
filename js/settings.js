@@ -48,6 +48,8 @@ class Settings {
    * @returns {*} Returns either the wanted value or undefined if value was not found
    */
   get (name) {
+    // DEBUG
+    // console.log(name, this.data[name] === undefined ? this.defaults[name] : this.data[name])
     return this.data[name] === undefined ? this.defaults[name] : this.data[name]
   }
 

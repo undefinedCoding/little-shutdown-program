@@ -15,6 +15,7 @@ const settings = require('./js/settings')
 
 // Global variables
 var mainWindow = null
+var alreadyCheckingForUpdates = false
 const appName = app.getName()
 const appVersion = app.getVersion()
 
@@ -56,6 +57,7 @@ ipcMain
   .on('get-name', event => {
     event.returnValue = appName
   })
+  .on('check-for-update', checkForNewVersion)
   .on('relaunch', () => {
     // save settings before closing the app
     saveSettings()
@@ -68,34 +70,42 @@ ipcMain
  * Check for a new version
  */
 function checkForNewVersion () {
-  // make a request to the github api over tags of the repository
-  const request = net.request('https://api.github.com/repos/undefinedCoding/little-shutdown-program/releases/latest'
-  )
-  request.on('response', response => {
-    console.log(`STATUS: ${response.statusCode}`)
-    console.log(`HEADERS: ${JSON.stringify(response.headers)}`)
-    response.on('data', jsonData => {
-      console.log(`BODY: ${jsonData}`)
-      // try to convert the gotten data into an object
-      try {
-        const latestRelease = JSON.parse(jsonData)
-        // if object and tag name key is not undefined
-        if (
-          latestRelease !== undefined &&
-              latestRelease.tag_name !== undefined
-        ) {
+  if (!alreadyCheckingForUpdates) {
+    alreadyCheckingForUpdates = true
+    // make a request to the github api over tags of the repository
+    var buffers = []
+    net.request('https://api.github.com/repos/undefinedCoding/little-shutdown-program/releases/latest'
+    ).on('response', response => {
+      // DEBUG: Log status code
+      // console.log(`STATUS: ${response.statusCode}`)
+      response.on('data', chunk => {
+        // push gotten data into the buffer
+        buffers.push(chunk)
+      }).on('end', () => {
+        // no more response data, everything was collected in the buffer - parse to JSON
+        const jsonObjectString = Buffer.concat(buffers).toString()
+        // DEBUG: Log response data
+        // console.log(`BODY: ${jsonObjectString}`)
+        // try to convert the gotten data into an object
+        try {
+          const latestRelease = JSON.parse(jsonObjectString)
+          // DEBUG:
+          // console.log(latestRelease)
           // save old and current tag in constant variables
           const newestTag = latestRelease.tag_name
           const currentTag = settings.get('tag')
           // if they are different
           if (newestTag !== currentTag) {
-            // change newest tag in the settings and send message to render process
+          // change newest tag in the settings and send message to render process
             settings.set('newTag', newestTag)
             mainWindow.webContents.send(
               'newVersionDetected',
-              latestRelease.url
+              {
+                latestTag: newestTag,
+                url: latestRelease.html_url
+              }
             )
-            // show a message box that notifies, that a new version is aviable
+            // show a message box that says that a new version is aviable if settings say so
             dialog.showMessageBox(
               mainWindow,
               {
@@ -108,27 +118,32 @@ function checkForNewVersion () {
               buttonId => {
                 switch (buttonId) {
                   case 0:
-                    shell.openExternal(latestRelease.url)
+                    shell.openExternal(latestRelease.html_url)
                     break
-                  case 3:
+                  case 2:
                     settings.set('checkForNewVersionOnStartup', false)
+                    mainWindow.webContents.send('auto-updates-disabled')
                 }
               }
             )
           }
+        } catch (e) {
+          console.log(`ERROR: [PARSE JSON] ${JSON.stringify(e)}`)
         }
-      } catch (e) {
-        console.error(e)
-      }
-    })
-    response.on('end', () => {
-      console.log('No more data in response.')
-    })
-  })
-  request.on('error', error => {
-    console.log('connection could not be established', error)
-  })
-  request.end()
+      }).on('error', error => {
+        console.log(`ERROR: [RESPONSE] ${JSON.stringify(error)}`)
+      })
+    }).on('error', error => {
+      console.log(`ERROR: [REQUEST] ${JSON.stringify(error)}`)
+    }).on('finish', () => {
+      // DEBUG:
+      // console.log('Emitted just after the last chunk of the requests data has been written into the request object.')
+    }).on('close', () => {
+      // DEBUG:
+      // console.log('Emitted as the last event in the HTTP request-response transaction. The close event indicates that no more events will be emitted on either the request or response objects.')
+      alreadyCheckingForUpdates = false
+    }).end()
+  }
 }
 
 /**
@@ -220,7 +235,7 @@ function createWindow () {
       })
   }
 
-  // DEBUGGING: Open chromium dev tools from start
+  // DEBUG: Open dev tools from start
   // mainWindow.webContents.openDevTools()
 
   // The renderer process has rendered the page for the first time

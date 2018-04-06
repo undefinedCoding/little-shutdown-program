@@ -160,6 +160,7 @@ const checkboxTray = document.getElementById('checkbox-tray')
 const checkboxNativeTitleBar = document.getElementById(
   'checkbox-nativeTitleBar'
 )
+const checkboxNewVersionUpdate = document.getElementById('checkbox-newVersionUpdate')
 
 // aboutContainer
 const aboutContainer = document.getElementById('about')
@@ -201,6 +202,7 @@ checkboxNativeTitleBar.checked = ipcRenderer.sendSync(
   'get-settings',
   'nativeTitleBar'
 )
+checkboxNewVersionUpdate.checked = ipcRenderer.sendSync('get-settings', 'checkForNewVersionOnStartup')
 
 // move the containers to their correct place
 aboutContainer.style.display = 'none'
@@ -231,16 +233,14 @@ timerInputSeconds.value = timeInputLastTime.s
 setTime((timeInputLastTime.d === '') ? 0 : timeInputLastTime.d, (timeInputLastTime.h === '') ? 0 : timeInputLastTime.h, (timeInputLastTime.m === '') ? 0 : timeInputLastTime.m, (timeInputLastTime.s === '') ? 0 : timeInputLastTime.s)
 
 // set new version button if one was found
-ipcRenderer.on('newVersionDetected', () => {
-  const newTag = ipcRenderer.sendSync('get-settings', 'newTag')
+ipcRenderer.on('newVersionDetected', (event, arg) => {
   versionUpdate.style.display = 'inline'
-  versionUpdate.innerText = 'New version found: ' + newTag
+  versionUpdate.innerText = `Latest version: ${arg.latestTag}`
   versionUpdate.onclick = () => {
-    openLinkExternally(
-      'https://github.com/undefinedCoding/little-shutdown-program/releases/tag/' +
-      newTag
-    )
+    openLinkExternally(arg.url)
   }
+}).on('auto-updates-disabled', () => {
+  checkboxNewVersionUpdate.checked = false
 })
 
 /*
@@ -376,6 +376,13 @@ checkboxNativeTitleBar.addEventListener('click', () => {
       }
     }
   )
+})
+checkboxNewVersionUpdate.addEventListener('click', () => {
+  ipcRenderer.send('set-settings', {
+    name: 'checkForNewVersionOnStartup',
+    value: checkboxNewVersionUpdate.checked
+  })
+  if (checkboxNewVersionUpdate.checked) ipcRenderer.send('check-for-update')
 })
 
 // onclick listener for the spotify picture
