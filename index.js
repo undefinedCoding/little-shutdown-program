@@ -269,22 +269,27 @@ function toggleAbout () {
   } else slideAnimation(aboutContainer, mainContainer, true)
 }
 
-// touch gesture listener
-new Hammer(document.body).on('panright', () => {
+function leftAnimation () {
   if (settingsContainer.style.transform === '') {
     slideAnimation(settingsContainer, mainContainer, false)
   } else if (mainContainer.style.transform === '') {
     slideAnimation(mainContainer, aboutContainer, false)
   }
-}).on('panleft', () => {
+}
+
+function rightAnimation () {
   if (aboutContainer.style.transform === '') {
     slideAnimation(aboutContainer, mainContainer, true)
   } else if (mainContainer.style.transform === '') {
     slideAnimation(mainContainer, settingsContainer, true)
   }
-})
+}
+
+// touch gesture listener
+new Hammer(document.body).on('panright', leftAnimation).on('panleft', rightAnimation)
 
 if (nativeTitleBar) {
+  titlebar.style.display = 'none'
   ipcRenderer.on('toggleSettings', toggleSettings).on('toggleAbout', toggleAbout)
 } else {
   mainContainer.classList.add('titlebar-active')
@@ -685,43 +690,32 @@ shutdownTimer
 // event listener for dev shortcuts
 document.addEventListener('keydown', e => {
   switch (e.which) {
-    case 116: // F5
+    case 116: // F5 - reload app
       remote.getCurrentWindow().reload()
-      break
-    case 123: // F12
-      remote.getCurrentWindow().toggleDevTools()
-  }
-})
-document.addEventListener('keyup', e => {
-  switch (e.which) {
-    case 13: // Enter
-      startstopTimer()
-      break
-    case 32: // space bar - Resume/Pause
-      if (shutdownTimer.isPaused) shutdownTimer.resume()
-      else shutdownTimer.pause()
-      break
-    case 82: // r - ickroll
-      spotifyHandler.rickroll()
-      break
-    case 37: // <-
-      if (settingsContainer.style.transform === '') {
-        slideAnimation(settingsContainer, mainContainer, false)
-      } else if (mainContainer.style.transform === '') {
-        slideAnimation(mainContainer, aboutContainer, false)
-      }
-      break
-    case 39: // ->
-      if (aboutContainer.style.transform === '') {
-        slideAnimation(aboutContainer, mainContainer, true)
-      } else if (mainContainer.style.transform === '') {
-        slideAnimation(mainContainer, settingsContainer, true)
-      }
       break
     case 122: // F11 - Fullscreen
       remote
         .getCurrentWindow()
         .setFullScreen(!remote.getCurrentWindow().isFullScreen())
+      break
+    case 123: // F12 - dev tools
+      remote.getCurrentWindow().toggleDevTools()
+      break
+    case 37: // <-  - Screen switch left
+      leftAnimation()
+      break
+    case 39: // -> - Screen switch right
+      rightAnimation()
+      break
+    case 13: // Enter - Start/Stop
+      startstopTimer()
+      break
+    case 32: // Space bar - Resume/Pause
+      if (shutdownTimer.isPaused) shutdownTimer.resume()
+      else shutdownTimer.pause()
+      break
+    case 82: // r - ickroll
+      spotifyHandler.rickroll()
       break
   }
 })
@@ -731,14 +725,18 @@ remote
   .getCurrentWindow()
   .on('enter-full-screen', () => {
     if (!nativeTitleBar) {
-      titlebar.style.display = 'none'
-      mainContainer.style.top = '0px'
+      titlebar.classList.add('hide')
+      mainContainer.classList.remove('titlebar-active')
+      aboutContainer.classList.remove('titlebar-active')
+      settingsContainer.classList.remove('titlebar-active')
     }
   })
   .on('leave-full-screen', () => {
     if (!nativeTitleBar) {
-      titlebar.style.display = 'block'
-      mainContainer.style.top = '32px'
+      titlebar.classList.remove('hide')
+      mainContainer.classList.add('titlebar-active')
+      aboutContainer.classList.add('titlebar-active')
+      settingsContainer.classList.add('titlebar-active')
     }
   })
   .on('maximize', () => {

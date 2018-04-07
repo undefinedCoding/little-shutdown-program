@@ -320,7 +320,6 @@ button {
 }
 
 #titlebar-windows-10 {
-    display: block;
     height: var(--titlebar-height);
     padding: 0;
     background-color: var(--titlebar-shadow);
