@@ -7,9 +7,7 @@
     <!-- Title of website -->
     <title>little shutdown program</title>
     <!-- CSS stylesheets -->
-    <link rel="stylesheet" type="text/css" href="css/titlebar.css">
     <link rel="stylesheet" type="text/css" href="css/layout.css">
-    <link rel="stylesheet" type="text/css" href="css/settings.css">
     <link rel="stylesheet" type="text/css" href="css/clock.css">
 </head>
 
@@ -54,224 +52,227 @@
         </div>
     </div>
 
-    <div id="settings">
-        <fieldset>
-            <legend class="bigtitle">Settings</legend>
+    <div id="settings" class="screen red">
+        <div class="container">
 
-            <fieldset class="settings-entry">
-                <input type="checkbox" checked id="checkbox-shutdown">
-                <label for="checkbox-shutdown" class="settings-windows10-checkbox"></label>
-                <legend class="title">Shutdown</legend>
-                <legend class="descripton">If enabled the computer will shut down when the timer ends</legend>
-            </fieldset>
+                <h2>Settings</h2>
+
+                <fieldset class="settings-entry">
+                    <input type="checkbox" checked id="checkbox-shutdown">
+                    <label for="checkbox-shutdown" class="settings-windows10-checkbox"></label>
+                    <legend class="title">Shutdown</legend>
+                    <legend class="descripton">If enabled the computer will shut down when the timer ends</legend>
+                </fieldset>
 
 
-            <fieldset class="settings-entry">
-                <input type="checkbox" checked id="checkbox-spotify">
-                <label for="checkbox-spotify" class="settings-windows10-checkbox"></label>
-                <legend class="title">Spotify</legend>
-                <legend class="descripton">If enabled Spotify will pause the music when the timer ends</legend>
-            </fieldset>
+                <fieldset class="settings-entry">
+                    <input type="checkbox" checked id="checkbox-spotify">
+                    <label for="checkbox-spotify" class="settings-windows10-checkbox"></label>
+                    <legend class="title">Spotify</legend>
+                    <legend class="descripton">If enabled Spotify will pause the music when the timer ends</legend>
+                </fieldset>
 
-            <fieldset class="settings-entry">
-                <input type="checkbox" id="checkbox-tray">
-                <label for="checkbox-tray" class="settings-windows10-checkbox"></label>
-                <legend class="title">Close to system tray</legend>
-                <legend class="descripton">If enabled this program will minimize itself to the system tray instead of the taskbar</legend>
-            </fieldset>
+                <fieldset class="settings-entry">
+                    <input type="checkbox" id="checkbox-tray">
+                    <label for="checkbox-tray" class="settings-windows10-checkbox"></label>
+                    <legend class="title">Close to system tray</legend>
+                    <legend class="descripton">If enabled this program will minimize itself to the system tray instead of the taskbar</legend>
+                </fieldset>
 
-            <fieldset class="settings-entry">
-                <input type="checkbox" id="checkbox-nativeTitleBar">
-                <label for="checkbox-nativeTitleBar" class="settings-windows10-checkbox"></label>
-                <legend class="title">Native title bar</legend>
-                <legend class="descripton">If enabled a native titlebar will be displayed instead of the customized one</legend>
-            </fieldset>
+                <fieldset class="settings-entry">
+                    <input type="checkbox" id="checkbox-nativeTitleBar">
+                    <label for="checkbox-nativeTitleBar" class="settings-windows10-checkbox"></label>
+                    <legend class="title">Native title bar</legend>
+                    <legend class="descripton">If enabled a native titlebar will be displayed instead of the customized one</legend>
+                </fieldset>
 
-            <fieldset class="settings-entry">
-                <input type="checkbox" id="checkbox-newVersionUpdate">
-                <label for="checkbox-newVersionUpdate" class="settings-windows10-checkbox"></label>
-                <legend class="title">Auto update</legend>
-                <legend class="descripton">Search on start of the application for a new available version and notify if there is one available</legend>
-            </fieldset>
-
-        </fieldset>
+                <fieldset class="settings-entry">
+                    <input type="checkbox" id="checkbox-newVersionUpdate">
+                    <label for="checkbox-newVersionUpdate" class="settings-windows10-checkbox"></label>
+                    <legend class="title">Auto update</legend>
+                    <legend class="descripton">Search on start of the application for a new available version and notify if there is one available</legend>
+                </fieldset>
+        </div>
     </div>
 
-    <div id="about">
-
-        <div id=about_container>
+    <div id="about" class="screen green">
+        <div class="container">
 
             <h2>About</h2>
 
             <p>Version:
                 <span id="version-number"></span>
-                <button id="newVersionNumber" class="newVersion"></button>
+                <button id="newVersionNumber" class="extra-new-version normal-button"></button>
             </p>
             <p>Authors:</p>
             <ul>
                 <li>AnonymerNiklasistanonym
-                    <button onclick="openLinkExternally('https://github.com/AnonymerNiklasistanonym')">GitHub</button>
+                    <button class="normal-button" onclick="openLinkExternally('https://github.com/AnonymerNiklasistanonym')">GitHub</button>
                 </li>
                 <li>undefinedCoding
-                    <button onclick="openLinkExternally('https://github.com/undefinedCoding')">GitHub</button>
+                    <button class="normal-button" onclick="openLinkExternally('https://github.com/undefinedCoding')">GitHub</button>
                 </li>
             </ul>
             <p>License: MIT
-                <button onclick="openLinkExternally('https://github.com/undefinedCoding/little-shutdown-program/blob/master/LICENSE')">GitHub</button>
+                <button class="normal-button" onclick="openLinkExternally('https://github.com/undefinedCoding/little-shutdown-program/blob/master/LICENSE')">GitHub</button>
             </p>
             <p>Dependencies:</p>
             <ul>
                 <li>dialogs
-                    <button onclick="openLinkExternally('https://www.npmjs.com/package/dialogs')">NPM</button>
+                    <button class="normal-button" onclick="openLinkExternally('https://www.npmjs.com/package/dialogs')">NPM</button>
                 </li>
                 <li>electron-shutdown-command
-                    <button onclick="openLinkExternally('https://www.npmjs.com/package/electron-shutdown-command')">NPM</button>
+                    <button class="normal-button" onclick="openLinkExternally('https://www.npmjs.com/package/electron-shutdown-command')">NPM</button>
                 </li>
                 <li>node-notifier
-                    <button onclick="openLinkExternally('https://www.npmjs.com/package/node-notifier')">NPM</button>
+                    <button class="normal-button" onclick="openLinkExternally('https://www.npmjs.com/package/node-notifier')">NPM</button>
                 </li>
                 <li>spotify-web-helper
-                    <button onclick="openLinkExternally('https://www.npmjs.com/package/spotify-web-helper')">NPM</button>
+                    <button class="normal-button" onclick="openLinkExternally('https://www.npmjs.com/package/spotify-web-helper')">NPM</button>
                 </li>
             </ul>
             <p>Inspirations/Sources:</p>
             <ul>
                 <li>The Windows 10 like titlebar is based on this module
-                    <button onclick="openLinkExternally('https://www.npmjs.com/package/electron-titlebar-windows')">Npm</button>
+                    <button class="normal-button" onclick="openLinkExternally('https://www.npmjs.com/package/electron-titlebar-windows')">Npm</button>
                 </li>
                 <li>
                     The inspiration at the begin
-                    <button onclick="openLinkExternally('https://codepen.io/DylanMacnab/pen/EVBPzK?q=Javascript+Timer&limit=all&type=type-pens')">CodePen by Dylan Macnab</button>
+                    <button class="normal-button" onclick="openLinkExternally('https://codepen.io/DylanMacnab/pen/EVBPzK?q=Javascript+Timer&limit=all&type=type-pens')">CodePen by Dylan Macnab</button>
                 </li>
                 <li>
                     The clock design
-                    <button onclick="openLinkExternally('https://codepen.io/bsmith/pen/drElg?q=digital%20clock&order=popularity&depth=everything&show_forks=false')">CodePen by Bubba Smith</button>
+                    <button class="normal-button" onclick="openLinkExternally('https://codepen.io/bsmith/pen/drElg?q=digital%20clock&order=popularity&depth=everything&show_forks=false')">CodePen by Bubba Smith</button>
                 </li>
                 <li>The Windows 10 like checkboxes are based on this
-                    <button onclick="openLinkExternally('https://codepen.io/ChrisAwesome/pen/yNdMEP?q=windows%2010&order=popularity&depth=everything&show_forks=false')">CodePen by Chris</button>
+                    <button class="normal-button" onclick="openLinkExternally('https://codepen.io/ChrisAwesome/pen/yNdMEP?q=windows%2010&order=popularity&depth=everything&show_forks=false')">CodePen by Chris</button>
                 </li>
                 <li>The Spotify logo
-                    <button onclick="openLinkExternally('https://commons.wikimedia.org/wiki/File:Spotify_logo_with_text.svg')">Wikimedia</button>
+                    <button class="normal-button" onclick="openLinkExternally('https://commons.wikimedia.org/wiki/File:Spotify_logo_with_text.svg')">Wikimedia</button>
                 </li>
                 <li>The Settings icon
-                    <button onclick="openLinkExternally('https://icons8.com/icon/5590/settings')">icons8.com</button>
+                    <button class="normal-button" onclick="openLinkExternally('https://icons8.com/icon/5590/settings')">icons8.com</button>
                 </li>
             </ul>
 
-            <button class="big-button" onclick="openLinkExternally('https://github.com/undefinedCoding/little-shutdown-program/issues')">Report a bug or issue another problem</button>
+            <button class="normal-button big-button" onclick="openLinkExternally('https://github.com/undefinedCoding/little-shutdown-program/issues')">Report a bug or issue another problem</button>
 
-            <button class="big-button" onclick="openLinkExternally('https://github.com/undefinedCoding/little-shutdown-program')">View source code on GitHub</button>
+            <button class="normal-button big-button" onclick="openLinkExternally('https://github.com/undefinedCoding/little-shutdown-program')">View source code on GitHub</button>
 
         </div>
 
     </div>
 
-    <div id="main-container">
+    <div id="main-container" class="screen blue">
+        <div class="container">
 
-        <!-- Überwache inputs, das nur Zahlen eingegeben werden -->
-        <div id="time-inputs" class="time-input">
-            <input id="timer_d" placeholder="DD" type="number" min="0" max="99">
-            <input id="timer_h" placeholder="HH" type="number" min="0" max="99">
-            <input id="timer_m" placeholder="MM" type="number" min="0" max="99">
-            <input id="timer_s" placeholder="SS" type="number" min="0" max="99">
-        </div>
+            <div id="time-inputs" class="time-input">
+                <input id="timer_d" placeholder="DD" type="number" min="0" max="99">
+                <input id="timer_h" placeholder="HH" type="number" min="0" max="99">
+                <input id="timer_m" placeholder="MM" type="number" min="0" max="99">
+                <input id="timer_s" placeholder="SS" type="number" min="0" max="99">
+            </div>
 
-        <div id="timer-buttons">
-            <input id="button_pause_resume" type="button" value="Pause"></input>
-            <input id="button_start_stop" type="button" value="Start"></input>
-            <input id="button_clear" type="button" value="Clear"></input>
-        </div>
+            <div id="timer-buttons">
+                <input id="button_pause_resume" class="normal-button" type="button" value="Pause"></input>
+                <input id="button_start_stop" class="normal-button" type="button" value="Start"></input>
+                <input id="button_clear" class="normal-button" type="button" value="Clear"></input>
+            </div>
 
-        <div id="clock" class="light">
-            <div id="display">
-                <div id="digits">
-                    <div class="zero">
-                        <span class="d1"></span>
-                        <span class="d2"></span>
-                        <span class="d3"></span>
-                        <span class="d4"></span>
-                        <span class="d5"></span>
-                        <span class="d6"></span>
-                        <span class="d7"></span>
-                    </div>
-                    <div class="zero">
-                        <span class="d1"></span>
-                        <span class="d2"></span>
-                        <span class="d3"></span>
-                        <span class="d4"></span>
-                        <span class="d5"></span>
-                        <span class="d6"></span>
-                        <span class="d7"></span>
-                    </div>
-                    <div class="dots"></div>
-                    <div class="zero">
-                        <span class="d1"></span>
-                        <span class="d2"></span>
-                        <span class="d3"></span>
-                        <span class="d4"></span>
-                        <span class="d5"></span>
-                        <span class="d6"></span>
-                        <span class="d7"></span>
-                    </div>
-                    <div class="zero">
-                        <span class="d1"></span>
-                        <span class="d2"></span>
-                        <span class="d3"></span>
-                        <span class="d4"></span>
-                        <span class="d5"></span>
-                        <span class="d6"></span>
-                        <span class="d7"></span>
-                    </div>
-                    <div class="dots"></div>
-                    <div class="zero">
-                        <span class="d1"></span>
-                        <span class="d2"></span>
-                        <span class="d3"></span>
-                        <span class="d4"></span>
-                        <span class="d5"></span>
-                        <span class="d6"></span>
-                        <span class="d7"></span>
-                    </div>
-                    <div class="zero">
-                        <span class="d1"></span>
-                        <span class="d2"></span>
-                        <span class="d3"></span>
-                        <span class="d4"></span>
-                        <span class="d5"></span>
-                        <span class="d6"></span>
-                        <span class="d7"></span>
-                    </div>
-                    <div class="dots"></div>
-                    <div class="zero">
-                        <span class="d1"></span>
-                        <span class="d2"></span>
-                        <span class="d3"></span>
-                        <span class="d4"></span>
-                        <span class="d5"></span>
-                        <span class="d6"></span>
-                        <span class="d7"></span>
-                    </div>
-                    <div class="zero">
-                        <span class="d1"></span>
-                        <span class="d2"></span>
-                        <span class="d3"></span>
-                        <span class="d4"></span>
-                        <span class="d5"></span>
-                        <span class="d6"></span>
-                        <span class="d7"></span>
+            <div id="clock">
+                <div id="display">
+                    <div id="digits">
+                        <div class="zero">
+                            <span class="d1"></span>
+                            <span class="d2"></span>
+                            <span class="d3"></span>
+                            <span class="d4"></span>
+                            <span class="d5"></span>
+                            <span class="d6"></span>
+                            <span class="d7"></span>
+                        </div>
+                        <div class="zero">
+                            <span class="d1"></span>
+                            <span class="d2"></span>
+                            <span class="d3"></span>
+                            <span class="d4"></span>
+                            <span class="d5"></span>
+                            <span class="d6"></span>
+                            <span class="d7"></span>
+                        </div>
+                        <div class="dots"></div>
+                        <div class="zero">
+                            <span class="d1"></span>
+                            <span class="d2"></span>
+                            <span class="d3"></span>
+                            <span class="d4"></span>
+                            <span class="d5"></span>
+                            <span class="d6"></span>
+                            <span class="d7"></span>
+                        </div>
+                        <div class="zero">
+                            <span class="d1"></span>
+                            <span class="d2"></span>
+                            <span class="d3"></span>
+                            <span class="d4"></span>
+                            <span class="d5"></span>
+                            <span class="d6"></span>
+                            <span class="d7"></span>
+                        </div>
+                        <div class="dots"></div>
+                        <div class="zero">
+                            <span class="d1"></span>
+                            <span class="d2"></span>
+                            <span class="d3"></span>
+                            <span class="d4"></span>
+                            <span class="d5"></span>
+                            <span class="d6"></span>
+                            <span class="d7"></span>
+                        </div>
+                        <div class="zero">
+                            <span class="d1"></span>
+                            <span class="d2"></span>
+                            <span class="d3"></span>
+                            <span class="d4"></span>
+                            <span class="d5"></span>
+                            <span class="d6"></span>
+                            <span class="d7"></span>
+                        </div>
+                        <div class="dots"></div>
+                        <div class="zero">
+                            <span class="d1"></span>
+                            <span class="d2"></span>
+                            <span class="d3"></span>
+                            <span class="d4"></span>
+                            <span class="d5"></span>
+                            <span class="d6"></span>
+                            <span class="d7"></span>
+                        </div>
+                        <div class="zero">
+                            <span class="d1"></span>
+                            <span class="d2"></span>
+                            <span class="d3"></span>
+                            <span class="d4"></span>
+                            <span class="d5"></span>
+                            <span class="d6"></span>
+                            <span class="d7"></span>
+                        </div>
                     </div>
                 </div>
             </div>
+
+
+            <div id="spotify-indicator">
+                <img id="spotify-logo" src="data/spotify_logo_by_wikimedia_disabled.svg" alt="Spotify connected indicator">
+            </div>
+
         </div>
+    </div>
 
-        <div id="spotify-indicator">
-            <img id="spotify-logo" src="data/spotify_logo_by_wikimedia_disabled.svg" alt="Spotify connected indicator">
-        </div>
+    <script src="index.js"></script>
 
-        <script src="index.js"></script>
-
-        <!-- New layout for buttons and time (with custom css) -->
-        <!-- Spotify support indicator that lights up if yes, is dark if no - but on hover clickable to retry or shines because it's scanning -->
+    <!-- New layout for buttons and time (with custom css) -->
+    <!-- Spotify support indicator that lights up if yes, is dark if no - but on hover clickable to retry or shines because it's scanning -->
 
 </body>
 

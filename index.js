@@ -5,16 +5,16 @@ const {
 const {
   SpotifyHandler
 } = require('./js/spotifyHandler')
-const shutdown = require('electron-shutdown-command')
+const {
+  ipcRenderer,
+  remote,
+  shell
+} = require('electron')
 const dialogs = require('dialogs')()
+const Hammer = require('hammerjs')
 const notifier = require('node-notifier')
 const path = require('path')
-const {
-  shell,
-  ipcRenderer,
-  remote
-} = require('electron')
-const Hammer = require('hammerjs')
+const shutdown = require('electron-shutdown-command')
 
 /*
  * Global objects
@@ -82,8 +82,8 @@ function slideAnimation (currentElement, elementToShow, directionRight = true) {
   // do not allow another animation
   animationPause = true
   // show both elements
-  currentElement.style.display = 'block'
-  elementToShow.style.display = 'block'
+  currentElement.classList.remove('hide')
+  elementToShow.classList.remove('hide')
   // move them to their correct place
   currentElement.style.transition = ''
   elementToShow.style.transition = ''
@@ -102,8 +102,8 @@ function slideAnimation (currentElement, elementToShow, directionRight = true) {
 
   // after this hide the current element and show the new element if the user clicks often on the button
   setTimeout(() => {
-    currentElement.style.display = 'none'
-    elementToShow.style.display = 'block'
+    currentElement.classList.add('hide')
+    currentElement.classList.remove('hide')
     currentElement.style.transition = ''
     elementToShow.style.transition = ''
     currentElement.style.transform = `translateX(${directionRight ? '-' : '+'}100vw)`
@@ -205,8 +205,8 @@ checkboxNativeTitleBar.checked = ipcRenderer.sendSync(
 checkboxNewVersionUpdate.checked = ipcRenderer.sendSync('get-settings', 'checkForNewVersionOnStartup')
 
 // move the containers to their correct place
-aboutContainer.style.display = 'none'
-settingsContainer.style.display = 'none'
+aboutContainer.classList.add('hide')
+settingsContainer.classList.add('hide')
 aboutContainer.style.transform = 'translateX(-100vw)'
 settingsContainer.style.transform = 'translateX(+100vw)'
 
@@ -230,7 +230,7 @@ timerInputDays.value = timeInputLastTime.d
 timerInputHours.value = timeInputLastTime.h
 timerInputMinutes.value = timeInputLastTime.m
 timerInputSeconds.value = timeInputLastTime.s
-setTime((timeInputLastTime.d === '') ? 0 : timeInputLastTime.d, (timeInputLastTime.h === '') ? 0 : timeInputLastTime.h, (timeInputLastTime.m === '') ? 0 : timeInputLastTime.m, (timeInputLastTime.s === '') ? 0 : timeInputLastTime.s)
+setTime(timeInputLastTime.d, timeInputLastTime.h, timeInputLastTime.m, timeInputLastTime.s)
 
 // set new version button if one was found
 ipcRenderer.on('newVersionDetected', (event, arg) => {
@@ -286,12 +286,10 @@ new Hammer(document.body).on('panright', () => {
 
 if (nativeTitleBar) {
   ipcRenderer.on('toggleSettings', toggleSettings).on('toggleAbout', toggleAbout)
-  titlebar.style.display = 'none'
-  mainContainer.style.top = '0px'
-  aboutContainer.style.top = '0px'
-  aboutContainer.style.maxHeight = 'calc(100vh - 25px)'
-  settingsContainer.style.marginTop = '25px'
 } else {
+  mainContainer.classList.add('titlebar-active')
+  aboutContainer.classList.add('titlebar-active')
+  settingsContainer.classList.add('titlebar-active')
   // titlebar event listeners
   titlebarSettings.addEventListener('click', toggleSettings)
   titlebarHelp.addEventListener('click', toggleAbout)
@@ -415,12 +413,10 @@ spotifySVG.addEventListener('click', () => {
 function startstopTimer () {
   if (!shutdownTimer.isStopped) shutdownTimer.stop()
   else {
-    const seconds =
-      timerInputDays.value * 24 * 60 * 60 +
+    shutdownTimer.start((timerInputDays.value * 24 * 60 * 60 +
       timerInputHours.value * 60 * 60 +
       timerInputMinutes.value * 60 +
-      timerInputSeconds.value
-    shutdownTimer.start(seconds * 1000)
+      timerInputSeconds.value) * 1000)
   }
 }
 
@@ -430,10 +426,7 @@ timerButtonPauseResume.addEventListener('click', () => {
   if (shutdownTimer.isPaused) shutdownTimer.resume()
   else shutdownTimer.pause()
 })
-timerButtonStartStop.addEventListener('click', () => {
-  // start timer or stop if running
-  startstopTimer()
-})
+timerButtonStartStop.addEventListener('click', startstopTimer)
 timerButtonClear.addEventListener('click', () => {
   shutdownTimer.reset()
 })
@@ -467,6 +460,10 @@ timerInputDays.addEventListener('keyup', saveInput)
 timerInputHours.addEventListener('keyup', saveInput)
 timerInputMinutes.addEventListener('keyup', saveInput)
 timerInputSeconds.addEventListener('keyup', saveInput)
+timerInputDays.addEventListener('keydown', saveInput)
+timerInputHours.addEventListener('keydown', saveInput)
+timerInputMinutes.addEventListener('keydown', saveInput)
+timerInputSeconds.addEventListener('keydown', saveInput)
 
 // set time on display
 /**
@@ -706,6 +703,20 @@ document.addEventListener('keyup', e => {
       break
     case 82: // r - ickroll
       spotifyHandler.rickroll()
+      break
+    case 37: // <-
+      if (settingsContainer.style.transform === '') {
+        slideAnimation(settingsContainer, mainContainer, false)
+      } else if (mainContainer.style.transform === '') {
+        slideAnimation(mainContainer, aboutContainer, false)
+      }
+      break
+    case 39: // ->
+      if (aboutContainer.style.transform === '') {
+        slideAnimation(aboutContainer, mainContainer, true)
+      } else if (mainContainer.style.transform === '') {
+        slideAnimation(mainContainer, settingsContainer, true)
+      }
       break
     case 122: // F11 - Fullscreen
       remote
