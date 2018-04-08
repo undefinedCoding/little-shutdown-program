@@ -339,7 +339,7 @@ checkboxSpotify.addEventListener('click', () => {
   } else {
     // else disconnect and then change the picture
     spotifyHandler.disconnect()
-    spotifySVG.classList.add('disabled')
+    spotifySVG.classList.add('disabled', 'blink')
   }
 })
 checkboxTray.addEventListener('click', () => {
@@ -391,26 +391,31 @@ checkboxNewVersionUpdate.addEventListener('click', () => {
 
 // onclick listener for the spotify picture
 spotifySVG.addEventListener('click', () => {
-  if (!ipcRenderer.sendSync('get-settings', 'spotify')) {
-    dialogs.confirm(
-      'Spoitfy support is deactivated - do you want to enable the support for Spotify again?',
-      okWasPressed => {
-        if (okWasPressed) {
-          checkboxSpotify.checked = true
-          console.log('ipcRenderer "set-settings"', {
-            name: 'spotify',
-            value: true
-          })
-        }
-      }
-    )
+  if (ipcRenderer.sendSync('get-settings', 'spotify')) {
+    spotifyHandler.connect()
+    spotifyWebHelperStarted = window.performance.now()
+    // disable active spotify picture
+    spotifySVG.classList.add('disabled', 'blink')
+    return
   }
 
-  // try to (re-)connect
-  spotifyHandler.connect()
-  spotifyWebHelperStarted = window.performance.now()
-  // disable active spotify picture
-  spotifySVG.classList.add('disabled')
+  dialogs.confirm(
+    'Spoitfy support is deactivated - do you want to enable the support for Spotify again?',
+    okWasPressed => {
+      if (okWasPressed) {
+        checkboxSpotify.checked = true
+        ipcRenderer.send('set-settings', {
+          name: 'spotify',
+          value: true
+        })
+        // try to (re-)connect
+        spotifyHandler.connect()
+        spotifyWebHelperStarted = window.performance.now()
+        // disable active spotify picture
+        spotifySVG.classList.add('disabled', 'blink')
+      }
+    }
+  )
 })
 
 /**
@@ -458,18 +463,10 @@ function saveInput () {
     setToReadableTime(currentTime.d, currentTime.h, currentTime.m, currentTime.s)
   }
 }
-timerInputDays.addEventListener('change', saveInput)
-timerInputHours.addEventListener('change', saveInput)
-timerInputMinutes.addEventListener('change', saveInput)
-timerInputSeconds.addEventListener('change', saveInput)
-timerInputDays.addEventListener('click', saveInput)
-timerInputHours.addEventListener('click', saveInput)
-timerInputMinutes.addEventListener('click', saveInput)
-timerInputSeconds.addEventListener('click', saveInput)
-timerInputDays.addEventListener('keyup', saveInput)
-timerInputHours.addEventListener('keyup', saveInput)
-timerInputMinutes.addEventListener('keyup', saveInput)
-timerInputSeconds.addEventListener('keyup', saveInput)
+timerInputDays.addEventListener('input', saveInput)
+timerInputHours.addEventListener('input', saveInput)
+timerInputMinutes.addEventListener('input', saveInput)
+timerInputSeconds.addEventListener('input', saveInput)
 
 function setToReadableTime (days, hours, minutes, seconds) {
   days = (days === '') ? 0 : Number(days)
@@ -540,8 +537,10 @@ shutdownTimer
     // pause music if wanted
     if (ipcRenderer.sendSync('get-settings', 'spotify')) {
       spotifyHandler.pauseMusic()
+      console.log('alarm callback, pause spotify')
+    } else {
+      console.log('WAIT A MINUTE - alarm callback, pause spotify')
     }
-
     // shutdown the computer if wanted
     if (ipcRenderer.sendSync('get-settings', 'shutdown')) {
       // start timeout (20s) for forcefully shutting down the computer
@@ -767,73 +766,18 @@ remote
 spotifyHandler
   .on('error', () => {
     console.log('Connection to Spotify could not be established or was killed')
+    spotifySVG.classList.remove('blink')
   })
   .on('ready', status => {
     // log successful spotify connection
     const currentlyPlayingString = `Have fun listening to "${status.track.track_resource.name}" by "${status.track.artist_resource.name}" from "${status.track.album_resource.name}" after ${millisecondsToStr(window.performance.now() - spotifyWebHelperStarted)}`
     console.log(currentlyPlayingString)
     // change spotify logo to a white on
-    spotifySVG.classList.remove('disabled')
+    spotifySVG.classList.remove('disabled', 'blink')
   })
 
 const html = document.getElementsByTagName('html')[0]
-var style = window.getComputedStyle(document.body)
-console.log(style.getPropertyValue('--main-color'))
-
-const backgroundColor = document.getElementById('colorPicker-backgroundColor')
-const backgroundColorS = document.getElementById('colorSelector-backgroundColor')
-const backgroundColorPreview = document.getElementById('preview-backgroundColor')
-backgroundColor.addEventListener('change', () => {
-  html.style.setProperty('--main-color', backgroundColor.value)
-  backgroundColorPreview.style.backgroundColor = backgroundColor.value
-  ipcRenderer.send('set-settings', {name: 'mainColor', value: backgroundColor.value})
-})
-backgroundColorS.addEventListener('click', () => {
-  pickColor(selectedColor => {
-    html.style.setProperty('--main-color', selectedColor)
-    backgroundColorPreview.style.backgroundColor = selectedColor
-    ipcRenderer.send('set-settings', {name: 'mainColor', value: selectedColor})
-  })
-})
-html.style.setProperty('--main-color', ipcRenderer.sendSync('get-settings', 'mainColor'))
-backgroundColor.value = style.getPropertyValue('--main-color')
-backgroundColorPreview.style.backgroundColor = style.getPropertyValue('--main-color')
-const textColor = document.getElementById('colorPicker-textColor')
-const textColorS = document.getElementById('colorSelector-textColor')
-const textColorPreview = document.getElementById('preview-textColor')
-textColor.addEventListener('change', () => {
-  html.style.setProperty('--main-color-text', textColor.value)
-  textColorPreview.style.backgroundColor = textColor.value
-  ipcRenderer.send('set-settings', {name: 'mainColorText', value: textColor.value})
-})
-textColorS.addEventListener('click', () => {
-  pickColor(selectedColor => {
-    html.style.setProperty('--main-color-text', selectedColor)
-    textColorPreview.style.backgroundColor = selectedColor
-    ipcRenderer.send('set-settings', {name: 'mainColorText', value: selectedColor})
-  })
-})
-html.style.setProperty('--main-color-text', ipcRenderer.sendSync('get-settings', 'mainColorText'))
-textColor.value = style.getPropertyValue('--titlebar-color-text-icon')
-textColorPreview.style.backgroundColor = style.getPropertyValue('--main-color-text')
-const titleBarColor = document.getElementById('colorPicker-titleBarColor')
-const titleBarColorS = document.getElementById('colorSelector-titleBarColor')
-const titleBarPreview = document.getElementById('preview-titleBarColor')
-titleBarColor.addEventListener('change', (e) => {
-  html.style.setProperty('--titlebar-color-text-icon', titleBarColor.value)
-  titleBarPreview.style.backgroundColor = titleBarColor.value
-  ipcRenderer.send('set-settings', {name: 'titlebarColorTextIcon', value: titleBarColor.value})
-})
-titleBarColorS.addEventListener('click', () => {
-  pickColor(selectedColor => {
-    html.style.setProperty('--titlebar-color-text-icon', selectedColor)
-    titleBarPreview.style.backgroundColor = selectedColor
-    ipcRenderer.send('set-settings', {name: 'titlebarColorTextIcon', value: selectedColor})
-  })
-})
-html.style.setProperty('--titlebar-color-text-icon', ipcRenderer.sendSync('get-settings', 'titlebarColorTextIcon'))
-titleBarColor.value = style.getPropertyValue('--titlebar-color-text-icon')
-titleBarPreview.style.backgroundColor = style.getPropertyValue('--titlebar-color-text-icon')
+const style = window.getComputedStyle(document.body)
 
 function pickColor (callback) {
   getColorHexRGB().then(value => {
@@ -843,13 +787,55 @@ function pickColor (callback) {
   })
 }
 
+function addColorSetting (htmlIdWithoutPrefix, settingId, cssVariableName) {
+  const colorPickerInput = document.getElementById('colorPicker-' + htmlIdWithoutPrefix)
+  const colorSelectorInput = document.getElementById('colorSelector-' + htmlIdWithoutPrefix)
+  const colorPreview = document.getElementById('preview-' + htmlIdWithoutPrefix)
+  colorPickerInput.addEventListener('input', () => {
+    setColorSetting(cssVariableName, colorPickerInput.value, settingId, colorPreview)
+  })
+  colorSelectorInput.addEventListener('click', () => {
+    pickColor(selectedColor => {
+      setColorSetting(cssVariableName, selectedColor, settingId, colorPreview)
+    })
+  })
+  updateColorSetting(htmlIdWithoutPrefix, settingId, cssVariableName)
+}
+
+function setColorSetting (cssVariableName, newColor, settingId, colorPreviewElement) {
+  html.style.setProperty('--' + cssVariableName, newColor)
+  colorPreviewElement.style.backgroundColor = newColor
+  ipcRenderer.send('set-settings', {name: settingId, value: newColor})
+}
+
+function updateColorSetting (htmlIdWithoutPrefix, settingId, cssVariableName) {
+  html.style.setProperty('--' + cssVariableName, ipcRenderer.sendSync('get-settings', settingId))
+  const colorPickerInput = document.getElementById('colorPicker-' + htmlIdWithoutPrefix)
+  const colorPreview = document.getElementById('preview-' + htmlIdWithoutPrefix)
+  colorPickerInput.value = style.getPropertyValue('--' + cssVariableName)
+  colorPreview.style.backgroundColor = style.getPropertyValue('--' + cssVariableName)
+}
+
+const colorSettings = [
+  {htmlId: 'backgroundColor', settingsId: 'mainColor', cssId: 'main-color'},
+  {htmlId: 'textColor', settingsId: 'mainColorText', cssId: 'main-color-text'},
+  {htmlId: 'titleBarColor', settingsId: 'titlebarColorTextIcon', cssId: 'titlebar-color-text-icon'}
+]
+
+for (const colorSetting of colorSettings) {
+  addColorSetting(colorSetting.htmlId, colorSetting.settingsId, colorSetting.cssId)
+}
+
 const restoreDefaultSettingsButton = document.getElementById('restoreDefaults')
 restoreDefaultSettingsButton.addEventListener('click', () => {
   ipcRenderer.send('reset-settings')
   // ipcRenderer.sendSync('get-settings-all', true)
   // reset colors
+  for (const colorSetting of colorSettings) {
+    updateColorSetting(colorSetting.htmlId, colorSetting.settingsId, colorSetting.cssId)
+  }
   // reset checkboxes
   // reset time input
   // because of this here is a quick fix for all of the solutions:
-  ipcRenderer.send('relaunch')
+  // ipcRenderer.send('relaunch')
 })
