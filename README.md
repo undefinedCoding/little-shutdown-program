@@ -27,14 +27,14 @@ Also there is the option to minimze the window to the system tray or dis-/enable
 
 ## Installation
 
-Just go to the [GitHub Release Site](https://github.com/undefinedCoding/little-shutdown-program/releases) from this Project and download the latest release.
+Just go to the [GitHub Release Site](https://github.com/undefinedCoding/little-shutdown-program/releases) from this project and download the latest release.
 
 Then double-click the File `little-shutdown-program Setup 0.0.9.exe`.
-After a short Time the program is installed and you can start it like any other program on your (Windows) computer.
+Follow the instructions of the installer to install the program. Then you can start it like any other program on your (Windows) computer.
 
 ## Authors
 
-- AnonymerNiklasistanonym [GitHub](https://github.com/AnonymerNiklasistanonym)
+- [AnonymerNiklasistanonym](https://github.com/AnonymerNiklasistanonym)
 - [undefinedCoding](https://github.com/undefinedCoding)
 
 ## Inspirations/Sources
@@ -44,7 +44,6 @@ After a short Time the program is installed and you can start it like any other 
 - The actual clock design: [CodePen by Bubba Smith](https://codepen.io/bsmith/pen/drElg?q=digital%20clock&order=popularity&depth=everything&show_forks=false)
 - The Windows 10 like checkboxes are based on: [CodePen by Chris Awesome](https://codepen.io/ChrisAwesome/pen/yNdMEP?q=windows%2010&order=popularity&depth=everything&show_forks=false)
 - The Spotify Logo is from [Wikimedia](https://commons.wikimedia.org/wiki/File:Spotify_logo_with_text.svg)
-- The settings icon is from [icons8.com](https://icons8.com/icon/5590/settings)
 - The used dependcies can be found in the [package.json](package.json) file
 
 ## Start/Run/Edit/Build it yourself
@@ -87,7 +86,7 @@ If you edit code, please check that your code style is [JavaScript standard](htt
 eslint FILE --fix
 ```
 
-T use this command you need to install the eslint module with the command:
+To use this command you need to install the `eslint` module with the command:
 
 ```bash
 npm install eslint -g
