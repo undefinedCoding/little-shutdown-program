@@ -48,6 +48,9 @@ ipcMain
   .on('get-settings', (event, arg) => {
     event.returnValue = settings.get(arg)
   })
+  .on('reset-settings', () => {
+    settings.reset()
+  })
   .on('set-settings', (event, arg) => {
     settings.set(arg.name, arg.value)
   })

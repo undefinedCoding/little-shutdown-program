@@ -842,3 +842,14 @@ function pickColor (callback) {
     console.error(err)
   })
 }
+
+const restoreDefaultSettingsButton = document.getElementById('restoreDefaults')
+restoreDefaultSettingsButton.addEventListener('click', () => {
+  ipcRenderer.send('reset-settings')
+  // ipcRenderer.sendSync('get-settings-all', true)
+  // reset colors
+  // reset checkboxes
+  // reset time input
+  // because of this here is a quick fix for all of the solutions:
+  ipcRenderer.send('relaunch')
+})

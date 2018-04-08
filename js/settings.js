@@ -53,6 +53,21 @@ class Settings {
   }
 
   /**
+   * Get the whole settings object
+   * @param {Boolean} defaults - specify if custom data is wanted or the defaults
+   */
+  getAll (defaults = false) {
+    return defaults ? this.defaults : this.data
+  }
+
+  /**
+   * Reset the custom data and replace it with the default values
+   */
+  reset () {
+    this.data = this.defaults
+  }
+
+  /**
    * Get default settings value
    * @param {string} name - name of the desired key/setting
    * @returns {*} either the found default value or if not found undefined
