@@ -37,7 +37,10 @@ settings.setup('user-preferences', {
   tag: 'v' + app.getVersion(),
   timeInput: { d: '', h: '', m: '', s: '' },
   tray: false,
-  windowBounds: { width: 600, height: 600, x: 0, y: 0 }
+  windowBounds: { width: 600, height: 600, x: 0, y: 0 },
+  mainColorText: 'white',
+  mainColor: '#c9329e',
+  titlebarColorTextIcon: 'white'
 })
 
 // interprocess communication listeners
@@ -247,6 +250,7 @@ function saveSettings () {
 app
   .on('ready', createWindow)
   .on('window-all-closed', () => {
+    // quit app if all windows are closed
     // macOS: Applications keep their menu bar until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') app.quit()
   }).on('activate', () => {

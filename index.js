@@ -15,6 +15,7 @@ const Hammer = require('hammerjs')
 const notifier = require('node-notifier')
 const path = require('path')
 const shutdown = require('electron-shutdown-command')
+const { getColorHexRGB } = require('electron-color-picker')
 
 /*
  * Global objects
@@ -774,3 +775,70 @@ spotifyHandler
     // change spotify logo to a white on
     spotifySVG.classList.remove('disabled')
   })
+
+const html = document.getElementsByTagName('html')[0]
+var style = window.getComputedStyle(document.body)
+console.log(style.getPropertyValue('--main-color'))
+
+const backgroundColor = document.getElementById('colorPicker-backgroundColor')
+const backgroundColorS = document.getElementById('colorSelector-backgroundColor')
+const backgroundColorPreview = document.getElementById('preview-backgroundColor')
+backgroundColor.addEventListener('change', () => {
+  html.style.setProperty('--main-color', backgroundColor.value)
+  backgroundColorPreview.style.backgroundColor = backgroundColor.value
+  ipcRenderer.send('set-settings', {name: 'mainColor', value: backgroundColor.value})
+})
+backgroundColorS.addEventListener('click', () => {
+  pickColor(selectedColor => {
+    html.style.setProperty('--main-color', selectedColor)
+    backgroundColorPreview.style.backgroundColor = selectedColor
+    ipcRenderer.send('set-settings', {name: 'mainColor', value: selectedColor})
+  })
+})
+html.style.setProperty('--main-color', ipcRenderer.sendSync('get-settings', 'mainColor'))
+backgroundColor.value = style.getPropertyValue('--main-color')
+backgroundColorPreview.style.backgroundColor = style.getPropertyValue('--main-color')
+const textColor = document.getElementById('colorPicker-textColor')
+const textColorS = document.getElementById('colorSelector-textColor')
+const textColorPreview = document.getElementById('preview-textColor')
+textColor.addEventListener('change', () => {
+  html.style.setProperty('--main-color-text', textColor.value)
+  textColorPreview.style.backgroundColor = textColor.value
+  ipcRenderer.send('set-settings', {name: 'mainColorText', value: textColor.value})
+})
+textColorS.addEventListener('click', () => {
+  pickColor(selectedColor => {
+    html.style.setProperty('--main-color-text', selectedColor)
+    textColorPreview.style.backgroundColor = selectedColor
+    ipcRenderer.send('set-settings', {name: 'mainColorText', value: selectedColor})
+  })
+})
+html.style.setProperty('--main-color-text', ipcRenderer.sendSync('get-settings', 'mainColorText'))
+textColor.value = style.getPropertyValue('--titlebar-color-text-icon')
+textColorPreview.style.backgroundColor = style.getPropertyValue('--main-color-text')
+const titleBarColor = document.getElementById('colorPicker-titleBarColor')
+const titleBarColorS = document.getElementById('colorSelector-titleBarColor')
+const titleBarPreview = document.getElementById('preview-titleBarColor')
+titleBarColor.addEventListener('change', (e) => {
+  html.style.setProperty('--titlebar-color-text-icon', titleBarColor.value)
+  titleBarPreview.style.backgroundColor = titleBarColor.value
+  ipcRenderer.send('set-settings', {name: 'titlebarColorTextIcon', value: titleBarColor.value})
+})
+titleBarColorS.addEventListener('click', () => {
+  pickColor(selectedColor => {
+    html.style.setProperty('--titlebar-color-text-icon', selectedColor)
+    titleBarPreview.style.backgroundColor = selectedColor
+    ipcRenderer.send('set-settings', {name: 'titlebarColorTextIcon', value: selectedColor})
+  })
+})
+html.style.setProperty('--titlebar-color-text-icon', ipcRenderer.sendSync('get-settings', 'titlebarColorTextIcon'))
+titleBarColor.value = style.getPropertyValue('--titlebar-color-text-icon')
+titleBarPreview.style.backgroundColor = style.getPropertyValue('--titlebar-color-text-icon')
+
+function pickColor (callback) {
+  getColorHexRGB().then(value => {
+    callback(value)
+  }).catch(err => {
+    console.error(err)
+  })
+}

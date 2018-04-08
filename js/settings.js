@@ -53,6 +53,15 @@ class Settings {
   }
 
   /**
+   * Get default settings value
+   * @param {string} name - name of the desired key/setting
+   * @returns {*} either the found default value or if not found undefined
+   */
+  getDefault (name) {
+    return this.defaults[name]
+  }
+
+  /**
    * Set a new settings value (or overwrite an old one)
    * @param {string} name - name of the new key/setting
    * @param {*} value - value of the new key/setting
