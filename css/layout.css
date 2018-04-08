@@ -1,13 +1,20 @@
 :root {
-    --main-bg-color: #c9329e;
-    --main-text-color: white;
-    --settings-on-color: #00AC64;
-    --settings-off-color: white;
-    --settings-click-color: #808B8D;
+    --main-color-shadow: rgba(0, 0, 0, 0.14);
+    --main-color-text: white;
+    --main-color: #c9329e;
     --main-font-family: Open sans, sans-serif;
+    --settings-color-click: #808B8D;
+    --settings-color-off: white;
+    --settings-color-on: #00AC64;
+    --titlebar-color-text-icon: white;
+    --titlebar-color-action-hover: rgba(0, 0, 0, 0.1);
+    --titlebar-color-action-hover-close: rgba(232, 17, 35, 0.9);
+    --titlebar-font-family: Segoe UI;
+    --titlebar-font-size: 14px;
     --titlebar-height: 32px;
-    --titlebar-shadow: rgba(0, 0, 0, 0.14);
-    --titlebar-text-color: white;
+    --titlebar-width-height-action-icon: 10px;
+    --titlebar-width-resize-area: 3px;
+    --titlebar-width-action: 45px;
 }
 
 body {
@@ -22,9 +29,11 @@ body {
     /* Set the mouse cursor to default everywhere */
     cursor: default;
     /* Font color */
-    color: var(--main-text-color);
+    color: var(--main-color-text);
     /* Specify a Windows 10 like font */
     font-family: var(--main-font-family);
+    /* background color */
+    background-color: var(--main-color);
 }
 
 button {
@@ -38,7 +47,7 @@ button {
     overflow-y: auto;
     /* Create automatically scroll bars if necessary */
     position: absolute;
-    width: 100vw;
+    width: 100%;
     /* Clean */
     margin: 0;
     top: 0;
@@ -47,7 +56,7 @@ button {
 
 .titlebar-active {
     top: var(--titlebar-height);
-    height: calc(100vh - var(--titlebar-height));
+    height: calc(100% - var(--titlebar-height));
 }
 
 .hide {
@@ -100,7 +109,7 @@ button {
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: var(--titlebar-shadow);
+    background-color: var(--main-color-shadow);
 }
 
 .extra-new-version {
@@ -175,12 +184,12 @@ button {
     float: left;
     border: 0.18rem solid;
     border-radius: 0.65rem;
-    border-color: var(--settings-off-color);
+    border-color: var(--settings-color-off);
 }
 
 .settings-entry input[type="checkbox"]:checked+label:before {
-    border-color: var(--settings-on-color);
-    background: var(--settings-on-color);
+    border-color: var(--settings-color-on);
+    background: var(--settings-color-on);
     text-align: right;
 }
 
@@ -202,10 +211,14 @@ button {
 
 .settings-entry input[type="checkbox"]+label:active:before,
 .settings-entry input[type="checkbox"]:checked+label:active:before {
-    border-color: var(--settings-click-color);
-    background: var(--settings-click-color);
+    border-color: var(--settings-color-click);
+    background: var(--settings-color-click);
     text-align: left;
 }
+
+/*=============================================
+=                 Main screen                 =
+=============================================*/
 
 #timer-buttons input,
 #spotify-logo {
@@ -273,24 +286,6 @@ button {
     border: 1px white solid;
 }
 
-#spotify-logo {
-    width: 150px;
-    padding: 20px;
-    border-radius: 10px;
-    grid-area: spotify-logo;
-    transition: background-color 0.1s;
-}
-
-#spotify-logo:hover,
-#spotify-logo:focus {
-    background-color: rgba(250, 250, 250, 0.6);
-}
-
-#spotify-indicator {
-    display: grid;
-    grid-template-areas: "1fr spotify-logo";
-}
-
 #button_pause_resume {
     grid-area: button-pause-resume;
 }
@@ -319,144 +314,148 @@ button {
     grid-area: input-seconds;
 }
 
-#titlebar-windows-10 {
-    height: var(--titlebar-height);
-    padding: 0;
-    background-color: var(--titlebar-shadow);
-    ;
-    -webkit-app-region: drag;
-    cursor: default;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 999;
+/*----------  Spotify indicator/logo  ----------*/
+
+#spotify-indicator {
+    /* Use grid to center another div in this area (the logo) */
+    display: grid;
+    /* Defined the content of the grid */
+    grid-template-areas: "1fr spotify-logo";
 }
 
-/* TITLEBAR */
+#spotify-logo {
+    width: 200px;
+    padding: 25px;
+    border-radius: 10px;
+    /* Name it for the gird */
+    grid-area: spotify-logo;
+    /* Transition the background color beacuse it looks better */
+    transition: background-color 0.1s ease-in-out;
+    /* Show on this object the pointer cursor to signal something can be clicked */
+    cursor: pointer;
+    fill: white;
+}
+
+#spotify-logo.disabled {
+    fill: var(--main-color-shadow);
+}
+
+#spotify-logo:hover {
+    /* On hover indicate that the  logo is a clickable */
+    background-color: var(--main-color-shadow);
+}
+
+/*=============================================
+=                  Titlebar                   =
+=============================================*/
+
+#titlebar-windows-10 {
+    /* Height of titlebar */
+    height: var(--titlebar-height);
+    /* Background color of titlebar */
+    background-color: var(--main-color-shadow);
+    /* Titlebar can be clicked and drags the whole window */
+    -webkit-app-region: drag;
+    /* Font family that looks like the windows one */
+    font-family: var(--titlebar-font-family);
+    /* Font size of all the text in the titlebar */
+    font-size: var(--titlebar-font-size);
+    /* Font color of all the text in the titlebar */
+    color: var(--titlebar-color-text-icon);
+}
+
+/*----------  Invisible resize areas  ----------*/
 
 #titlebar-windows-10 .resize-handle {
+    /* Make the area absolute to the whole window */
     position: absolute;
-    top: 0px;
-    left: 0px;
+    /* Enable window resizing by disabling drag */
     -webkit-app-region: no-drag;
 }
 
 #titlebar-windows-10 .resize-handle.top {
+    /* Make the top handle as big as the window width */
     width: 100%;
-    height: 3px;
+    /* And as height as defined */
+    height: var(--titlebar-width-resize-area);
 }
 
 #titlebar-windows-10 .resize-handle.left {
-    width: 3px;
+    /* Make the left handle as big as defined */
+    width: var(--titlebar-width-resize-area);
+    /* And as high as the titlebar is */
     height: var(--titlebar-height);
 }
 
+/*----------  Title  ----------*/
+
 #titlebar-windows-10 .title {
+    /* Position title on the left */
     float: left;
-    margin-top: 6px;
-    margin-left: 6px;
-    color: var(--titlebar-text-color);
-    font-family: "Segoe UI";
-    font-size: 14px;
+    /* Surround title with space and center it on the taskbar */
+    margin: 6px;
 }
 
-#titlebar-windows-10 .actions .titlebar-help {
-    color: var(--titlebar-text-color);
-    font-family: "Segoe UI";
-    font-size: 14px;
-}
+/*----------  Action buttons  ----------*/
 
 #titlebar-windows-10 .actions {
+    /* Position all action buttons on the right*/
     float: right;
-    text-align: left;
+    /* Enable selecting/clicking actions by disabling drag */
     -webkit-app-region: no-drag;
 }
 
-#titlebar-windows-10:after,
-.actions:after {
-    content: ' ';
-    display: table;
-    clear: both;
-}
-
-.titlebar-minimize,
-.titlebar-resize,
-.titlebar-close,
-.titlebar-help {
+#titlebar-windows-10 .actions div {
+    /* Position each action left next to each other on the same line */
     float: left;
-    width: 45px;
-    height: 31px;
-    margin: 1px 1px 0 0;
+    /* Each button should have this width */
+    width: var(--titlebar-width-action);
+    /* Each button should have this height */
+    height: var(--titlebar-height);
+    /* Center text in each button */
     text-align: center;
-    line-height: 29px;
-    transition: background-color .2s;
+    /* Set line height to titlebar height for vertically centering content */
+    line-height: var(--titlebar-height);
 }
 
-.titlebar.draggable .titlebar-minimize,
-.titlebar.draggable .titlebar-resize,
-.titlebar.draggable .titlebar-close {
-    -webkit-app-region: no-drag;
-}
-
-.titlebar-minimize svg,
-.titlebar-resize svg.maximize-svg,
-.titlebar-resize svg.fullscreen-svg,
-.titlebar-close svg {
-    width: 10px;
-    height: 10px;
+#titlebar-windows-10 .actions svg {
+    /* Set width and height of svg icon */
+    width: var(--titlebar-width-height-action-icon);
+    height: var(--titlebar-width-height-action-icon);
+    /* Render svg edges exactly (only looks good if everything is a rectangle) */
     shape-rendering: crispEdges;
+    /* Fill all action icons with this color */
+    fill: var(--titlebar-color-text-icon);
 }
 
-.titlebar-close svg polygon {
-    transition: fill .2s;
-}
-
-:not(.fullscreen) svg.maximize-svg {
+#titlebar-windows-10 .actions svg.maximize-svg {
+    /* Hide maximize svg if user is not in fullscreen */
     display: none;
 }
 
-.fullscreen svg.maximize-svg {
+#titlebar-windows-10.fullscreen .actions svg.maximize-svg {
+    /* Show maximize svg if user is in fullscreen */
     display: block;
-    margin: 10px;
-    margin-left: 18px;
+    /* Add margin so that the maximize svg is centered in the action button area */
+    margin: 10px 18px;
 }
 
-.fullscreen svg.fullscreen-svg {
+#titlebar-windows-10.fullscreen .actions svg.fullscreen-svg {
+    /* Hide fullscreen svg if user is in fullscreen */
     display: none;
 }
 
-.titlebar-minimize:hover,
-.titlebar-resize:hover,
-.titlebar-fullscreen:hover,
-.titlebar-help:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+#titlebar-windows-10 .actions :not(.close):hover {
+    /* Make background dark when any action is hovered except close */
+    background-color: var(--titlebar-color-action-hover);
 }
 
-#titlebar-windows-10 .titlebar-minimize:hover,
-#titlebar-windows-10 .titlebar-resize:hover,
-#titlebar-windows-10 .titlebar-fullscreen:hover,
-#titlebar-windows-10 .titlebar-help:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+#titlebar-windows-10 .actions .close:hover {
+    /* On hover of the close action make background red */
+    background-color: var(--titlebar-color-action-hover-close);
 }
 
-.titlebar-close:hover {
-    background-color: rgba(232, 17, 35, 0.9);
-}
-
-.titlebar-close:hover svg polygon {
-    fill: var(--titlebar-text-color);
-}
-
-#titlebar-windows-10 .titlebar-close:hover {
-    fill: rgba(0, 0, 0, 1);
-}
-
-#titlebar-windows-10 svg polygon,
-#titlebar-windows-10 svg rect,
-#titlebar-windows-10 svg>path {
-    fill: var(--titlebar-text-color);
-}
-
-#titlebar-windows-10 .titlebar-close:hover {
-    background-color: rgba(232, 17, 35, 0.9);
+#titlebar-windows-10 .actions .close:hover svg {
+    /* On hover of the close action always make the 'X' white */
+    fill: white;
 }

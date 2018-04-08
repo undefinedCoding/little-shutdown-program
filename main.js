@@ -1,4 +1,4 @@
-// Import modules
+// imports
 const {
   app,
   BrowserWindow,
@@ -10,16 +10,14 @@ const {
   Tray
 } = require('electron')
 const path = require('path')
-const url = require('url')
 const settings = require('./js/settings')
+const url = require('url')
 
-// Global variables
-var mainWindow = null
+// global variables
 var alreadyCheckingForUpdates = false
-const appName = app.getName()
-const appVersion = app.getVersion()
+var mainWindow = null
 
-// Singelton implementation: check for another running instance of this program
+// singelton implementation: only one instance of the program should run
 if (
   app.makeSingleInstance(() => {
     // if an initalized main window (!== null) was found (restore +) focus it
@@ -31,19 +29,15 @@ if (
 ) { app.quit() }
 
 // setup of the settings with file name and default values
-settings.setup({
-  configName: 'user-preferences',
-  defaults: {
-    checkForNewVersionOnStartup: true,
-    nativeTitleBar: false,
-    newTag: 'v' + appVersion,
-    shutdown: true,
-    spotify: true,
-    tag: 'v' + appVersion,
-    timeInput: { d: '', h: '', m: '', s: '' },
-    tray: false,
-    windowBounds: { width: 600, height: 600, x: 0, y: 0 }
-  }
+settings.setup('user-preferences', {
+  checkForNewVersionOnStartup: true,
+  nativeTitleBar: false,
+  shutdown: true,
+  spotify: false,
+  tag: 'v' + app.getVersion(),
+  timeInput: { d: '', h: '', m: '', s: '' },
+  tray: false,
+  windowBounds: { width: 600, height: 600, x: 0, y: 0 }
 })
 
 // interprocess communication listeners
@@ -55,7 +49,7 @@ ipcMain
     settings.set(arg.name, arg.value)
   })
   .on('get-name', event => {
-    event.returnValue = appName
+    event.returnValue = app.getName()
   })
   .on('check-for-update', checkForNewVersion)
   .on('relaunch', () => {
@@ -70,80 +64,73 @@ ipcMain
  * Check for a new version
  */
 function checkForNewVersion () {
-  if (!alreadyCheckingForUpdates) {
-    alreadyCheckingForUpdates = true
-    // make a request to the github api over tags of the repository
-    var buffers = []
-    net.request('https://api.github.com/repos/undefinedCoding/little-shutdown-program/releases/latest'
-    ).on('response', response => {
-      // DEBUG: Log status code
-      // console.log(`STATUS: ${response.statusCode}`)
-      response.on('data', chunk => {
-        // push gotten data into the buffer
-        buffers.push(chunk)
-      }).on('end', () => {
-        // no more response data, everything was collected in the buffer - parse to JSON
-        const jsonObjectString = Buffer.concat(buffers).toString()
-        // DEBUG: Log response data
-        // console.log(`BODY: ${jsonObjectString}`)
-        // try to convert the gotten data into an object
-        try {
-          const latestRelease = JSON.parse(jsonObjectString)
-          // DEBUG:
-          // console.log(latestRelease)
-          // save old and current tag in constant variables
-          const newestTag = latestRelease.tag_name
-          const currentTag = settings.get('tag')
-          // if they are different
-          if (newestTag !== currentTag) {
-          // change newest tag in the settings and send message to render process
-            settings.set('newTag', newestTag)
-            mainWindow.webContents.send(
-              'newVersionDetected',
-              {
-                latestTag: newestTag,
-                url: latestRelease.html_url
+  // if there currently is no version check
+  if (alreadyCheckingForUpdates) return
+  // else block this function until it is finished
+  alreadyCheckingForUpdates = true
+  // create a buffer in which all the chunks of data will be saved
+  let responseDataBuffer = []
+  // make a request to the github api about the latest release
+  net.request('https://api.github.com/repos/undefinedCoding/little-shutdown-program/releases/latest'
+  ).on('response', response => {
+    response.on('data', chunk => {
+      // push gotten reponse chunk data into the buffer
+      responseDataBuffer.push(chunk)
+    }).on('end', () => {
+      // until there is no more response data - then concat everything in the buffer
+      const jsonObjectString = Buffer.concat(responseDataBuffer).toString()
+      // dereference the buffer
+      responseDataBuffer = null
+      // try to parse the response data into an json object
+      try {
+        const latestRelease = JSON.parse(jsonObjectString)
+        // get current tag
+        const currentTag = settings.get('tag')
+        // if the tags are different
+        if (latestRelease.tag_name !== currentTag) {
+          // send information to the renderer process
+          mainWindow.webContents.send(
+            'newVersionDetected',
+            {
+              tag: latestRelease.tag_name,
+              url: latestRelease.html_url
+            }
+          )
+          // show a message box that says that a new version is aviablee
+          dialog.showMessageBox(
+            mainWindow,
+            {
+              type: 'info',
+              title: 'New version avaible',
+              message: 'Do you want to install the new version?',
+              buttons: ['OK', 'NO', 'DISABLE NOTIFICATION'],
+              detail: `Installed: ${currentTag}, Latest: ${latestRelease.tag_name}`
+            },
+            buttonId => {
+              switch (buttonId) {
+                case 0: // OK -> Open release website
+                  shell.openExternal(latestRelease.html_url)
+                  break
+                case 2: // DISABLE NOTIFICATION -> Stop searching for updates on startup
+                  settings.set('checkForNewVersionOnStartup', false)
+                  mainWindow.webContents.send('auto-updates-disabled')
               }
-            )
-            // show a message box that says that a new version is aviable if settings say so
-            dialog.showMessageBox(
-              mainWindow,
-              {
-                type: 'info',
-                title: 'New version avaible',
-                message: 'Do you want to install the new version?',
-                buttons: ['OK', 'NO', 'DISABLE NOTIFICATION'],
-                detail: `Installed: ${currentTag}, Latest: ${newestTag}`
-              },
-              buttonId => {
-                switch (buttonId) {
-                  case 0:
-                    shell.openExternal(latestRelease.html_url)
-                    break
-                  case 2:
-                    settings.set('checkForNewVersionOnStartup', false)
-                    mainWindow.webContents.send('auto-updates-disabled')
-                }
-              }
-            )
-          }
-        } catch (e) {
-          console.log(`ERROR: [PARSE JSON] ${JSON.stringify(e)}`)
+            }
+          )
         }
-      }).on('error', error => {
-        console.log(`ERROR: [RESPONSE] ${JSON.stringify(error)}`)
-      })
+      } catch (e) {
+        console.log(`ERROR: [PARSE JSON] ${JSON.stringify(e)}`)
+      }
     }).on('error', error => {
-      console.log(`ERROR: [REQUEST] ${JSON.stringify(error)}`)
-    }).on('finish', () => {
-      // DEBUG:
-      // console.log('Emitted just after the last chunk of the requests data has been written into the request object.')
-    }).on('close', () => {
-      // DEBUG:
-      // console.log('Emitted as the last event in the HTTP request-response transaction. The close event indicates that no more events will be emitted on either the request or response objects.')
-      alreadyCheckingForUpdates = false
-    }).end()
-  }
+      console.log(`ERROR: [RESPONSE] ${JSON.stringify(error)}`)
+    })
+  }).on('error', error => {
+    console.log(`ERROR: [REQUEST] ${JSON.stringify(error)}`)
+  }).on('close', () => {
+    // will be called after 'the last' event in the HTTP request-response transaction was done
+    // because of that unblock the use of this function
+    alreadyCheckingForUpdates = false
+  }).end()
 }
 
 /**
@@ -154,12 +141,10 @@ function createWindow () {
   const settingsWindowBounds = settings.get('windowBounds')
   const settingsNativeTitleBar = settings.get('nativeTitleBar')
   const settingsTray = settings.get('tray')
-
-  // Create a BrowserWindow object
+  // create a BrowserWindow object
   mainWindow = new BrowserWindow({
-    title: appName,
-    titleBarStyle: 'hidden',
-    backgroundColor: '#c9329e',
+    title: app.getName(),
+    titleBarStyle: 'hidden', // macOS: buttons are an overlay
     minWidth: 600,
     minHeight: 600,
     width: settingsWindowBounds.width,
@@ -171,8 +156,7 @@ function createWindow () {
     icon: path.join(__dirname, 'icon', 'icon.ico'),
     center: settingsWindowBounds.x === 0 && settingsWindowBounds.y === 0
   })
-
-  // Load the 'index.html' file in the window
+  // load the 'index.html' file in the window
   mainWindow.loadURL(
     url.format({
       pathname: path.join(__dirname, 'index.html'),
@@ -180,8 +164,7 @@ function createWindow () {
       slashes: true
     })
   )
-
-  // if a native title bar is wanted add a menu bar with two buttons instead of the custom title bar icons
+  // if a native title bar is wanted add a menu bar
   if (settingsNativeTitleBar) {
     Menu.setApplicationMenu(
       Menu.buildFromTemplate([
@@ -200,22 +183,20 @@ function createWindow () {
       ])
     )
   }
-
-  // create tray icon if settings say so
+  // if a tray icon is wanted create one
   if (settingsTray) {
-    // create tray icon
+    // create tray icon and right click method
     const tray = new Tray(
       path.join(__dirname, 'icon', 'icon.ico')
     ).on('click', () => {
       // if tray icon is clicked the window will either be hidden or shown
       mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
     })
-
-    // create left click menu for the tray icon
+    // create left click method / context menu
     tray.setContextMenu(
       Menu.buildFromTemplate([
         {
-          label: 'Exit',
+          label: 'Close',
           click: () => {
             mainWindow.close()
           }
@@ -224,8 +205,7 @@ function createWindow () {
     )
     // create text that will be shown on hover of the tray icon
     tray.setToolTip('Click to hide or show the app')
-
-    // highlight icon if window currently shown and do the opposite if not
+    // macOS: highlight icon if window currently shown and do the opposite if not
     mainWindow
       .on('show', () => {
         tray.setHighlightMode('always')
@@ -234,27 +214,23 @@ function createWindow () {
         tray.setHighlightMode('never')
       })
   }
-
-  // DEBUG: Open dev tools from start
-  // mainWindow.webContents.openDevTools()
-
-  // The renderer process has rendered the page for the first time
+  // window event listener
   mainWindow
     .on('ready-to-show', () => {
-      // show window
+      // if page is loaded show window
       mainWindow.show()
-      // focus window
+      // and focus the window
       mainWindow.focus()
-      // if settings say so check if a new version is available
+      // and if settings say so check if a new version is available
       if (settings.get('checkForNewVersionOnStartup')) checkForNewVersion()
     })
     .on('minimize', () => {
-      // if tray activated hide window from taskbar
+      // if settings say so hide window from taskbar
       if (settingsTray) mainWindow.hide()
     })
     .on('close', saveSettings)
     .on('closed', () => {
-      // Dereference the window object
+      // dereference the window object
       mainWindow = null
     })
 }
@@ -263,18 +239,17 @@ function createWindow () {
  * Save current settings (+ window size/position) in preferences file
  */
 function saveSettings () {
-  settings.set('windowBounds', mainWindow.getBounds()).save()
+  settings.set('windowBounds', mainWindow.getBounds())
+  settings.save()
 }
 
 // app listeners (ready = electron is loaded)
 app
   .on('ready', createWindow)
   .on('window-all-closed', () => {
-    // Quit when all windows are closed.
     // macOS: Applications keep their menu bar until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') app.quit()
-  })
-  .on('activate', () => {
+  }).on('activate', () => {
     // macOS: Re-create a window in the app when the dock icon is clicked and there are no other open windows
     if (mainWindow === null) createWindow()
   })

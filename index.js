@@ -230,12 +230,12 @@ timerInputDays.value = timeInputLastTime.d
 timerInputHours.value = timeInputLastTime.h
 timerInputMinutes.value = timeInputLastTime.m
 timerInputSeconds.value = timeInputLastTime.s
-setTime(timeInputLastTime.d, timeInputLastTime.h, timeInputLastTime.m, timeInputLastTime.s)
+setToReadableTime(timeInputLastTime.d, timeInputLastTime.h, timeInputLastTime.m, timeInputLastTime.s)
 
 // set new version button if one was found
 ipcRenderer.on('newVersionDetected', (event, arg) => {
   versionUpdate.style.display = 'inline'
-  versionUpdate.innerText = `Latest version: ${arg.latestTag}`
+  versionUpdate.innerText = `Latest version: ${arg.tag}`
   versionUpdate.onclick = () => {
     openLinkExternally(arg.url)
   }
@@ -338,7 +338,7 @@ checkboxSpotify.addEventListener('click', () => {
   } else {
     // else disconnect and then change the picture
     spotifyHandler.disconnect()
-    spotifySVG.src = 'data/spotify_logo_by_wikimedia_disabled.svg'
+    spotifySVG.classList.add('disabled')
   }
 })
 checkboxTray.addEventListener('click', () => {
@@ -409,7 +409,7 @@ spotifySVG.addEventListener('click', () => {
   spotifyHandler.connect()
   spotifyWebHelperStarted = window.performance.now()
   // disable active spotify picture
-  spotifySVG.src = 'data/spotify_logo_by_wikimedia_disabled.svg'
+  spotifySVG.classList.add('disabled')
 })
 
 /**
@@ -418,10 +418,11 @@ spotifySVG.addEventListener('click', () => {
 function startstopTimer () {
   if (!shutdownTimer.isStopped) shutdownTimer.stop()
   else {
-    shutdownTimer.start((timerInputDays.value * 24 * 60 * 60 +
-      timerInputHours.value * 60 * 60 +
-      timerInputMinutes.value * 60 +
-      timerInputSeconds.value) * 1000)
+    const days = (timerInputDays.value === '') ? 0 : Number(timerInputDays.value)
+    const hours = (timerInputHours.value === '') ? 0 : Number(timerInputHours.value)
+    const minutes = (timerInputMinutes.value === '') ? 0 : Number(timerInputMinutes.value)
+    const seconds = (timerInputSeconds.value === '') ? 0 : Number(timerInputSeconds.value)
+    shutdownTimer.start((days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60 + seconds) * 1000)
   }
 }
 
@@ -451,7 +452,10 @@ function saveInput () {
     name: 'timeInput',
     value: currentTime
   })
-  if (shutdownTimer.isStopped) setTime(currentTime.d, currentTime.h, currentTime.m, currentTime.s)
+  console.log('saveInput')
+  if (shutdownTimer.isStopped) {
+    setToReadableTime(currentTime.d, currentTime.h, currentTime.m, currentTime.s)
+  }
 }
 timerInputDays.addEventListener('change', saveInput)
 timerInputHours.addEventListener('change', saveInput)
@@ -465,12 +469,23 @@ timerInputDays.addEventListener('keyup', saveInput)
 timerInputHours.addEventListener('keyup', saveInput)
 timerInputMinutes.addEventListener('keyup', saveInput)
 timerInputSeconds.addEventListener('keyup', saveInput)
-timerInputDays.addEventListener('keydown', saveInput)
-timerInputHours.addEventListener('keydown', saveInput)
-timerInputMinutes.addEventListener('keydown', saveInput)
-timerInputSeconds.addEventListener('keydown', saveInput)
 
-// set time on display
+function setToReadableTime (days, hours, minutes, seconds) {
+  days = (days === '') ? 0 : Number(days)
+  hours = (hours === '') ? 0 : Number(hours)
+  minutes = (minutes === '') ? 0 : Number(minutes)
+  seconds = (seconds === '') ? 0 : Number(seconds)
+  const allSeconds = days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60 + seconds
+  seconds = Math.floor(allSeconds)
+  minutes = Math.floor(seconds / 60)
+  seconds = seconds % 60
+  hours = Math.floor(minutes / 60)
+  minutes = minutes % 60
+  days = Math.floor(hours / 24)
+  hours = hours % 24
+  setTime(days, hours, minutes, seconds)
+}
+
 /**
  * Sets given time on display
  * @param {Number} days - Number of days
@@ -479,10 +494,10 @@ timerInputSeconds.addEventListener('keydown', saveInput)
  * @param {Number} seconds - Number of seconds
  */
 function setTime (days, hours, minutes, seconds) {
-  days = (days === '') ? 0 : days
-  hours = (hours === '') ? 0 : hours
-  minutes = (minutes === '') ? 0 : minutes
-  seconds = (seconds === '') ? 0 : seconds
+  days = (days === '') ? 0 : Number(days)
+  hours = (hours === '') ? 0 : Number(hours)
+  minutes = (minutes === '') ? 0 : Number(minutes)
+  seconds = (seconds === '') ? 0 : Number(seconds)
 
   // save all chars in an array
   const timeArray = [
@@ -668,7 +683,7 @@ shutdownTimer
       m: timerInputMinutes.value,
       s: timerInputSeconds.value
     }
-    setTime(currentTime.d, currentTime.h, currentTime.m, currentTime.s)
+    setToReadableTime(currentTime.d, currentTime.h, currentTime.m, currentTime.s)
     oldT = currentTime
   }).on('resetCallback', err => {
     if (err) {
@@ -754,17 +769,8 @@ spotifyHandler
   })
   .on('ready', status => {
     // log successful spotify connection
-    const currentlyPlayingString =
-      'Have fun listening to ' +
-      status.track.track_resource.name +
-      ' by ' +
-      status.track.artist_resource.name +
-      ' from ' +
-      status.track.album_resource.name
-    const timeString =
-      'Spotify helper is ready after ' +
-      millisecondsToStr(window.performance.now() - spotifyWebHelperStarted)
-    console.log(currentlyPlayingString, timeString)
+    const currentlyPlayingString = `Have fun listening to "${status.track.track_resource.name}" by "${status.track.artist_resource.name}" from "${status.track.album_resource.name}" after ${millisecondsToStr(window.performance.now() - spotifyWebHelperStarted)}`
+    console.log(currentlyPlayingString)
     // change spotify logo to a white on
-    spotifySVG.src = 'data/spotify_logo_by_wikimedia.svg'
+    spotifySVG.classList.remove('disabled')
   })
