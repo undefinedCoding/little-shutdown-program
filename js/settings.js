@@ -63,8 +63,16 @@ class Settings {
   /**
    * Reset the custom data and replace it with the default values
    */
-  reset () {
+  resetAll () {
     this.data = this.defaults
+  }
+
+  /**
+   * Reset one setting back to the default one
+   */
+  reset (name) {
+    this.data[name] = this.defaults[name]
+    return this.data[name]
   }
 
   /**

@@ -15,6 +15,9 @@
     --titlebar-width-height-action-icon: 10px;
     --titlebar-width-resize-area: 3px;
     --titlebar-width-action: 45px;
+    --spotify-indicator-ok: white;
+    --settings-input-color-border-width: 2px;
+    --settings-input-color-border-radius: 20px;
 }
 
 body {
@@ -335,16 +338,32 @@ button {
     transition: background-color 0.1s ease-in-out;
     /* Show on this object the pointer cursor to signal something can be clicked */
     cursor: pointer;
-    fill: white;
+    /* Fill the logo with white paint if everything is okay */
+    fill: var(--spotify-indicator-ok);
 }
 
 #spotify-logo:not(.blink).disabled {
+    /* If the Spotify connection is disabled fill with titlebar/main shadow */
     fill: var(--main-color-shadow);
 }
 
 #spotify-logo:not(.blink):hover {
     /* On hover indicate that the  logo is a clickable */
     background-color: var(--main-color-shadow);
+}
+
+@keyframes blink {
+    0% {
+        fill: var(--main-color-shadow);
+    }
+    100% {
+        fill: var(--spotify-indicator-ok);
+    }
+}
+
+.blink {
+    /* Infinite blink animation from shadow fill to white color fill */
+    animation: blink 1s ease-in-out infinite;
 }
 
 /*=============================================
@@ -428,6 +447,12 @@ button {
     shape-rendering: crispEdges;
     /* Fill all action icons with this color */
     fill: var(--titlebar-color-text-icon);
+    transform: rotate(0deg);
+    transition: transform 0.4s ease-in-out;
+}
+
+#titlebar-windows-10 .actions svg.rotate {
+    transform: rotate(90deg);
 }
 
 #titlebar-windows-10 .actions svg.maximize-svg {
@@ -452,6 +477,10 @@ button {
     background-color: var(--titlebar-color-action-hover);
 }
 
+#titlebar-windows-10 .actions svg:hover {
+    background-color: transparent;
+}
+
 #titlebar-windows-10 .actions .close:hover {
     /* On hover of the close action make background red */
     background-color: var(--titlebar-color-action-hover-close);
@@ -473,25 +502,32 @@ fieldset.settings-entry .special {
     padding: 10px 20px;
     cursor: pointer;
     text-align: center;
-    border-radius: 30px 0px 0px 30px;
+    border-radius: var(--settings-input-color-border-radius) 0px 0px var(--settings-input-color-border-radius);
     height: 1rem;
-    float: right;
-    border: 4px solid white;
+    border: var(--settings-input-color-border-width) solid white;
 }
 
-fieldset.settings-entry .special:hover,
-.color-selector:hover {
-    background-color: black;
+fieldset.settings-entry .color-container:hover .special {
+    background-color: var(--settings-color-click);
     color: white;
+}
+fieldset.settings-entry .color-container:hover .special, 
+fieldset.settings-entry .color-container:hover .color-preview {
+    border: var(--settings-input-color-border-width) solid var(--settings-color-click);
+}
+
+.color-container {
+    float: right;
+    display: grid;
+    grid-template-areas: "1fr 1fr";
 }
 
 .color-preview {
-    border-radius: 0px 30px 30px 0px;
+    border-radius: 0px var(--settings-input-color-border-radius) var(--settings-input-color-border-radius) 0px;
     width: 30px;
     padding: 10px;
-    float: right;
     height: 1rem;
-    border: 4px solid white;
+    border: var(--settings-input-color-border-width) solid white;
     box-shadow: inset 0 0 10px 0px black;
 }
 
@@ -499,29 +535,4 @@ hr {
     margin: 30px 0;
     color: white;
     border: 1px white solid;
-}
-
-.color-selector {
-    float: right;
-    height: 1rem;
-    padding: 10px;
-    cursor: pointer;
-    background: white;
-    box-sizing: content-box;
-    font-family: var(--main-font-family);
-    font-size: 14px;
-    border: 4px solid white;
-}
-
-@keyframes blink {
-    0% {
-        fill: var(--main-color-shadow);
-    }
-    100% {
-        fill: white;
-    }
-}
-
-.blink {
-    animation: blink 1s ease-in-out infinite;
 }

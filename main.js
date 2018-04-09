@@ -34,6 +34,7 @@ settings.setup('user-preferences', {
   nativeTitleBar: false,
   shutdown: true,
   spotify: false,
+  touchGestures: true,
   tag: 'v' + app.getVersion(),
   timeInput: { d: '', h: '', m: '', s: '' },
   tray: false,
@@ -48,8 +49,15 @@ ipcMain
   .on('get-settings', (event, arg) => {
     event.returnValue = settings.get(arg)
   })
-  .on('reset-settings', () => {
-    settings.reset()
+  .on('get-settings-default', (event, arg) => {
+    event.returnValue = settings.getDefault(arg)
+  })
+  .on('reset-settings', (event, arg) => {
+    event.returnValue = settings.reset(arg)
+  })
+  .on('reset-settings-all', (event) => {
+    settings.resetAll()
+    event.returnValue = true
   })
   .on('set-settings', (event, arg) => {
     settings.set(arg.name, arg.value)

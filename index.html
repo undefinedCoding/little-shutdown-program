@@ -16,14 +16,17 @@
         <div class="title">little shutdown program</div>
         <div class="actions">
             <div id="titelbar-settings" class="settings">
-                <svg x="0px" y="0px" viewBox="0 0 10 10" class="icon">
+                <svg id="settingsIcon" x="0px" y="0px" viewBox="0 0 10 10" class="icon">
                     <rect y="0" width="10" height="2"></rect>
                     <rect y="4" width="10" height="2"></rect>
                     <rect y="8" width="10" height="2"></rect>
                 </svg>
             </div>
             <div id="titelbar-help" class="help" alt="help">
-                ?
+                <svg id="aboutIcon" x="0px" y="0px" viewBox="0 0 2 10" class="icon">
+                    <rect y="0" width="2" height="2"></rect>
+                    <rect y="4" width="2" height="6"></rect>
+                </svg>
             </div>
             <div id="titelbar-minimize" class="minimize">
                 <svg x="0px" y="0px" viewBox="0 0 10 1">
@@ -92,13 +95,24 @@
                 <legend class="descripton">Search on start of the application for a new available version and notify if there is one available</legend>
             </fieldset>
 
+            <fieldset class="settings-entry">
+                <input type="checkbox" id="checkbox-touchGestures">
+                <label for="checkbox-touchGestures" class="settings-windows10-checkbox"></label>
+                <legend class="title">Touch gestures</legend>
+                <legend class="descripton">Swipe left and right to get to the other screens</legend>
+            </fieldset>
+
+            <button class="normal-button big-button" id="resetSettings">Reset settings</button>
+
             <hr>
 
             <fieldset class="settings-entry">
                 <input type="color" id="colorPicker-backgroundColor">
                 <label for="colorPicker-backgroundColor">
-                    <div class="color-preview" id="preview-backgroundColor"></div>
-                    <div class="special">pick color</div>
+                    <div class="color-container">
+                        <div class="special">pick color</div>
+                        <div class="color-preview" id="preview-backgroundColor"></div>
+                    </div>
                 </label>
                 <legend class="title">Background color</legend>
                 <legend class="descripton">Set the background color of the application</legend>
@@ -107,8 +121,10 @@
             <fieldset class="settings-entry">
                 <input type="color" id="colorPicker-textColor">
                 <label for="colorPicker-textColor">
-                    <div class="color-preview" id="preview-textColor"></div>
-                    <div class="special">pick color</div>
+                    <div class="color-container">
+                        <div class="special">pick color</div>
+                        <div class="color-preview" id="preview-textColor"></div>
+                    </div>
                 </label>
                 <legend class="title">Text color</legend>
                 <legend class="descripton">Set the text color of the application</legend>
@@ -117,14 +133,20 @@
             <fieldset class="settings-entry">
                 <input type="color" id="colorPicker-titleBarColor">
                 <label for="colorPicker-titleBarColor">
-                    <div class="color-preview" id="preview-titleBarColor"></div>
-                    <div class="special">pick color</div>
+                    <div class="color-container">
+                        <div class="special">pick color</div>
+                        <div class="color-preview" id="preview-titleBarColor"></div>
+                    </div>
                 </label>
                 <legend class="title">Title bar color</legend>
                 <legend class="descripton">Set the text/icon color of the title bar</legend>
             </fieldset>
 
-            <button class="normal-button big-button" id="restoreDefaults">Restore defaults</button>
+            <button class="normal-button big-button" id="resetColors">Reset colors</button>
+
+            <hr>
+
+            <button class="normal-button big-button" id="resetEverything">Reset everything</button>
 
         </div>
     </div>
