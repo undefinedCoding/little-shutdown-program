@@ -15,7 +15,6 @@ const Hammer = require('hammerjs')
 const notifier = require('node-notifier')
 const path = require('path')
 const shutdown = require('electron-shutdown-command')
-const { getColorHexRGB } = require('electron-color-picker')
 
 /*
  * Global objects
@@ -190,6 +189,7 @@ var spotifyWebHelperStarted
 if (spotifyStateOnStart) {
   spotifyHandler.connect()
   spotifyWebHelperStarted = window.performance.now()
+  spotifySVG.classList.add('disabled', 'blink')
 }
 
 // set correct version number on the about page
@@ -779,25 +779,11 @@ spotifyHandler
 const html = document.getElementsByTagName('html')[0]
 const style = window.getComputedStyle(document.body)
 
-function pickColor (callback) {
-  getColorHexRGB().then(value => {
-    callback(value)
-  }).catch(err => {
-    console.error(err)
-  })
-}
-
 function addColorSetting (htmlIdWithoutPrefix, settingId, cssVariableName) {
   const colorPickerInput = document.getElementById('colorPicker-' + htmlIdWithoutPrefix)
-  const colorSelectorInput = document.getElementById('colorSelector-' + htmlIdWithoutPrefix)
   const colorPreview = document.getElementById('preview-' + htmlIdWithoutPrefix)
   colorPickerInput.addEventListener('input', () => {
     setColorSetting(cssVariableName, colorPickerInput.value, settingId, colorPreview)
-  })
-  colorSelectorInput.addEventListener('click', () => {
-    pickColor(selectedColor => {
-      setColorSetting(cssVariableName, selectedColor, settingId, colorPreview)
-    })
   })
   updateColorSetting(htmlIdWithoutPrefix, settingId, cssVariableName)
 }
