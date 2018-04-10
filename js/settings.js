@@ -1,10 +1,12 @@
-// imports
 const { app } = require('electron')
-const path = require('path')
 const fs = require('fs')
+const path = require('path')
 
 /**
  * Class that handels the settings
+ *
+ * @summary Save and load settings in an object
+ * @author AnonymerNiklasistanyonym, undefinedCoding
  */
 class Settings {
   /**

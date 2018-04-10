@@ -212,10 +212,8 @@ const checkboxSettings = [
         value: checkboxSpotify.checked
       })
       // if checkbox gets checked (re-)connect to Spotify
-      if (checkboxSpotify.checked) {
-        spotifyHandler.connect()
-        spotifyWebHelperStarted = window.performance.now()
-      } else {
+      if (checkboxSpotify.checked) connectToSpotify()
+      else {
       // else disconnect and then change the picture
         spotifyHandler.disconnect()
         spotifySVG.classList.add('disabled')
@@ -229,19 +227,16 @@ const checkboxSettings = [
       console.log('onClick tray')
       // every time the checkbox is clicked ask for a restart of the program
       // to add/remove the tray
-      dialogs.confirm(
-        'To change this option you need to restart the program',
-        okWasPressed => {
-          if (okWasPressed) {
-            ipcRenderer.send('set-settings', {
-              name: 'tray',
-              value: checkboxTray.checked
-            })
-            // relaunch after setting setting entry
-            ipcRenderer.send('relaunch')
-          } else checkboxTray.checked = ipcRenderer.send('get-settings', 'tray')
-        }
-      )
+      questionDialog('To change this option you need to restart the program', () => {
+        ipcRenderer.send('set-settings', {
+          name: 'tray',
+          value: checkboxTray.checked
+        })
+        // relaunch after setting setting entry
+        ipcRenderer.send('relaunch')
+      }, () => {
+        checkboxTray.checked = ipcRenderer.send('get-settings', 'tray')
+      })
     }},
   {htmlElement: checkboxMenuBar,
     settingsId: 'nativeTitleBar',
@@ -250,24 +245,19 @@ const checkboxSettings = [
       console.log('onClick nativeTitleBar')
       // every time the checkbox is clicked ask for a restart of the program
       // to add/remove the tray
-      dialogs.confirm(
-        'To change this option you need to restart the program',
-        okWasPressed => {
-          if (okWasPressed) {
-            ipcRenderer.send('set-settings', {
-              name: 'nativeTitleBar',
-              value: checkboxMenuBar.checked
-            })
-            // relaunch after setting setting entry
-            ipcRenderer.send('relaunch')
-          } else {
-            checkboxMenuBar.checked = ipcRenderer.send(
-              'get-settings',
-              'nativeTitleBar'
-            )
-          }
-        }
-      )
+      questionDialog('To change this option you need to restart the program', () => {
+        ipcRenderer.send('set-settings', {
+          name: 'nativeTitleBar',
+          value: checkboxMenuBar.checked
+        })
+        // relaunch after setting setting entry
+        ipcRenderer.send('relaunch')
+      }, () => {
+        checkboxMenuBar.checked = ipcRenderer.send(
+          'get-settings',
+          'nativeTitleBar'
+        )
+      })
     }},
   {htmlElement: checkboxNewVersionUpdate,
     settingsId: 'checkForNewVersionOnStartup',
@@ -370,13 +360,9 @@ ipcRenderer.on('newVersionDetected', (event, arg) => {
 // onclick listener for the spotify picture
 spotifySVG.addEventListener('click', () => {
   if (ipcRenderer.sendSync('get-settings', 'spotify')) {
-    spotifyHandler.connect()
-    spotifyWebHelperStarted = window.performance.now()
-    // disable active spotify picture
-    spotifySVG.classList.add('disabled', 'blink')
+    connectToSpotify()
     return
   }
-
   questionDialog('Spoitfy support is deactivated - do you want to enable the support for Spotify again?', () => {
     checkboxSpotify.checked = true
     ipcRenderer.send('set-settings', {
@@ -384,10 +370,7 @@ spotifySVG.addEventListener('click', () => {
       value: true
     })
     // try to (re-)connect
-    spotifyHandler.connect()
-    spotifyWebHelperStarted = window.performance.now()
-    // disable active spotify picture
-    spotifySVG.classList.add('disabled', 'blink')
+    connectToSpotify()
   })
 })
 // shutdownTimer event listener/callbacks

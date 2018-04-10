@@ -1,17 +1,16 @@
-// imports
-const {
-  app,
-  BrowserWindow,
-  dialog,
-  ipcMain,
-  Menu,
-  net,
-  shell,
-  Tray
-} = require('electron')
+/**
+ * Main script of the application littel-shutdown-program
+ *
+ * @summary handles the app start/close, main process, windows, ...
+ * @author AnonymerNiklasistanyonym, undefinedCoding
+ */
+
+/* =====  Imports  ====== */
+
+const { app, BrowserWindow, dialog, ipcMain, Menu, net, shell, Tray } = require('electron')
 const path = require('path')
-const settings = require('./js/settings')
 const url = require('url')
+const settings = require('./js/settings')
 
 // global variables
 var alreadyCheckingForUpdates = false
@@ -26,7 +25,7 @@ if (
       mainWindow.focus()
     }
   })
-) { app.quit() }
+) app.quit()
 
 // setup of the settings with file name and default values
 settings.setup('user-preferences', {

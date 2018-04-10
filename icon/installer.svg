@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   id="svg14"
+   version="1.2"
+   viewBox="0 0 123 235.56"
+   height="235.56pt"
+   width="123pt">
+  <metadata
+     id="metadata18">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs5">
+    <clipPath
+       id="clip1">
+      <path
+         id="path2"
+         d="M 0 0 L 123 0 L 123 235.558594 L 0 235.558594 Z M 0 0 " />
+    </clipPath>
+  </defs>
+  <g
+     id="surface36">
+    <g
+       id="g9"
+       clip-rule="nonzero"
+       clip-path="url(#clip1)">
+      <path
+         id="path7"
+         d="M 0 235.558594 L 123 235.558594 L 123 0 L 0 0 Z M 0 235.558594 "
+         style=" stroke:none;fill-rule:evenodd;fill:rgb(65.098572%,10.598755%,49.798584%);fill-opacity:1;" />
+    </g>
+    <path
+       id="path11"
+       transform="matrix(1,0,0,-1,0,235.56)"
+       d="M 57.9375 164.161563 L 67.429688 163.770938 C 85.09375 161.450625 100.171875 149.099063 105.621094 131.681094 C 111.839844 111.77875 103.960938 90.177188 86.371094 78.923281 C 68.78125 67.681094 45.824219 69.56 30.308594 83.52875 C 14.800781 97.4975 10.558594 120.079531 19.953125 138.700625 L 29.71875 133.798281 C 22.535156 119.56 25.773438 102.31 37.628906 91.630313 C 49.484375 80.962344 67.023438 79.520938 80.472656 88.110781 C 93.917969 96.712344 99.933594 113.220156 95.183594 128.431094 C 91.609375 139.829531 82.640625 148.399844 71.648438 151.731875 L 69.753906 152.220156 L 69.753906 117.09125 C 69.753906 114.349063 67.535156 112.130313 64.785156 112.130313 L 57.925781 112.130313 C 55.1875 112.130313 52.960938 114.349063 52.960938 117.09125 L 52.960938 159.200625 C 52.960938 161.950625 55.1875 164.161563 57.925781 164.161563 Z M 57.9375 164.161563 "
+       style="fill-rule:evenodd;fill:rgb(100%,100%,100%);fill-opacity:1;stroke-width:4.08;stroke-linecap:round;stroke-linejoin:round;stroke:rgb(100%,100%,100%);stroke-opacity:1;stroke-miterlimit:10;" />
+  </g>
+</svg>

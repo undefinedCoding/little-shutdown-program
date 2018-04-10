@@ -1,10 +1,15 @@
-// imports
 const SpotifyWebHelper = require('spotify-web-helper')
 
 /**
  * Class that controls the SpotifyWebHelper
+ *
+ * @summary Control the running Spotify application
+ * @author AnonymerNiklasistanyonym, undefinedCoding
  */
 class SpotifyHandler {
+  /**
+   * Constructor
+   */
   constructor () {
     // variables
     this.connected = false
@@ -22,10 +27,11 @@ class SpotifyHandler {
   }
 
   /**
-     * Set callback methods to different events
-     * @param {String} event - Event identifier
-     * @param {Function} callback - Callback function
-     */
+   * Set callback methods to different events
+   * @param {String} event - Event identifier
+   * @param {Function} callback - Callback function
+   * @returns {SpotifyHandler}
+   */
   on (event, callback) {
     switch (event) {
       case 'error':
@@ -40,6 +46,9 @@ class SpotifyHandler {
     return this
   }
 
+  /**
+   * Try to connect to a running Spotify Desktop instance
+   */
   connect () {
     // disconnect and clear old things
     this.disconnect()
@@ -60,11 +69,17 @@ class SpotifyHandler {
     })
   }
 
+  /**
+   * Disconnect to the Spotify instance
+   */
   disconnect () {
     this.spotifyWebHelper = null
     this.connected = false
   }
 
+  /**
+   * Pause music on the running Spotify instance
+   */
   pauseMusic () {
     console.log('pause music', this.connected)
     if (!this.connected) return
@@ -79,6 +94,9 @@ class SpotifyHandler {
     }
   }
 
+  /**
+   * Play music on the running Spotify instance
+   */
   playMusic () {
     if (!this.connected) return
 
@@ -91,6 +109,9 @@ class SpotifyHandler {
     }
   }
 
+  /**
+   * Play rickroll music
+   */
   rickroll () {
     if (!this.connected) return
 
