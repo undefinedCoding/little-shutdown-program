@@ -3,5 +3,5 @@
 echo "Convert the logo icon.svg to a 256x256px icon.png image:"
 inkscape -f icon.svg -e icon.png --export-width=256 --export-height=256
 echo "Convert the installer picture installer.svg to a 164x314px installer.png image:"
-inkscape -f installer.svg -e installer.bmp --export-width=164 --export-height=314
+inkscape -f installer.svg -e installer.png --export-width=164 --export-height=314
 echo "Conversion is ready"

@@ -33,9 +33,29 @@ def create_program_ico_icon(source_file, output_path_ico):
         print("- \"" + source_file + "\" was not found")
 
 
+def create_installer_bmps(source_file, output_file_installer, output_file_uninstaller):
+    """Creates installer bmps."""
+
+    if os.path.exists(source_file):
+
+        img = Image.open(source_file)
+        img.save(output_file_installer, 'BMP')
+        print("- \"" + source_file +
+            "\" was converted to " + output_file_installer)
+        img = Image.open(source_file)
+        img = ImageEnhance.Color(img).enhance(0.0)
+        img.save(output_file_uninstaller, 'BMP')
+        print("- \"" + source_file +
+            "\" was converted to " + output_file_uninstaller)
+
+    else:
+        print("- \"" + source_file + "\" was not found")
+
+
 if __name__ == '__main__':
     """Creates all images."""
 
     create_program_ico_icon("icon.png", "icon.ico")
+    create_installer_bmps('installer.png', 'installerSidebar.bmp', 'uninstallerSidebar.bmp')
 
     print("Ready!")

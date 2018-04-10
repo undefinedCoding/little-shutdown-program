@@ -1,6 +1,6 @@
 {
   "name": "little-shutdown-program",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "url": "https://github.com/undefinedCoding/little-shutdown-program",
   "description": "A little program that turns off the computer if a set timer is done",
   "license": "MIT",
@@ -54,7 +54,8 @@
       "perMachine": false,
       "license": "LICENSE",
       "installerIcon": "icon/icon.ico",
-      "installerSidebar": "icon/installer.bmp",
+      "installerSidebar": "icon/installerSidebar.bmp",
+      "uninstallerSidebar": "icon/uninstallerSidebar.bmp",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "include": "build/installer.nsh"
