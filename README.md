@@ -13,11 +13,9 @@ Just a little program, that shuts down a (Windows 10) computer after a, from the
 
 From here you can set the time of the timer and start/stop, pause/resume it and also clear your input and the current timer.
 
-### Settings screen
+### Settings and About screen
 
-![settings-screen-screenshot](/pictures/settings-screen-screenshot.png)
-
-You can get to the settings screen by clicking the settings icon in the title bar (first icon from the left). If you click the '?' you get to the about screen. To get back home simply press either of the icons again.
+You can get to the settings screen by clicking the settings icon in the title bar (first icon from the left). If you click the 'i' you get to the about screen. To get back home simply press either of the icons again.
 
 Also there is the option to minimze the window to the system tray or dis-/enable a native window title bar and menu if you do not like the default custom title bar.
 
