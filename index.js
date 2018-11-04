@@ -13,7 +13,6 @@ const shutdown = require('electron-shutdown-command')
 const Hammer = require('hammerjs')
 const notifier = require('node-notifier')
 const path = require('path')
-const { SpotifyHandler } = require('./js/spotifyHandler')
 const { ShutdownTimer } = require('./js/timer')
 
 /* =====  Global objects  ====== */
@@ -35,10 +34,6 @@ const mainWindow = remote.getCurrentWindow()
  * ShutdownTimer object - controls the timer
  */
 const shutdownTimer = new ShutdownTimer()
-/**
- * SpotifyHandler object - controls Spotify desktop
- */
-const spotifyHandler = new SpotifyHandler()
 
 /* =====  Global functions (that use no variables besides require) ====== */
 
@@ -139,8 +134,6 @@ const timerInputSeconds = document.getElementById('timer_s')
 const timerButtonPauseResume = document.getElementById('button_pause_resume')
 const timerButtonStartStop = document.getElementById('button_start_stop')
 const timerButtonClear = document.getElementById('button_clear')
-// mainContainer >> spotify connection indicator
-const spotifySVG = document.getElementById('spotify-logo')
 // mainContainer >> the digits of the time display
 var digits = document.getElementById('digits')
 digits = Array.from(digits.children)
@@ -155,7 +148,6 @@ for (let i = 0; i < digits.length; i++) {
 const settingsContainer = document.getElementById('settings')
 // settingsContainer >> checkboxes
 const checkboxShutdown = document.getElementById('checkbox-shutdown')
-const checkboxSpotify = document.getElementById('checkbox-spotify')
 const checkboxTray = document.getElementById('checkbox-tray')
 const checkboxMenuBar = document.getElementById('checkbox-nativeTitleBar')
 const checkboxNewVersionUpdate = document.getElementById('checkbox-newVersionUpdate')
@@ -202,23 +194,6 @@ const checkboxSettings = [
         name: 'shutdown',
         value: checkboxShutdown.checked
       })
-    }},
-  {htmlElement: checkboxSpotify,
-    settingsId: 'spotify',
-    onClick: () => {
-      console.log('onClick spotify')
-      ipcRenderer.send('set-settings', {
-        name: 'spotify',
-        value: checkboxSpotify.checked
-      })
-      // if checkbox gets checked (re-)connect to Spotify
-      if (checkboxSpotify.checked) connectToSpotify()
-      else {
-      // else disconnect and then change the picture
-        spotifyHandler.disconnect()
-        spotifySVG.classList.add('disabled')
-        spotifySVG.classList.remove('blink')
-      }
     }},
   {htmlElement: checkboxTray,
     settingsId: 'tray',
@@ -288,9 +263,6 @@ var animationPause = false
 // save time to not render more than is necessary
 var oldT
 
-// measure how long spotify needs to connect (after update not rly necessary :)
-var spotifyWebHelperStarted
-
 /* =====  Setup code  ====== */
 
 // set correct version number on the about page
@@ -300,10 +272,6 @@ settingsCheckboxSetup()
 for (const checkboxSetting of checkboxSettings) {
   checkboxSetting.htmlElement.addEventListener('change', checkboxSetting.onClick)
 }
-// connect to spotify if settings say so
-if (ipcRenderer.sendSync('get-settings', 'spotify')) connectToSpotify()
-// enable touch gesture listener if settings say so
-if (ipcRenderer.sendSync('get-settings', 'touchGestures')) activateTouchGestures()
 // setup screen positons
 aboutContainer.classList.add('hide')
 settingsContainer.classList.add('hide')
@@ -357,22 +325,6 @@ ipcRenderer.on('newVersionDetected', (event, arg) => {
 }).on('auto-updates-disabled', () => {
   checkboxNewVersionUpdate.checked = false
 })
-// onclick listener for the spotify picture
-spotifySVG.addEventListener('click', () => {
-  if (ipcRenderer.sendSync('get-settings', 'spotify')) {
-    connectToSpotify()
-    return
-  }
-  questionDialog('Spoitfy support is deactivated - do you want to enable the support for Spotify again?', () => {
-    checkboxSpotify.checked = true
-    ipcRenderer.send('set-settings', {
-      name: 'spotify',
-      value: true
-    })
-    // try to (re-)connect
-    connectToSpotify()
-  })
-})
 // shutdownTimer event listener/callbacks
 shutdownTimer
   .on('alarmCallback', (err, t) => {
@@ -382,11 +334,6 @@ shutdownTimer
     timerButtonStartStop.value = 'Start'
     // reset time display to 00:00:00:00
     setTime(0, 0, 0, 0)
-    // pause music if wanted
-    if (ipcRenderer.sendSync('get-settings', 'spotify')) {
-      spotifyHandler.pauseMusic()
-      console.log('alarm callback, pause spotify')
-    }
     // shutdown the computer if wanted
     if (ipcRenderer.sendSync('get-settings', 'shutdown')) {
       // start timeout (20s) for forcefully shutting down the computer
@@ -400,10 +347,6 @@ shutdownTimer
       questionDialog('Stop the computer from shutting down? (in 20s this will automatically happen)', () => {
         // stop timeout/shutdown
         clearTimeout(shutdownTimeout)
-        // play music again if wanted (and if it was played before the alarm went off)
-        if (ipcRenderer.sendSync('get-settings', 'spotify')) {
-          spotifyHandler.playMusic()
-        }
       }
       )
       // start a notification to inform that the computer will be shut down in 20s (for preventing it)
@@ -412,10 +355,6 @@ shutdownTimer
         dialogs.cancel()
         // clear timeout / stop shutdown
         clearTimeout(shutdownTimeout)
-        // play music again if wanted and it was played before
-        if (ipcRenderer.sendSync('get-settings', 'spotify')) {
-          spotifyHandler.playMusic()
-        }
         // restore window if it's minimized
         if (mainWindow.isMinimized()) {
           mainWindow.restore()
@@ -425,10 +364,6 @@ shutdownTimer
       })
     } else {
       const dialogTitle = `Timer has finished (after ${millisecondsToStr(t.msInput)})`
-      // if no shutdown is wished just prompt that the timer has finished and the time
-      questionDialog(dialogTitle, () => {
-        if (ipcRenderer.sendSync('get-settings', 'spotify')) spotifyHandler.playMusic()
-      })
       notificationDialog(dialogTitle, ':)', () => {
         // close open dialogs when notification gets clicked
         dialogs.cancel()
@@ -512,9 +447,6 @@ document.addEventListener('keydown', e => {
     case 32: // Space bar - Resume/Pause
       shutdownTimer.isPaused ? shutdownTimer.resume() : shutdownTimer.pause()
       break
-    case 82: // r - ickroll
-      spotifyHandler.rickroll()
-      break
   }
 })
 // if custom titlebar is selected
@@ -543,19 +475,6 @@ if (!checkboxMenuBar.checked) {
       titlebar.classList.remove('fullscreen')
     })
 }
-// spotify handler callbacks if an error comes up or a connection is initiated
-spotifyHandler
-  .on('error', () => {
-    console.log('Connection to Spotify could not be established or was killed')
-    spotifySVG.classList.remove('blink')
-  })
-  .on('ready', status => {
-    // log successful spotify connection
-    const currentlyPlayingString = `Have fun listening to "${status.track.track_resource.name}" by "${status.track.artist_resource.name}" from "${status.track.album_resource.name}" after ${millisecondsToStr(window.performance.now() - spotifyWebHelperStarted)}`
-    console.log(currentlyPlayingString)
-    // change spotify logo to a white on
-    spotifySVG.classList.remove('disabled', 'blink')
-  })
 for (const colorSetting of colorSettings) {
   settingsColorPickerSetup(colorSetting.htmlId, colorSetting.settingsId, colorSetting.cssId)
 }
@@ -642,15 +561,6 @@ function notificationDialog (title, message, clickCallback, timeoutCallback = ()
 }
 
 /**
- * (Try) to connect to Spotify
- */
-function connectToSpotify () {
-  spotifyHandler.connect()
-  spotifyWebHelperStarted = window.performance.now()
-  spotifySVG.classList.add('disabled', 'blink')
-}
-
-/**
  * Setup settings checkboxes (setup toggle elements)
  */
 function settingsCheckboxSetup () {
@@ -720,6 +630,7 @@ function rightAnimation () {
  * Activate touch gesture support
  */
 function activateTouchGestures () {
+  console.log('activate touch')
   hammer.on('panright', leftAnimation).on('panleft', rightAnimation).add(pan)
 }
 
@@ -841,3 +752,6 @@ function settingsColorPickerUpdate (htmlIdWithoutPrefix, settingId, cssVariableN
   colorPickerInput.value = style.getPropertyValue('--' + cssVariableName)
   colorPreview.style.backgroundColor = style.getPropertyValue('--' + cssVariableName)
 }
+
+// TODO: Set to a place where it belongs - just a bugfix that was fixed for now
+if (checkboxTouchGestures.checked) activateTouchGestures()

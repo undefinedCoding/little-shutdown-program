@@ -17,22 +17,20 @@ var alreadyCheckingForUpdates = false
 var mainWindow = null
 
 // singelton implementation: only one instance of the program should run
-if (
-  app.makeSingleInstance(() => {
-    // if an initalized main window (!== null) was found (restore +) focus it
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore()
-      mainWindow.focus()
-    }
-  })
-) app.quit()
+if (!app.requestSingleInstanceLock()) app.quit()
+
+app.on('second-instance', () => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore()
+    mainWindow.focus()
+  }
+})
 
 // setup of the settings with file name and default values
 settings.setup('user-preferences', {
   checkForNewVersionOnStartup: true,
   nativeTitleBar: false,
   shutdown: true,
-  spotify: false,
   touchGestures: true,
   tag: 'v' + app.getVersion(),
   timeInput: { d: '', h: '', m: '', s: '' },

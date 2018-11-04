@@ -13,15 +13,11 @@ Just a little program, that shuts down a (Windows 10) computer after a, from the
 
 From here you can set the time of the timer and start/stop, pause/resume it and also clear your input and the current timer.
 
-By clicking the Spotify logo you can (re-)connect to Spotify desktop that is running in the background. If not connected or there is an error the logo will be dark and not white.
-
 ### Settings screen
 
 ![settings-screen-screenshot](/pictures/settings-screen-screenshot.png)
 
 You can get to the settings screen by clicking the settings icon in the title bar (first icon from the left). If you click the '?' you get to the about screen. To get back home simply press either of the icons again.
-
-Here you can dis-/enable the Spotify support to pause music when the timer ends or dis-/enable the automatic shutdown that follows when the timer is expired.
 
 Also there is the option to minimze the window to the system tray or dis-/enable a native window title bar and menu if you do not like the default custom title bar.
 
@@ -43,7 +39,6 @@ Follow the instructions of the installer to install the program. Then you can st
 - The code of the timer at the start of the project: [CodePen by Dylan Macnab](https://codepen.io/DylanMacnab/pen/EVBPzK?q=Javascript+Timer&limit=all&type=type-pens)
 - The actual clock design: [CodePen by Bubba Smith](https://codepen.io/bsmith/pen/drElg?q=digital%20clock&order=popularity&depth=everything&show_forks=false)
 - The Windows 10 like checkboxes are based on: [CodePen by Chris Awesome](https://codepen.io/ChrisAwesome/pen/yNdMEP?q=windows%2010&order=popularity&depth=everything&show_forks=false)
-- The Spotify Logo is from [Wikimedia](https://commons.wikimedia.org/wiki/File:Spotify_logo_with_text.svg)
 - The used dependcies can be found in the [package.json](package.json) file
 
 ## Start/Run/Edit/Build it yourself

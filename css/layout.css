@@ -70,6 +70,7 @@ button {
     margin: 2rem auto 3rem auto;
     padding: 0 3rem;
     max-width: 850px;
+    min-height: calc(100% - 4rem - var(--titlebar-height));
 }
 
 .container h2 {
@@ -511,7 +512,7 @@ fieldset.settings-entry .color-container:hover .special {
     background-color: var(--settings-color-click);
     color: white;
 }
-fieldset.settings-entry .color-container:hover .special, 
+fieldset.settings-entry .color-container:hover .special,
 fieldset.settings-entry .color-container:hover .color-preview {
     border: var(--settings-input-color-border-width) solid var(--settings-color-click);
 }
