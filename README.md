@@ -15,16 +15,21 @@ From here you can set the time of the timer and start/stop, pause/resume it and 
 
 ### Settings and About screen
 
-You can get to the settings screen by clicking the settings icon in the title bar (first icon from the left). If you click the 'i' you get to the about screen. To get back home simply press either of the icons again.
+You can get to the settings screen by clicking the settings icon in the title bar (first icon from the left).
+If you click the `i` you get to the about screen.
+To get back home simply press either of the icons again.
 
-Also there is the option to minimze the window to the system tray or dis-/enable a native window title bar and menu if you do not like the default custom title bar.
+Also there is the option to minimize the window to the system tray or dis-/enable a native window title bar and menu if you do not like the default custom title bar.
 
 ## Installation
 
 Just go to the [GitHub Release Site](https://github.com/undefinedCoding/little-shutdown-program/releases) from this project and download the latest release.
 
-Then double-click the File `little-shutdown-program Setup 0.0.9.exe`.
-Follow the instructions of the installer to install the program. Then you can start it like any other program on your (Windows) computer.
+### Installation > Windows
+
+Then double-click the File `little-shutdown-program Setup X.Y.Z.exe`.
+Follow the instructions of the installer to install the program.
+Then you can start it like any other program on your (Windows) computer.
 
 ## Authors
 
@@ -55,15 +60,13 @@ npm install
 npm start
 ```
 
-### Build
+### Build Executable
+
+**Windows:**
 
 ``` bash
-.\build.sh
-```
-
-or
-
-``` bash
+npm run build-win
+# or
 npx electron-builder . --win
 ```
 
@@ -73,19 +76,11 @@ We used [Visual Studio Code](https://code.visualstudio.com/) for editing/creatin
 
 #### Code style
 
-If you edit code, please check that your code style is [JavaScript standard](https://standardjs.com/). Thanks to eslint you can before you commit clean all your code to this style guide by running:
+To enforce the code style run:
 
 ```bash
-eslint FILE --fix
+npm run lint
 ```
-
-To use this command you need to install the `eslint` module with the command:
-
-```bash
-npm install eslint -g
-```
-
-There is even an script named [`eslintJsFiles.sh`](eslintJsFiles.sh) which can be run and then automatically fixes the code style in all files.
 
 ## Disclaimer
 

@@ -68,36 +68,38 @@ class ShutdownTimer {
    * alarmCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
    * countdownCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
    * startCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
-   * pauseCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number},{msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
-   * resumeCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number},{msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * pauseCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number},
+   * {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
+   * resumeCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number},
+   * {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
    * stopCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
    * resetCallback: (err, {msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}) => {},
    */
   on (event, callback) {
     switch (event) {
-      case 'alarmCallback':
-        this.alarmCallback = callback
-        break
-      case 'countdownCallback':
-        this.countdownCallback = callback
-        break
-      case 'startCallback':
-        this.startCallback = callback
-        break
-      case 'pauseCallback':
-        this.pauseCallback = callback
-        break
-      case 'resumeCallback':
-        this.resumeCallback = callback
-        break
-      case 'stopCallback':
-        this.stopCallback = callback
-        break
-      case 'resetCallback':
-        this.resetCallback = callback
-        break
-      default:
-        console.error(new Error('Event does not exist!'))
+    case 'alarmCallback':
+      this.alarmCallback = callback
+      break
+    case 'countdownCallback':
+      this.countdownCallback = callback
+      break
+    case 'startCallback':
+      this.startCallback = callback
+      break
+    case 'pauseCallback':
+      this.pauseCallback = callback
+      break
+    case 'resumeCallback':
+      this.resumeCallback = callback
+      break
+    case 'stopCallback':
+      this.stopCallback = callback
+      break
+    case 'resetCallback':
+      this.resetCallback = callback
+      break
+    default:
+      console.error(new Error('Event does not exist!'))
     }
     return this
   }
@@ -137,7 +139,7 @@ class ShutdownTimer {
         return
       } else {
         milliseconds = this.inputTime.msInput
-        console.log(
+        console.debug(
           'Hint:',
           `Milliseconds were undefined, but inputTime.msInput (${this.inputTime.msInput}) was not`
         )
@@ -173,7 +175,8 @@ class ShutdownTimer {
   }
 
   /**
-   * Pause timer which means the interval will be killed, the remaining time will be saved and paused will be set to true
+   * Pause timer which means the interval will be killed, the remaining time
+   * will be saved and paused will be set to true
    */
   pause () {
     // error catching
@@ -279,12 +282,14 @@ class ShutdownTimer {
   }
 
   /**
-   * Convert given milliseconds to an object which contains days, hours, minutes, seconds, milliseconds and the original milliseconds number
-   * @param {Number} msInput - Number of milliseconds
-   * @returns {{msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}} - Time object
+   * Convert given milliseconds to an object which contains days, hours,
+   * minutes, seconds, milliseconds and the original milliseconds number
+   * @param {Number} msInput Number of milliseconds
+   * @returns {{msInput:Number,d:Number,h:Number,m:Number,s:Number,ms:Number}}
+   * Time object
    */
   msToObject (msInput) {
-    var d, h, m, s
+    var d; var h; var m; var s
     const newMs = Math.floor(msInput % 1000)
     s = Math.floor(msInput / 1000)
     m = Math.floor(s / 60)
@@ -294,16 +299,14 @@ class ShutdownTimer {
     d = Math.floor(h / 24)
     h = h % 24
     return {
-      msInput: msInput,
-      d: d,
-      h: h,
-      m: m,
-      s: s,
-      ms: newMs
+      d,
+      h,
+      m,
+      ms: newMs,
+      msInput,
+      s
     }
   }
 }
 
-module.exports = {
-  ShutdownTimer
-}
+module.exports = { ShutdownTimer }

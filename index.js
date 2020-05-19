@@ -8,7 +8,9 @@
 /* =====  Imports  ====== */
 
 const Dialogs = require('dialogs')
-const { ipcRenderer, remote, shell } = require('electron')
+const {
+  ipcRenderer, remote, shell
+} = require('electron')
 const shutdown = require('electron-shutdown-command')
 const Hammer = require('hammerjs')
 const notifier = require('node-notifier')
@@ -41,7 +43,7 @@ const shutdownTimer = new ShutdownTimer()
  * Open a given URL externally in the default browser
  * @param {String} url - Web URL
  */
-function openLinkExternally (url) {
+const openLinkExternally = (url) => {
   shell.openExternal(url)
 }
 
@@ -51,8 +53,8 @@ function openLinkExternally (url) {
  * @returns {string} Human readable time string
  * @author Dan - https://stackoverflow.com/a/8212878
  */
-function millisecondsToStr (milliseconds) {
-  const numberEnding = (number) => number > 1 ? 's' : ''
+const millisecondsToStr = (milliseconds) => {
+  const numberEnding = (num) => num > 1 ? 's' : ''
   let temp = Math.floor(milliseconds / 1000)
   const days = Math.floor((temp %= 31536000) / 86400)
   if (days) return days + ' day' + numberEnding(days)
@@ -71,7 +73,10 @@ function millisecondsToStr (milliseconds) {
  * @param {HTMLElement} elementToShow - HTML element that should slide in
  * @param {Boolean} directionRight - The direction of the slide
  */
-function slideAnimation (currentElement, elementToShow, directionRight = true, rotateElement, rotateBack = undefined, secondRotateElement = undefined, secondRotateBack = undefined) {
+const slideAnimation = (
+  currentElement, elementToShow, directionRight = true, rotateElement,
+  rotateBack = undefined, secondRotateElement = undefined, secondRotateBack = undefined
+) => {
   // do only allow one animation at a time
   if (animationPause) return
   else animationPause = true
@@ -104,12 +109,249 @@ function slideAnimation (currentElement, elementToShow, directionRight = true, r
   }, 440)
 }
 
-function rotateIcon (elementToRotate, rotateBack = false) {
+const rotateIcon = (elementToRotate, rotateBack = false) => {
   if (rotateBack) {
     elementToRotate.classList.remove('rotate')
   } else {
     elementToRotate.classList.add('rotate')
   }
+}
+
+/* =====  Global functions  ====== */
+
+/**
+ * Dialog with OK and CANCEL button
+ * @param {String} message - Message of the dialog
+ * @param {Function} okCallback - Function that will be executed on OK press
+ * @param {Function} cancelCallback - Function that will be executed on CANCEL press
+ */
+const questionDialog = (message, okCallback = () => {}, cancelCallback = () => {}) => {
+  dialogs.confirm(message, okWasPressed => {
+    if (okWasPressed) {
+      okCallback()
+    } else {
+      cancelCallback()
+    }
+  })
+}
+
+/**
+ * Notification with click and timeout listener
+ * @param {String} title - Title text
+ * @param {String} message - Message text
+ * @param {Function} clickCallback - Function that will be executed on click
+ * @param {Function} timeoutCallback - Function that will be executed on timeout
+ */
+const notificationDialog = (title, message, clickCallback, timeoutCallback = () => {}) => {
+  notifier.notify({
+    icon: path.join(__dirname, 'icon', 'icon.png'),
+    message,
+    sound: true,
+    title,
+    wait: true
+  },
+  (err, response) => {
+    if (err) return console.error(err)
+    if (response === 'the toast has timed out') timeoutCallback()
+    else clickCallback(response)
+  })
+}
+
+/**
+ * Setup settings checkboxes (setup toggle elements)
+ */
+const settingsCheckboxSetup = () => {
+  for (const checkboxSetting of checkboxSettings) {
+    checkboxSetting.htmlElement.checked = ipcRenderer.sendSync('get-settings', checkboxSetting.settingsId)
+  }
+}
+
+/**
+ * Reset settings checkboxes to their default values and execute on click functions
+ */
+const settingsCheckboxReset = () => {
+  const oldValues = []
+  const newValues = []
+  for (let i = 0; i < checkboxSettings.length; i++) {
+    oldValues[i] = checkboxSettings[i].htmlElement.checked
+  }
+  settingsCheckboxSetup()
+  for (let i = 0; i < checkboxSettings.length; i++) {
+    newValues[i] = checkboxSettings[i].htmlElement.checked
+  }
+  // do something if values are now different
+  for (let i = 0; i < checkboxSettings.length; i++) {
+    if (oldValues[i] !== newValues[i]) checkboxSettings[i].onClick()
+  }
+}
+
+/**
+ * Toggle the settings container
+ */
+const toggleSettings = () => {
+  if (aboutContainer.style.transform === '') {
+    slideAnimation(aboutContainer, settingsContainer, true, settingsIcon, false, aboutIcon, true)
+  } else if (mainContainer.style.transform === '') {
+    slideAnimation(mainContainer, settingsContainer, true, settingsIcon)
+  } else slideAnimation(settingsContainer, mainContainer, false, settingsIcon, true)
+}
+
+/**
+ * Toggle the about container
+ */
+const toggleAbout = () => {
+  if (settingsContainer.style.transform === '') {
+    slideAnimation(settingsContainer, aboutContainer, false, aboutIcon, false, settingsIcon, true)
+  } else if (mainContainer.style.transform === '') {
+    slideAnimation(mainContainer, aboutContainer, false, aboutIcon)
+  } else slideAnimation(aboutContainer, mainContainer, true, aboutIcon, true)
+}
+
+/**
+ * Move to the screen to the left
+ */
+const leftAnimation = () => {
+  if (settingsContainer.style.transform === '') toggleSettings()
+  else if (mainContainer.style.transform === '') toggleAbout()
+}
+
+/**
+ * Move to the screen to the right
+ */
+const rightAnimation = () => {
+  if (aboutContainer.style.transform === '') toggleAbout()
+  else if (mainContainer.style.transform === '') toggleSettings()
+}
+
+/**
+ * Activate touch gesture support
+ */
+const activateTouchGestures = () => {
+  console.debug('activate touch')
+  hammer.on('panright', leftAnimation)
+  hammer.on('panleft', rightAnimation)
+  hammer.add(pan)
+}
+
+/**
+ * Start timer with the inputted time or stop it if it's running
+ */
+const startstopTimer = () => {
+  // if timer is running stop it
+  if (!shutdownTimer.isStopped) return shutdownTimer.stop()
+  // else start it
+  const days = (timerInputDays.value === '') ? 0 : Number(timerInputDays.value)
+  const hours = (timerInputHours.value === '') ? 0 : Number(timerInputHours.value)
+  const minutes = (timerInputMinutes.value === '') ? 0 : Number(timerInputMinutes.value)
+  const seconds = (timerInputSeconds.value === '') ? 0 : Number(timerInputSeconds.value)
+  const allSeconds = (days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60 + seconds) * 1000
+  shutdownTimer.start(allSeconds)
+}
+
+/**
+ * Saves current inputted time in the settings and displays it on the timer if it is stopped
+ */
+const saveInput = () => {
+  const input = {
+    d: timerInputDays.value,
+    h: timerInputHours.value,
+    m: timerInputMinutes.value,
+    s: timerInputSeconds.value
+  }
+  ipcRenderer.send('set-settings', {
+    name: 'timeInput',
+    value: input
+  })
+  if (shutdownTimer.isStopped) setToReadableTime(input.d, input.h, input.m, input.s)
+}
+
+/**
+ * Convert time input into the correct DD:HH:MM:SS format and then set the time on the timer
+ * @param {String} daysInput - Day input value
+ * @param {String} hoursInput - Hour input value
+ * @param {String} minutesInput - Minute input value
+ * @param {String} secondsInput - Second input value
+ */
+const setToReadableTime = (daysInput, hoursInput, minutesInput, secondsInput) => {
+  let days = (daysInput === '') ? 0 : Number(daysInput)
+  let hours = (hoursInput === '') ? 0 : Number(hoursInput)
+  let minutes = (minutesInput === '') ? 0 : Number(minutesInput)
+  let seconds = (secondsInput === '') ? 0 : Number(secondsInput)
+  seconds = days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60 + seconds
+  minutes = Math.floor(seconds / 60)
+  seconds = seconds % 60
+  hours = Math.floor(minutes / 60)
+  minutes = minutes % 60
+  days = Math.floor(hours / 24)
+  hours = hours % 24
+  setTime(days, hours, minutes, seconds)
+}
+
+/**
+ * Sets given time on display
+ * @param {Number|String} daysInput - Number of days
+ * @param {Number|String} hoursInput - Number of hours
+ * @param {Number|String} minutesInput - Number of minutes
+ * @param {Number|String} secondsInput - Number of seconds
+ */
+const setTime = (daysInput, hoursInput, minutesInput, secondsInput) => {
+  let days = (daysInput === '') ? 0 : Number(daysInput)
+  let hours = (hoursInput === '') ? 0 : Number(hoursInput)
+  let minutes = (minutesInput === '') ? 0 : Number(minutesInput)
+  let seconds = (secondsInput === '') ? 0 : Number(secondsInput)
+
+  // save all chars in an array
+  const timeArray = [
+    days.toString().split(''),
+    hours.toString().split(''),
+    minutes.toString().split(''),
+    seconds.toString().split('')
+  ]
+  // add for every time thing two numbers
+  for (
+    let index = 0, index2 = 0; index < timeArray.length; index++, (index2 += 2)
+  ) {
+    if (timeArray[index].length > 1) {
+      digits[index2].className = digitClasses[Number(timeArray[index][0])]
+      digits[index2 + 1].className = digitClasses[Number(timeArray[index][1])]
+    } else {
+      digits[index2].className = digitClasses[0]
+      digits[index2 + 1].className = digitClasses[Number(timeArray[index][0])]
+    }
+  }
+}
+
+/**
+ * Color picker preview and listener setup
+ * @param {String} htmlIdWithoutPrefix - Id of colorpicker html element without the 'colorPicker-' at the beginning
+ * @param {String} settingId - Name of the color setting entry in the settings file
+ * @param {String} cssVariableName - Name of the CSS variable
+ */
+const settingsColorPickerSetup = (htmlIdWithoutPrefix, settingId, cssVariableName) => {
+  const colorPickerInput = document.getElementById('colorPicker-' + htmlIdWithoutPrefix)
+  const colorPreview = document.getElementById('preview-' + htmlIdWithoutPrefix)
+  colorPickerInput.addEventListener('input', () => {
+    html.style.setProperty('--' + cssVariableName, colorPickerInput.value)
+    colorPreview.style.backgroundColor = colorPickerInput.value
+    ipcRenderer.send('set-settings', {
+      name: settingId, value: colorPickerInput.value
+    })
+  })
+  settingsColorPickerUpdate(htmlIdWithoutPrefix, settingId, cssVariableName)
+}
+
+/**
+ * Update a color preview and
+ * @param {String} htmlIdWithoutPrefix - Id of colorpicker html element without the 'colorPicker-' at the beginning
+ * @param {String} settingId - Name of the color setting entry in the settings file
+ * @param {String} cssVariableName - Name of the CSS variable
+ */
+const settingsColorPickerUpdate = (htmlIdWithoutPrefix, settingId, cssVariableName) => {
+  html.style.setProperty('--' + cssVariableName, ipcRenderer.sendSync('get-settings', settingId))
+  const colorPickerInput = document.getElementById('colorPicker-' + htmlIdWithoutPrefix)
+  const colorPreview = document.getElementById('preview-' + htmlIdWithoutPrefix)
+  colorPickerInput.value = style.getPropertyValue('--' + cssVariableName)
+  colorPreview.style.backgroundColor = style.getPropertyValue('--' + cssVariableName)
 }
 
 /* =====  Global variables  ====== */
@@ -171,34 +413,41 @@ const html = document.getElementsByTagName('html')[0]
 const style = window.getComputedStyle(document.body)
 
 // digit classes for CSS (clock)
-const digitClasses = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+const digitClasses = [ 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine' ]
 
 // get the time input from the last session
 const timeInputLastSession = ipcRenderer.sendSync('get-settings', 'timeInput')
 
 // color settings
 const colorSettings = [
-  {htmlId: 'backgroundColor', settingsId: 'mainColor', cssId: 'main-color'},
-  {htmlId: 'textColor', settingsId: 'mainColorText', cssId: 'main-color-text'},
-  {htmlId: 'titleBarColor', settingsId: 'titlebarColorTextIcon', cssId: 'titlebar-color-text-icon'}
+  {
+    cssId: 'main-color', htmlId: 'backgroundColor', settingsId: 'mainColor'
+  },
+  {
+    cssId: 'main-color-text', htmlId: 'textColor', settingsId: 'mainColorText'
+  },
+  {
+    cssId: 'titlebar-color-text-icon', htmlId: 'titleBarColor', settingsId: 'titlebarColorTextIcon'
+  }
 ]
 
 // checkbox settings
 const checkboxSettings = [
-  {htmlElement: checkboxShutdown,
-    settingsId: 'shutdown',
+  {
+    htmlElement: checkboxShutdown,
     onClick: () => {
-      console.log('onClick shutdown')
+      console.debug('onClick shutdown')
       ipcRenderer.send('set-settings', {
         name: 'shutdown',
         value: checkboxShutdown.checked
       })
-    }},
-  {htmlElement: checkboxTray,
-    settingsId: 'tray',
-    restart: true,
+    },
+    settingsId: 'shutdown'
+  },
+  {
+    htmlElement: checkboxTray,
     onClick: () => {
-      console.log('onClick tray')
+      console.debug('onClick tray')
       // every time the checkbox is clicked ask for a restart of the program
       // to add/remove the tray
       questionDialog('To change this option you need to restart the program', () => {
@@ -211,12 +460,14 @@ const checkboxSettings = [
       }, () => {
         checkboxTray.checked = ipcRenderer.send('get-settings', 'tray')
       })
-    }},
-  {htmlElement: checkboxMenuBar,
-    settingsId: 'nativeTitleBar',
+    },
     restart: true,
+    settingsId: 'tray'
+  },
+  {
+    htmlElement: checkboxMenuBar,
     onClick: () => {
-      console.log('onClick nativeTitleBar')
+      console.debug('onClick nativeTitleBar')
       // every time the checkbox is clicked ask for a restart of the program
       // to add/remove the tray
       questionDialog('To change this option you need to restart the program', () => {
@@ -232,28 +483,35 @@ const checkboxSettings = [
           'nativeTitleBar'
         )
       })
-    }},
-  {htmlElement: checkboxNewVersionUpdate,
-    settingsId: 'checkForNewVersionOnStartup',
+    },
+    restart: true,
+    settingsId: 'nativeTitleBar'
+  },
+  {
+    htmlElement: checkboxNewVersionUpdate,
     onClick: () => {
-      console.log('onClick checkForNewVersionOnStartup')
+      console.debug('onClick checkForNewVersionOnStartup')
       ipcRenderer.send('set-settings', {
         name: 'checkForNewVersionOnStartup',
         value: checkboxNewVersionUpdate.checked
       })
       if (checkboxNewVersionUpdate.checked) ipcRenderer.send('check-for-update')
-    }},
-  {htmlElement: checkboxTouchGestures,
-    settingsId: 'touchGestures',
+    },
+    settingsId: 'checkForNewVersionOnStartup'
+  },
+  {
+    htmlElement: checkboxTouchGestures,
     onClick: () => {
-      console.log('onClick touchGestures')
+      console.debug('onClick touchGestures')
       ipcRenderer.send('set-settings', {
         name: 'touchGestures',
         value: checkboxTouchGestures.checked
       })
       if (checkboxTouchGestures.checked) activateTouchGestures()
       else hammer.remove(pan)
-    }}
+    },
+    settingsId: 'touchGestures'
+  }
 ]
 
 // indicator if right now an animation is played
@@ -297,7 +555,11 @@ if (checkboxMenuBar.checked) {
     mainWindow.minimize()
   })
   titlebarResize.addEventListener('click', () => {
-    mainWindow.isMaximized() ? mainWindow.restore() : mainWindow.maximize()
+    if (mainWindow.isMaximized()) {
+      mainWindow.restore()
+    } else {
+      mainWindow.maximize()
+    }
   })
   titlebarClose.addEventListener('click', () => {
     // if timer is still running ask if the program really should be closed
@@ -338,9 +600,7 @@ shutdownTimer
       // start timeout (20s) for forcefully shutting down the computer
       const shutdownTimeout = setTimeout(() => {
         // simple system shutdown with default options
-        shutdown.shutdown({
-          force: true
-        })
+        shutdown.shutdown({ force: true })
       }, 20000)
       // start dialog to inform that the computer will be shut down in 20s (for preventing it)
       questionDialog('Stop the computer from shutting down? (in 20s this will automatically happen)', () => {
@@ -349,23 +609,26 @@ shutdownTimer
       }
       )
       // start a notification to inform that the computer will be shut down in 20s (for preventing it)
-      notificationDialog('Timer is finished (' + millisecondsToStr(t.msInput) + ')', 'The computer is about to shut down (20s) - click here to stop this from happening!', (response) => {
-        if (response == null || response === undefined || response === '') {
+      notificationDialog('Timer is finished (' + millisecondsToStr(t.msInput) + ')',
+        'The computer is about to shut down (20s)'
+                         + ' - click here to stop this from happening!',
+        (response) => {
+          if (response == null || response === undefined || response === '') {
           // Catch undefined behaviour
           // TODO Notifier doesn't work on Manjaro Linux!!!
-          return;
-        }
-        // close open dialogs when notification gets clicked
-        dialogs.cancel()
-        // clear timeout / stop shutdown
-        clearTimeout(shutdownTimeout)
-        // restore window if it's minimized
-        if (mainWindow.isMinimized()) {
-          mainWindow.restore()
-        }
-        // focus the window
-        mainWindow.focus()
-      })
+            return
+          }
+          // close open dialogs when notification gets clicked
+          dialogs.cancel()
+          // clear timeout / stop shutdown
+          clearTimeout(shutdownTimeout)
+          // restore window if it's minimized
+          if (mainWindow.isMinimized()) {
+            mainWindow.restore()
+          }
+          // focus the window
+          mainWindow.focus()
+        })
     } else {
       const dialogTitle = `Timer has finished (after ${millisecondsToStr(t.msInput)})`
       notificationDialog(dialogTitle, ':)', () => {
@@ -430,27 +693,31 @@ shutdownTimer
 // event listener for dev shortcuts
 document.addEventListener('keydown', e => {
   switch (e.which) {
-    case 116: // F5 - reload app
-      mainWindow.reload()
-      break
-    case 122: // F11 - Fullscreen
-      mainWindow.setFullScreen(!mainWindow.isFullScreen())
-      break
-    case 123: // F12 - dev tools
-      mainWindow.webContents.toggleDevTools()
-      break
-    case 37: // <-  - Screen switch left
-      leftAnimation()
-      break
-    case 39: // -> - Screen switch right
-      rightAnimation()
-      break
-    case 13: // Enter - Start/Stop
-      startstopTimer()
-      break
-    case 32: // Space bar - Resume/Pause
-      shutdownTimer.isPaused ? shutdownTimer.resume() : shutdownTimer.pause()
-      break
+  case 116: // F5 - reload app
+    mainWindow.reload()
+    break
+  case 122: // F11 - Fullscreen
+    mainWindow.setFullScreen(!mainWindow.isFullScreen())
+    break
+  case 123: // F12 - dev tools
+    mainWindow.webContents.toggleDevTools()
+    break
+  case 37: // <-  - Screen switch left
+    leftAnimation()
+    break
+  case 39: // -> - Screen switch right
+    rightAnimation()
+    break
+  case 13: // Enter - Start/Stop
+    startstopTimer()
+    break
+  case 32: // Space bar - Resume/Pause
+    if (shutdownTimer.isPaused) {
+      shutdownTimer.resume()
+    } else {
+      shutdownTimer.pause()
+    }
+    break
   }
 })
 // if custom titlebar is selected
@@ -512,14 +779,20 @@ resetSettingsButton.addEventListener('click', () => {
   }
 })
 resetEverythingButton.addEventListener('click', () => {
-  questionDialog('To reset everything the program will restart, do you really want to reset everything back to default?', () => {
+  questionDialog('To reset everything the program will restart,'
+                 + ' do you really want to reset everything back to default?',
+  () => {
     ipcRenderer.sendSync('reset-settings-all')
     ipcRenderer.send('relaunch')
   })
 })
 // timer pause/resume button - resume timer or pause if running
 timerButtonPauseResume.addEventListener('click', () => {
-  shutdownTimer.isPaused ? shutdownTimer.resume() : shutdownTimer.pause()
+  if (shutdownTimer.isPaused) {
+    shutdownTimer.resume()
+  } else {
+    shutdownTimer.pause()
+  }
 })
 // timer start/resume button - start timer if no timer is running else stop it
 timerButtonStartStop.addEventListener('click', startstopTimer)
@@ -527,237 +800,6 @@ timerButtonStartStop.addEventListener('click', startstopTimer)
 timerButtonClear.addEventListener('click', () => {
   shutdownTimer.reset()
 })
-
-/* =====  Global functions  ====== */
-
-/**
- * Dialog with OK and CANCEL button
- * @param {String} message - Message of the dialog
- * @param {Function} okCallback - Function that will be executed on OK press
- * @param {Function} cancelCallback - Function that will be executed on CANCEL press
- */
-function questionDialog (message, okCallback = () => {}, cancelCallback = () => {}) {
-  dialogs.confirm(message, okWasPressed => {
-    okWasPressed ? okCallback() : cancelCallback()
-  })
-}
-
-/**
- * Notification with click and timeout listener
- * @param {String} title - Title text
- * @param {String} message - Message text
- * @param {Function} clickCallback - Function that will be executed on click
- * @param {Function} timeoutCallback - Function that will be executed on timeout
- */
-function notificationDialog (title, message, clickCallback, timeoutCallback = () => {}) {
-  notifier.notify({
-    title: title,
-    message: message,
-    icon: path.join(__dirname, 'icon', 'icon.png'),
-    sound: true,
-    wait: true
-  },
-  (err, response) => {
-    if (err) return console.error(err)
-    if (response === 'the toast has timed out') timeoutCallback()
-    else clickCallback(response)
-  })
-}
-
-/**
- * Setup settings checkboxes (setup toggle elements)
- */
-function settingsCheckboxSetup () {
-  for (const checkboxSetting of checkboxSettings) {
-    checkboxSetting.htmlElement.checked = ipcRenderer.sendSync('get-settings', checkboxSetting.settingsId)
-  }
-}
-
-/**
- * Reset settings checkboxes to their default values and execute on click functions
- */
-function settingsCheckboxReset () {
-  const oldValues = []
-  const newValues = []
-  for (let i = 0; i < checkboxSettings.length; i++) {
-    oldValues[i] = checkboxSettings[i].htmlElement.checked
-  }
-  settingsCheckboxSetup()
-  for (let i = 0; i < checkboxSettings.length; i++) {
-    newValues[i] = checkboxSettings[i].htmlElement.checked
-  }
-  // do something if values are now different
-  for (let i = 0; i < checkboxSettings.length; i++) {
-    if (oldValues[i] !== newValues[i]) checkboxSettings[i].onClick()
-  }
-}
-
-/**
- * Toggle the settings container
- */
-function toggleSettings () {
-  if (aboutContainer.style.transform === '') {
-    slideAnimation(aboutContainer, settingsContainer, true, settingsIcon, false, aboutIcon, true)
-  } else if (mainContainer.style.transform === '') {
-    slideAnimation(mainContainer, settingsContainer, true, settingsIcon)
-  } else slideAnimation(settingsContainer, mainContainer, false, settingsIcon, true)
-}
-
-/**
- * Toggle the about container
- */
-function toggleAbout () {
-  if (settingsContainer.style.transform === '') {
-    slideAnimation(settingsContainer, aboutContainer, false, aboutIcon, false, settingsIcon, true)
-  } else if (mainContainer.style.transform === '') {
-    slideAnimation(mainContainer, aboutContainer, false, aboutIcon)
-  } else slideAnimation(aboutContainer, mainContainer, true, aboutIcon, true)
-}
-
-/**
- * Move to the screen to the left
- */
-function leftAnimation () {
-  if (settingsContainer.style.transform === '') toggleSettings()
-  else if (mainContainer.style.transform === '') toggleAbout()
-}
-
-/**
- * Move to the screen to the right
- */
-function rightAnimation () {
-  if (aboutContainer.style.transform === '') toggleAbout()
-  else if (mainContainer.style.transform === '') toggleSettings()
-}
-
-/**
- * Activate touch gesture support
- */
-function activateTouchGestures () {
-  console.log('activate touch')
-  hammer.on('panright', leftAnimation)
-  hammer.on('panleft', rightAnimation)
-  hammer.add(pan)
-}
-
-/**
- * Start timer with the inputted time or stop it if it's running
- */
-function startstopTimer () {
-  // if timer is running stop it
-  if (!shutdownTimer.isStopped) return shutdownTimer.stop()
-  // else start it
-  const days = (timerInputDays.value === '') ? 0 : Number(timerInputDays.value)
-  const hours = (timerInputHours.value === '') ? 0 : Number(timerInputHours.value)
-  const minutes = (timerInputMinutes.value === '') ? 0 : Number(timerInputMinutes.value)
-  const seconds = (timerInputSeconds.value === '') ? 0 : Number(timerInputSeconds.value)
-  const allSeconds = (days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60 + seconds) * 1000
-  shutdownTimer.start(allSeconds)
-}
-
-/**
- * Saves current inputted time in the settings and displays it on the timer if it is stopped
- */
-function saveInput () {
-  const input = {
-    d: timerInputDays.value,
-    h: timerInputHours.value,
-    m: timerInputMinutes.value,
-    s: timerInputSeconds.value
-  }
-  ipcRenderer.send('set-settings', {
-    name: 'timeInput',
-    value: input
-  })
-  if (shutdownTimer.isStopped) setToReadableTime(input.d, input.h, input.m, input.s)
-}
-
-/**
- * Convert time input into the correct DD:HH:MM:SS format and then set the time on the timer
- * @param {String} daysInput - Day input value
- * @param {String} hoursInput - Hour input value
- * @param {String} minutesInput - Minute input value
- * @param {String} secondsInput - Second input value
- */
-function setToReadableTime (daysInput, hoursInput, minutesInput, secondsInput) {
-  let days = (daysInput === '') ? 0 : Number(daysInput)
-  let hours = (hoursInput === '') ? 0 : Number(hoursInput)
-  let minutes = (minutesInput === '') ? 0 : Number(minutesInput)
-  let seconds = (secondsInput === '') ? 0 : Number(secondsInput)
-  seconds = days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60 + seconds
-  minutes = Math.floor(seconds / 60)
-  seconds = seconds % 60
-  hours = Math.floor(minutes / 60)
-  minutes = minutes % 60
-  days = Math.floor(hours / 24)
-  hours = hours % 24
-  setTime(days, hours, minutes, seconds)
-}
-
-/**
- * Sets given time on display
- * @param {Number|String} daysInput - Number of days
- * @param {Number|String} hoursInput - Number of hours
- * @param {Number|String} minutesInput - Number of minutes
- * @param {Number|String} secondsInput - Number of seconds
- */
-function setTime (daysInput, hoursInput, minutesInput, secondsInput) {
-  let days = (daysInput === '') ? 0 : Number(daysInput)
-  let hours = (hoursInput === '') ? 0 : Number(hoursInput)
-  let minutes = (minutesInput === '') ? 0 : Number(minutesInput)
-  let seconds = (secondsInput === '') ? 0 : Number(secondsInput)
-
-  // save all chars in an array
-  const timeArray = [
-    days.toString().split(''),
-    hours.toString().split(''),
-    minutes.toString().split(''),
-    seconds.toString().split('')
-  ]
-  // add for every time thing two numbers
-  for (
-    let index = 0, index2 = 0; index < timeArray.length; index++, (index2 += 2)
-  ) {
-    if (timeArray[index].length > 1) {
-      digits[index2].className = digitClasses[Number(timeArray[index][0])]
-      digits[index2 + 1].className = digitClasses[Number(timeArray[index][1])]
-    } else {
-      digits[index2].className = digitClasses[0]
-      digits[index2 + 1].className = digitClasses[Number(timeArray[index][0])]
-    }
-  }
-}
-
-/**
- * Color picker preview and listener setup
- * @param {String} htmlIdWithoutPrefix - Id of colorpicker html element without the 'colorPicker-' at the beginning
- * @param {String} settingId - Name of the color setting entry in the settings file
- * @param {String} cssVariableName - Name of the CSS variable
- */
-function settingsColorPickerSetup (htmlIdWithoutPrefix, settingId, cssVariableName) {
-  const colorPickerInput = document.getElementById('colorPicker-' + htmlIdWithoutPrefix)
-  const colorPreview = document.getElementById('preview-' + htmlIdWithoutPrefix)
-  colorPickerInput.addEventListener('input', () => {
-    html.style.setProperty('--' + cssVariableName, colorPickerInput.value)
-    colorPreview.style.backgroundColor = colorPickerInput.value
-    ipcRenderer.send('set-settings', {name: settingId, value: colorPickerInput.value})
-  })
-  settingsColorPickerUpdate(htmlIdWithoutPrefix, settingId, cssVariableName)
-}
-
-/**
- * Update a color preview and
- * @param {String} htmlIdWithoutPrefix - Id of colorpicker html element without the 'colorPicker-' at the beginning
- * @param {String} settingId - Name of the color setting entry in the settings file
- * @param {String} cssVariableName - Name of the CSS variable
- */
-function settingsColorPickerUpdate (htmlIdWithoutPrefix, settingId, cssVariableName) {
-  html.style.setProperty('--' + cssVariableName, ipcRenderer.sendSync('get-settings', settingId))
-  const colorPickerInput = document.getElementById('colorPicker-' + htmlIdWithoutPrefix)
-  const colorPreview = document.getElementById('preview-' + htmlIdWithoutPrefix)
-  colorPickerInput.value = style.getPropertyValue('--' + cssVariableName)
-  colorPreview.style.backgroundColor = style.getPropertyValue('--' + cssVariableName)
-}
 
 // TODO: Set to a place where it belongs - just a bugfix that was fixed for now
 if (checkboxTouchGestures.checked) activateTouchGestures()

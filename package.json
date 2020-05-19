@@ -11,7 +11,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build-win": "npx electron-builder . --win"
+    "build-win": "npx electron-builder . --win",
+    "lint": "eslint -c .eslintrc.js --ext .js js index.js main.js --fix"
   },
   "dependencies": {
     "dialogs": "^2.0.1",
@@ -22,9 +23,11 @@
   "devDependencies": {
     "electron": "^9.0.0",
     "electron-builder": "^22.6.1",
+    "eslint": "^7.0.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prefer-arrow": "^1.2.1",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1"
   },

@@ -7,10 +7,12 @@
 
 /* =====  Imports  ====== */
 
-const { app, BrowserWindow, dialog, ipcMain, Menu, net, shell, Tray } = require('electron')
+const {
+  app, BrowserWindow, dialog, ipcMain, Menu, net, shell, Tray
+} = require('electron')
 const path = require('path')
-const url = require('url')
 const settings = require('./js/settings')
+const url = require('url')
 
 // global variables
 var alreadyCheckingForUpdates = false
@@ -29,52 +31,26 @@ app.on('second-instance', () => {
 // setup of the settings with file name and default values
 settings.setup('user-preferences', {
   checkForNewVersionOnStartup: true,
+  mainColor: '#c9329e',
+  mainColorText: 'white',
   nativeTitleBar: false,
   shutdown: true,
-  touchGestures: true,
   tag: 'v' + app.getVersion(),
-  timeInput: { d: '', h: '', m: '', s: '' },
+  timeInput: {
+    d: '', h: '', m: '', s: ''
+  },
+  titlebarColorTextIcon: 'white',
+  touchGestures: true,
   tray: false,
-  windowBounds: { width: 600, height: 600, x: 0, y: 0 },
-  mainColorText: 'white',
-  mainColor: '#c9329e',
-  titlebarColorTextIcon: 'white'
+  windowBounds: {
+    height: 600, width: 600, x: 0, y: 0
+  }
 })
-
-// interprocess communication listeners
-ipcMain
-  .on('get-settings', (event, arg) => {
-    event.returnValue = settings.get(arg)
-  })
-  .on('get-settings-default', (event, arg) => {
-    event.returnValue = settings.getDefault(arg)
-  })
-  .on('reset-settings', (event, arg) => {
-    event.returnValue = settings.reset(arg)
-  })
-  .on('reset-settings-all', (event) => {
-    settings.resetAll()
-    event.returnValue = true
-  })
-  .on('set-settings', (event, arg) => {
-    settings.set(arg.name, arg.value)
-  })
-  .on('get-name', event => {
-    event.returnValue = app.getName()
-  })
-  .on('check-for-update', checkForNewVersion)
-  .on('relaunch', () => {
-    // save settings before closing the app
-    saveSettings()
-    // close and reopen the app
-    app.relaunch({ args: process.argv.slice(1).concat(['--relaunch']) })
-    app.exit(0)
-  })
 
 /**
  * Check for a new version
  */
-function checkForNewVersion () {
+const checkForNewVersion = () => {
   // if there currently is no version check
   if (alreadyCheckingForUpdates) return
   // else block this function until it is finished
@@ -111,31 +87,31 @@ function checkForNewVersion () {
           dialog.showMessageBox(
             mainWindow,
             {
-              type: 'info',
-              title: 'New version avaible',
+              buttons: [ 'OK', 'NO', 'DISABLE NOTIFICATION' ],
+              detail: `Installed: ${currentTag}, Latest: ${latestRelease.tag_name}`,
               message: 'Do you want to install the new version?',
-              buttons: ['OK', 'NO', 'DISABLE NOTIFICATION'],
-              detail: `Installed: ${currentTag}, Latest: ${latestRelease.tag_name}`
+              title: 'New version avaible',
+              type: 'info'
             }).then(buttonId => {
-              switch (buttonId.response) {
-                case 0: // OK -> Open release website
-                  shell.openExternal(latestRelease.html_url)
-                  break
-                case 2: // DISABLE NOTIFICATION -> Stop searching for updates on startup
-                  settings.set('checkForNewVersionOnStartup', false)
-                  mainWindow.webContents.send('auto-updates-disabled')
-              }
+            switch (buttonId.response) {
+            case 0: // OK -> Open release website
+              shell.openExternal(latestRelease.html_url)
+              break
+            case 2: // DISABLE NOTIFICATION -> Stop searching for updates on startup
+              settings.set('checkForNewVersionOnStartup', false)
+              mainWindow.webContents.send('auto-updates-disabled')
             }
+          }
           )
         }
       } catch (e) {
-        console.log(`ERROR: [PARSE JSON] ${JSON.stringify(e)}`)
+        console.error(`ERROR: [PARSE JSON] ${JSON.stringify(e)}`)
       }
     }).on('error', error => {
-      console.log(`ERROR: [RESPONSE] ${JSON.stringify(error)}`)
+      console.error(`ERROR: [RESPONSE] ${JSON.stringify(error)}`)
     })
   }).on('error', error => {
-    console.log(`ERROR: [REQUEST] ${JSON.stringify(error)}`)
+    console.error(`ERROR: [REQUEST] ${JSON.stringify(error)}`)
   }).on('close', () => {
     // will be called after 'the last' event in the HTTP request-response transaction was done
     // because of that unblock the use of this function
@@ -143,32 +119,62 @@ function checkForNewVersion () {
   }).end()
 }
 
+// interprocess communication listeners
+ipcMain
+  .on('get-settings', (event, arg) => {
+    event.returnValue = settings.get(arg)
+  })
+  .on('get-settings-default', (event, arg) => {
+    event.returnValue = settings.getDefault(arg)
+  })
+  .on('reset-settings', (event, arg) => {
+    event.returnValue = settings.reset(arg)
+  })
+  .on('reset-settings-all', (event) => {
+    settings.resetAll()
+    event.returnValue = true
+  })
+  .on('set-settings', (event, arg) => {
+    settings.set(arg.name, arg.value)
+  })
+  .on('get-name', event => {
+    event.returnValue = app.getName()
+  })
+  .on('check-for-update', checkForNewVersion)
+  .on('relaunch', () => {
+    // save settings before closing the app
+    saveSettings()
+    // close and reopen the app
+    app.relaunch({ args: process.argv.slice(1).concat(['--relaunch']) })
+    app.exit(0)
+  })
+
 /**
  * Create the main window
  */
-function createWindow () {
+const createWindow = () => {
   // get settings
   const settingsWindowBounds = settings.get('windowBounds')
   const settingsNativeTitleBar = settings.get('nativeTitleBar')
   const settingsTray = settings.get('tray')
   // create a BrowserWindow object
   mainWindow = new BrowserWindow({
-    webPreferences: {
-        enableRemoteModule: true,
-        nodeIntegration: true
-    },
+    center: settingsWindowBounds.x === 0 && settingsWindowBounds.y === 0,
+    frame: settingsNativeTitleBar,
+    height: settingsWindowBounds.height,
+    icon: path.join(__dirname, 'icon', 'icon.png'),
+    minHeight: 600,
+    minWidth: 600,
+    show: false, // do not show the window before content is loaded
     title: app.getName(),
     titleBarStyle: 'hidden', // macOS: buttons are an overlay
-    minWidth: 600,
-    minHeight: 600,
+    webPreferences: {
+      enableRemoteModule: true,
+      nodeIntegration: true
+    },
     width: settingsWindowBounds.width,
-    height: settingsWindowBounds.height,
     x: settingsWindowBounds.x,
-    y: settingsWindowBounds.y,
-    frame: settingsNativeTitleBar,
-    show: false, // do not show the window before content is loaded
-    icon: path.join(__dirname, 'icon', 'icon.png'),
-    center: settingsWindowBounds.x === 0 && settingsWindowBounds.y === 0
+    y: settingsWindowBounds.y
   })
   // load the 'index.html' file in the window
   mainWindow.loadURL(
@@ -183,16 +189,16 @@ function createWindow () {
     Menu.setApplicationMenu(
       Menu.buildFromTemplate([
         {
-          label: 'Settings',
-          click () {
+          click: () => {
             mainWindow.webContents.send('toggleSettings')
-          }
+          },
+          label: 'Settings'
         },
         {
-          label: 'About',
-          click () {
+          click: () => {
             mainWindow.webContents.send('toggleAbout')
-          }
+          },
+          label: 'About'
         }
       ])
     )
@@ -200,20 +206,22 @@ function createWindow () {
   // if a tray icon is wanted create one
   if (settingsTray) {
     // create tray icon and right click method
-    const tray = new Tray(
-      path.join(__dirname, 'icon', 'icon.png')
-    ).on('click', () => {
+    const tray = new Tray(path.join(__dirname, 'icon', 'icon.png')).on('click', () => {
       // if tray icon is clicked the window will either be hidden or shown
-      mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
+      if (mainWindow.isVisible()) {
+        mainWindow.hide()
+      } else {
+        mainWindow.show()
+      }
     })
     // create left click method / context menu
     tray.setContextMenu(
       Menu.buildFromTemplate([
         {
-          label: 'Close',
           click: () => {
             mainWindow.close()
-          }
+          },
+          label: 'Close'
         }
       ])
     )
@@ -244,7 +252,7 @@ function createWindow () {
 /**
  * Save current settings (+ window size/position) in preferences file
  */
-function saveSettings () {
+const saveSettings = () => {
   settings.set('windowBounds', mainWindow.getBounds())
   settings.save()
 }
