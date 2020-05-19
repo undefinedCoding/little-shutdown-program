@@ -38,7 +38,7 @@ class Settings {
    */
   load () {
     try {
-      return JSON.parse(fs.readFileSync(this.pathSettingsFile))
+      return JSON.parse(fs.readFileSync(this.pathSettingsFile).toString())
     } catch (error) {
       console.log('File does not yet exist or another error', error)
       return {}

@@ -18,19 +18,19 @@ class ShutdownTimer {
     this.paused = undefined
 
     // callback methods
-    this.alarmCallback = () => {}
-    this.countdownCallback = () => {}
-    this.startCallback = () => {}
-    this.pauseCallback = () => {}
-    this.resumeCallback = () => {}
-    this.stopCallback = () => {}
-    this.resetCallback = () => {}
+    this.alarmCallback = (error, msObject) => {}
+    this.countdownCallback = (error, msObject) => {}
+    this.startCallback = (error, msObject) => {}
+    this.pauseCallback = (error, msObject1, msObject2) => {}
+    this.resumeCallback = (error, msObject1, msObject2) => {}
+    this.stopCallback = (error, msObject) => {}
+    this.resetCallback = (error) => {}
     // special callback method that runs every millisecond the timer runs
     this.timerCallback = () => {
       if (this.timerId === undefined) {
-        this.countdownCallback(new Error('Callback timer is not defined!'))
+        this.countdownCallback(Error('Callback timer is not defined!'))
       } else if (this.remainingTime === undefined) {
-        this.countdownCallback(new Error('No remaining time defined!'))
+        this.countdownCallback(Error('No remaining time defined!'))
       } else {
         this.remainingTime -= Math.floor(
           window.performance.now() - this.lastExecutedTime
@@ -108,10 +108,10 @@ class ShutdownTimer {
   alarm () {
     // error catching
     if (this.timerId === undefined) {
-      this.alarmCallback(new Error('The timer id was undefined!'))
+      this.alarmCallback(Error('The timer id was undefined!'))
       return
     } else if (this.inputTime === undefined) {
-      this.alarmCallback(new Error('The input time was undefined!'))
+      this.alarmCallback(Error('The input time was undefined!'))
       return
     }
 
@@ -130,10 +130,10 @@ class ShutdownTimer {
     // error catching
     if (milliseconds === undefined) {
       if (this.inputTime === undefined) {
-        this.startCallback(new Error('No milliseconds/saved-input-time found!'))
+        this.startCallback(Error('No milliseconds/saved-input-time found!'))
         return
       } else if (this.inputTime.msInput === undefined) {
-        this.startCallback(new Error('Saved input time was not defined!'))
+        this.startCallback(Error('Saved input time was not defined!'))
         return
       } else {
         milliseconds = this.inputTime.msInput
@@ -143,10 +143,10 @@ class ShutdownTimer {
         )
       }
     } else if (isNaN(milliseconds)) {
-      this.startCallback(new Error('Given milliseconds is not a number!'))
+      this.startCallback(Error('Given milliseconds is not a number!'))
       return
     } else if (milliseconds < 0) {
-      this.startCallback(new Error('Given milliseconds cannot be less than 0!'))
+      this.startCallback(Error('Given milliseconds cannot be less than 0!'))
       return
     }
 
@@ -178,10 +178,10 @@ class ShutdownTimer {
   pause () {
     // error catching
     if (this.timerId === undefined) {
-      this.pauseCallback('The timer id was undefined')
+      this.pauseCallback(Error('The timer id was undefined'))
       return
     } else if (this.paused === undefined) {
-      this.resumeCallback(new Error('The timer was not started before'))
+      this.resumeCallback(Error('The timer was not started before'))
       return
     }
 
@@ -242,11 +242,11 @@ class ShutdownTimer {
     // error catching
     if (this.timerId === undefined) {
       // check if a timer was defined
-      this.stopCallback(new Error('There was no timer defined'))
+      this.stopCallback(Error('There was no timer defined'))
       return
     } else if (this.inputTime === undefined) {
       // check if there is a saved input time
-      this.stopCallback(new Error('There was no input time defined'))
+      this.stopCallback(Error('There was no input time defined'))
       return
     }
 

@@ -7,7 +7,7 @@
 
 /* =====  Imports  ====== */
 
-const Dialog = require('dialogs')
+const Dialogs = require('dialogs')
 const { ipcRenderer, remote, shell } = require('electron')
 const shutdown = require('electron-shutdown-command')
 const Hammer = require('hammerjs')
@@ -20,7 +20,7 @@ const { ShutdownTimer } = require('./js/timer')
 /**
  * Dialog object - controls popup dialogs
  */
-const dialogs = new Dialog()
+const dialogs = Dialogs()
 /**
  * Hammer 'object' - gesture listener
  */
@@ -71,7 +71,7 @@ function millisecondsToStr (milliseconds) {
  * @param {HTMLElement} elementToShow - HTML element that should slide in
  * @param {Boolean} directionRight - The direction of the slide
  */
-function slideAnimation (currentElement, elementToShow, directionRight = true, rotateElement, rotateBack, secondRotateElement, secondRotateBack) {
+function slideAnimation (currentElement, elementToShow, directionRight = true, rotateElement, rotateBack = undefined, secondRotateElement = undefined, secondRotateBack = undefined) {
   // do only allow one animation at a time
   if (animationPause) return
   else animationPause = true
@@ -135,8 +135,7 @@ const timerButtonPauseResume = document.getElementById('button_pause_resume')
 const timerButtonStartStop = document.getElementById('button_start_stop')
 const timerButtonClear = document.getElementById('button_clear')
 // mainContainer >> the digits of the time display
-var digits = document.getElementById('digits')
-digits = Array.from(digits.children)
+var digits = Array.from(document.getElementById('digits').children)
 for (let i = 0; i < digits.length; i++) {
   if (digits[i].className === 'dots') {
     digits.splice(i, 1)
@@ -433,7 +432,7 @@ document.addEventListener('keydown', e => {
       mainWindow.setFullScreen(!mainWindow.isFullScreen())
       break
     case 123: // F12 - dev tools
-      mainWindow.toggleDevTools()
+      mainWindow.webContents.toggleDevTools()
       break
     case 37: // <-  - Screen switch left
       leftAnimation()
@@ -631,7 +630,9 @@ function rightAnimation () {
  */
 function activateTouchGestures () {
   console.log('activate touch')
-  hammer.on('panright', leftAnimation).on('panleft', rightAnimation).add(pan)
+  hammer.on('panright', leftAnimation)
+  hammer.on('panleft', rightAnimation)
+  hammer.add(pan)
 }
 
 /**
@@ -668,16 +669,16 @@ function saveInput () {
 
 /**
  * Convert time input into the correct DD:HH:MM:SS format and then set the time on the timer
- * @param {String} days - Day input value
- * @param {String} hours - Hour input value
- * @param {String} minutes - Minute input value
- * @param {String} seconds - Second input value
+ * @param {String} daysInput - Day input value
+ * @param {String} hoursInput - Hour input value
+ * @param {String} minutesInput - Minute input value
+ * @param {String} secondsInput - Second input value
  */
-function setToReadableTime (days, hours, minutes, seconds) {
-  days = (days === '') ? 0 : Number(days)
-  hours = (hours === '') ? 0 : Number(hours)
-  minutes = (minutes === '') ? 0 : Number(minutes)
-  seconds = (seconds === '') ? 0 : Number(seconds)
+function setToReadableTime (daysInput, hoursInput, minutesInput, secondsInput) {
+  let days = (daysInput === '') ? 0 : Number(daysInput)
+  let hours = (hoursInput === '') ? 0 : Number(hoursInput)
+  let minutes = (minutesInput === '') ? 0 : Number(minutesInput)
+  let seconds = (secondsInput === '') ? 0 : Number(secondsInput)
   seconds = days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60 + seconds
   minutes = Math.floor(seconds / 60)
   seconds = seconds % 60
@@ -690,16 +691,16 @@ function setToReadableTime (days, hours, minutes, seconds) {
 
 /**
  * Sets given time on display
- * @param {Number} days - Number of days
- * @param {Number} hours - Number of hours
- * @param {Number} minutes - Number of minutes
- * @param {Number} seconds - Number of seconds
+ * @param {Number|String} daysInput - Number of days
+ * @param {Number|String} hoursInput - Number of hours
+ * @param {Number|String} minutesInput - Number of minutes
+ * @param {Number|String} secondsInput - Number of seconds
  */
-function setTime (days, hours, minutes, seconds) {
-  days = (days === '') ? 0 : Number(days)
-  hours = (hours === '') ? 0 : Number(hours)
-  minutes = (minutes === '') ? 0 : Number(minutes)
-  seconds = (seconds === '') ? 0 : Number(seconds)
+function setTime (daysInput, hoursInput, minutesInput, secondsInput) {
+  let days = (daysInput === '') ? 0 : Number(daysInput)
+  let hours = (hoursInput === '') ? 0 : Number(hoursInput)
+  let minutes = (minutesInput === '') ? 0 : Number(minutesInput)
+  let seconds = (secondsInput === '') ? 0 : Number(secondsInput)
 
   // save all chars in an array
   const timeArray = [

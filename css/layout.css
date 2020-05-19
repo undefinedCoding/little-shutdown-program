@@ -9,7 +9,7 @@
     --titlebar-color-text-icon: white;
     --titlebar-color-action-hover: rgba(0, 0, 0, 0.1);
     --titlebar-color-action-hover-close: rgba(232, 17, 35, 0.9);
-    --titlebar-font-family: Segoe UI;
+    --titlebar-font-family: Segoe UI, Bitstream Vera Sans;
     --titlebar-font-size: 14px;
     --titlebar-height: 32px;
     --titlebar-width-height-action-icon: 10px;

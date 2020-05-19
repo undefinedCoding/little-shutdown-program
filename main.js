@@ -116,9 +116,8 @@ function checkForNewVersion () {
               message: 'Do you want to install the new version?',
               buttons: ['OK', 'NO', 'DISABLE NOTIFICATION'],
               detail: `Installed: ${currentTag}, Latest: ${latestRelease.tag_name}`
-            },
-            buttonId => {
-              switch (buttonId) {
+            }).then(buttonId => {
+              switch (buttonId.response) {
                 case 0: // OK -> Open release website
                   shell.openExternal(latestRelease.html_url)
                   break
@@ -154,6 +153,10 @@ function createWindow () {
   const settingsTray = settings.get('tray')
   // create a BrowserWindow object
   mainWindow = new BrowserWindow({
+    webPreferences: {
+        enableRemoteModule: true,
+        nodeIntegration: true
+    },
     title: app.getName(),
     titleBarStyle: 'hidden', // macOS: buttons are an overlay
     minWidth: 600,
@@ -164,7 +167,7 @@ function createWindow () {
     y: settingsWindowBounds.y,
     frame: settingsNativeTitleBar,
     show: false, // do not show the window before content is loaded
-    icon: path.join(__dirname, 'icon', 'icon.ico'),
+    icon: path.join(__dirname, 'icon', 'icon.png'),
     center: settingsWindowBounds.x === 0 && settingsWindowBounds.y === 0
   })
   // load the 'index.html' file in the window
@@ -198,7 +201,7 @@ function createWindow () {
   if (settingsTray) {
     // create tray icon and right click method
     const tray = new Tray(
-      path.join(__dirname, 'icon', 'icon.ico')
+      path.join(__dirname, 'icon', 'icon.png')
     ).on('click', () => {
       // if tray icon is clicked the window will either be hidden or shown
       mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
@@ -216,14 +219,6 @@ function createWindow () {
     )
     // create text that will be shown on hover of the tray icon
     tray.setToolTip('Click to hide or show the app')
-    // macOS: highlight icon if window currently shown and do the opposite if not
-    mainWindow
-      .on('show', () => {
-        tray.setHighlightMode('always')
-      })
-      .on('hide', () => {
-        tray.setHighlightMode('never')
-      })
   }
   // window event listener
   mainWindow
