@@ -349,7 +349,6 @@ shutdownTimer
       }
       )
       // start a notification to inform that the computer will be shut down in 20s (for preventing it)
-      notificationDialog('Timer is finished (' + millisecondsToStr(t.msInput) + ')', 'The computer is about to shut down (20s) - click here to stop this from happening!', () => {
       notificationDialog('Timer is finished (' + millisecondsToStr(t.msInput) + ')', 'The computer is about to shut down (20s) - click here to stop this from happening!', (response) => {
         if (response == null || response === undefined || response === '') {
           // Catch undefined behaviour
