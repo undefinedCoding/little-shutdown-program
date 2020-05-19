@@ -64,14 +64,5 @@ module.exports = {
         "template-curly-spacing": [ "error", "never" ],
         "use-isnan": "error",
         "valid-typeof": "off"
-    },
-    settings: {
-        jsdoc: {
-            mode: "typescript",
-            tagNamePreference: {
-                arg: "param",
-                return: "returns"
-            }
-        }
     }
 };
