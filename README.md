@@ -2,7 +2,6 @@
 
 Just a little program, that shuts down a (Windows 10) computer after a, from the user set, countdown is finished. The program is using [Electron](https://electronjs.org/).
 
-[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 [![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 
 ## How does it look like
